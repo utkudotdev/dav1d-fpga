@@ -27,6 +27,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdatomic.h>
 
 #include "src/levels.h"
 
@@ -45,7 +46,7 @@ enum Tx1dType {
 void (name)(int32_t *c, ptrdiff_t stride, int min, int max)
 typedef decl_itx_1d_fn(*itx_1d_fn);
 
-EXTERN size_t dav1d_tx1d_metrics[N_TX_SIZES][N_TX_1D_TYPES];
+EXTERN atomic_size_t dav1d_tx1d_metrics[N_TX_SIZES][N_TX_1D_TYPES];
 EXTERN const itx_1d_fn dav1d_tx1d_fns[N_TX_SIZES][N_TX_1D_TYPES];
 EXTERN const uint8_t /* enum Tx1dType */ dav1d_tx1d_types[N_TX_TYPES][2];
 
