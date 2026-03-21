@@ -36,6 +36,8 @@
 #include "data.h"
 #include "version.h"
 
+#include "src/itx_1d.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -321,6 +323,12 @@ DAV1D_API int dav1d_get_decode_error_data_props(Dav1dContext *c, Dav1dDataProps 
  *       provided Dav1dSettings.
  */
 DAV1D_API int dav1d_get_frame_delay(const Dav1dSettings *s);
+
+struct dav1d_metrics_t {
+    size_t info[N_TX_SIZES][N_TX_1D_TYPES];
+};
+
+DAV1D_API struct dav1d_metrics_t dav1d_get_metrics(void);
 
 #ifdef __cplusplus
 } /* extern "C" */

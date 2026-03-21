@@ -26,6 +26,7 @@
  */
 
 #include "config.h"
+#include "src/levels.h"
 #include "vcs_version.h"
 #include "cli_config.h"
 
@@ -388,6 +389,32 @@ int main(const int argc, char *const *const argv) {
         res = 1;
     }
     dav1d_close(&c);
+
+
+    struct dav1d_metrics_t metrics = dav1d_get_metrics();
+    printf("TX_4X4, DCT, %zu\n", metrics.info[TX_4X4][DCT]);
+    printf("TX_8X8, DCT, %zu\n", metrics.info[TX_8X8][DCT]);
+    printf("TX_16X16, DCT, %zu\n", metrics.info[TX_16X16][DCT]);
+    printf("TX_32X32, DCT, %zu\n", metrics.info[TX_32X32][DCT]);
+    printf("TX_64X64, DCT, %zu\n", metrics.info[TX_64X64][DCT]);
+
+    printf("TX_4X4, ADST, %zu\n", metrics.info[TX_4X4][ADST]);
+    printf("TX_8X8, ADST, %zu\n", metrics.info[TX_8X8][ADST]);
+    printf("TX_16X16, ADST, %zu\n", metrics.info[TX_16X16][ADST]);
+    printf("TX_32X32, ADST, %zu\n", metrics.info[TX_32X32][ADST]);
+    printf("TX_64X64, ADST, %zu\n", metrics.info[TX_64X64][ADST]);
+
+    printf("TX_4X4, FLIPADST, %zu\n", metrics.info[TX_4X4][FLIPADST]);
+    printf("TX_8X8, FLIPADST, %zu\n", metrics.info[TX_8X8][FLIPADST]);
+    printf("TX_16X16, FLIPADST, %zu\n", metrics.info[TX_16X16][FLIPADST]);
+    printf("TX_32X32, FLIPADST, %zu\n", metrics.info[TX_32X32][FLIPADST]);
+    printf("TX_64X64, FLIPADST, %zu\n", metrics.info[TX_64X64][FLIPADST]);
+
+    printf("TX_4X4, IDENTITY, %zu\n", metrics.info[TX_4X4][IDENTITY]);
+    printf("TX_8X8, IDENTITY, %zu\n", metrics.info[TX_8X8][IDENTITY]);
+    printf("TX_16X16, IDENTITY, %zu\n", metrics.info[TX_16X16][IDENTITY]);
+    printf("TX_32X32, IDENTITY, %zu\n", metrics.info[TX_32X32][IDENTITY]);
+    printf("TX_64X64, IDENTITY, %zu\n", metrics.info[TX_64X64][IDENTITY]);
 
     return (res == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

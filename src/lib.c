@@ -49,6 +49,7 @@
 #include "src/ref.h"
 #include "src/thread_task.h"
 #include "src/wedge.h"
+#include "src/itx_1d.h"
 
 static COLD void init_internal(void) {
     dav1d_init_cpu();
@@ -759,4 +760,10 @@ void dav1d_data_unref(Dav1dData *const buf) {
 
 void dav1d_data_props_unref(Dav1dDataProps *const props) {
     dav1d_data_props_unref_internal(props);
+}
+
+struct dav1d_metrics_t dav1d_get_metrics(void) {
+    struct dav1d_metrics_t result;
+    memcpy(&result.info, dav1d_tx1d_metrics, sizeof(dav1d_tx1d_metrics));
+    return result;
 }
