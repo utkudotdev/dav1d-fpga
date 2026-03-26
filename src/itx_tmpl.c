@@ -27,18 +27,24 @@
 
 #include "config.h"
 
+#include <stdatomic.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "common/attributes.h"
 #include "common/intops.h"
 
+#include "levels.h"
 #include "src/itx.h"
 #include "src/itx_1d.h"
 #include "src/scan.h"
 #include "src/tables.h"
+
+static atomic_bool block_flag = false;
 
 static NOINLINE void
 inv_txfm_add_c(pixel *dst, const ptrdiff_t stride, coef *const coeff,
@@ -112,10 +118,22 @@ inv_txfm_add_c(pixel *dst, const ptrdiff_t stride, coef *const coeff,
     for (int x = 0; x < w; x++)
         second_1d_fn(&tmp[x], w, col_clip_min, col_clip_max);
 
+    pixel* dst_copy = dst;
+
     c = tmp;
     for (int y = 0; y < h; y++, dst += PXSTRIDE(stride))
         for (int x = 0; x < w; x++)
             dst[x] = iclip_pixel(dst[x] + ((*c++ + 8) >> 4));
+
+    bool expected = false;
+    if (w == 32 && h == 32 && txtp == IDTX && rand() < RAND_MAX / 2 && atomic_compare_exchange_strong(&block_flag, &expected, true)) {
+        for (int y = 0; y < h; y++, dst_copy += PXSTRIDE(stride)) {
+            for (int x = 0; x < w; x++) {
+                printf("%d,", dst_copy[x]);
+            }
+            printf("\n");
+        }
+    }
 }
 
 #define inv_txfm_fn(type1, type2, type, pfx, w, h, shift) \
