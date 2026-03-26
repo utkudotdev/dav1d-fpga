@@ -15,3 +15,62 @@ subprojects/checkasm
 subprojects/.wraplock
 .cache/
 fpga-arm/
+
+# Intel Quartus Prime generated files and directories
+
+# Directories to ignore
+/db/
+/incremental_db/
+/output_files/
+/simulation/
+*.qwork/
+*.qsys_edit/
+
+# Files to ignore (by extension or specific name)
+# Backup files
+*.bak
+*~
+
+# Log and report files
+*.log
+*.rpt
+*.txt
+*.htm
+*.html
+
+# Generated programming and configuration files
+# *.sof -- i like the programming files :)
+*.pof
+*.rbf
+*.elf
+*.hex
+*.flash
+
+# Simulation files (Waveform, Vector, etc.)
+*.vwf
+*.vec
+*.sft
+*.tvf
+
+# Other temporary or generated files
+*.obj
+*.dat
+*.cnf
+*.eda.netlist
+*.compare_core_results
+*.qmsgs
+*.qws
+*.merge_result
+*.do
+*.cmp
+*.bsf
+*.vcproj
+*.vho
+*.vhi
+*.ocp
+*.ocx
+*.flock
+
+# System/OS generated files
+.DS_Store
+Thumbs.db
