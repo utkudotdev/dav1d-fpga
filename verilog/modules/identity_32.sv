@@ -3,8 +3,9 @@
 `define IDEN_32_VH
 /* verilog_format: on */
 
+// computes identity 32 on a 1-D array of 16-bit elements (i.e. a row or column)
 module identity_32      (   output signed [15:0] out_array [32],
-                            output done_row,
+                            output done_array,
                             input  signed [15:0] in_array [32],
                             input  load,
                             input  clk,
@@ -28,7 +29,7 @@ module identity_32      (   output signed [15:0] out_array [32],
         end
     end
     assign out_array = internal_registers;
-    assign done_row <= done_reg;
+    assign done_array <= done_reg;
 endmodule
 
 `endif
