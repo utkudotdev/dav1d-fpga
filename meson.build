@@ -80,6 +80,10 @@ if is_asm_enabled and get_option('b_sanitize') == 'memory'
     error('asm causes false positive with memory sanitizer. Use \'-Denable_asm=false\'.')
 endif
 
+# FPGA option
+is_fpga_enabled = get_option('enable_fpga') == true
+cdata.set10('HAVE_FPGA', is_fpga_enabled)
+
 cdata.set10('TRIM_DSP_FUNCTIONS', get_option('trim_dsp') == 'true' or
     (get_option('trim_dsp') == 'if-release' and get_option('buildtype') == 'release'))
 

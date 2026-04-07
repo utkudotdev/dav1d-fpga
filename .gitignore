@@ -9,3 +9,8 @@ tags
 *.snap
 /tools/output/xxhash.h
 *.mkv
+*.ivf
+*.yuv
+subprojects/checkasm
+subprojects/.wraplock
+.cache/
