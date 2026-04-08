@@ -6,7 +6,7 @@
 
 It is now battle-tested and production-ready and can be used everywhere.
 
-The canonical repository URL for this repo is https://code.videolan.org/videolan/dav1d
+The canonical repository URL for this repo is <https://code.videolan.org/videolan/dav1d>
 
 This project was partially funded by the *Alliance for Open Media*/**AOM**.
 
@@ -29,6 +29,7 @@ The reasoning behind this decision is the same as for libvorbis, see [RMS on vor
 The plan is the following:
 
 ### Reached
+
 1. Complete C implementation of the decoder,
 2. Provide a usable API,
 3. Port to most platforms,
@@ -43,15 +44,18 @@ The plan is the following:
 12. Improve threading.
 
 ### On-going
-13. Improve C code base with [various tweaks](https://code.videolan.org/videolan/dav1d/wikis/task-list),
-14. Accelerate for less common architectures, like PPC, SSE2, RISC-V or AVX-512.
+
+1. Improve C code base with [various tweaks](https://code.videolan.org/videolan/dav1d/wikis/task-list),
+2. Accelerate for less common architectures, like PPC, SSE2, RISC-V or AVX-512.
 
 ### After
-15. Use more GPU decoding, when possible.
+
+1. Use more GPU decoding, when possible.
 
 # Contribute
 
 Currently, we are looking for help from:
+
 - C developers,
 - asm developers,
 - platform-specific developers,
@@ -79,6 +83,7 @@ VideoLAN will only have the collective work rights.
 The [VideoLAN Code of Conduct](https://wiki.videolan.org/CoC) applies to this project.
 
 # Compile
+
 ## General compilation steps
 
 1. Install [Meson](https://mesonbuild.com/) (0.49 or higher), [Ninja](https://ninja-build.org/), and, for x86\* targets, [nasm](https://nasm.us/) (2.14 or higher)
@@ -110,6 +115,14 @@ For 32-bit linux, run
 meson setup .. --cross-file=../package/crossfiles/i686-linux32.meson
 ```
 
+For 32-bit Linux on the DE1-SoC HPS, run
+
+```sh
+meson setup build-arm/ --reconfigure --cross-file arm32_cross.txt --default-library=static -Denable_asm=true -Denable_tests=false -Denable_fpga=true -Dbitdepths=8
+```
+
+Note that you will need the system root for the DE1-SoC. The important directories are probably `/usr/lib` and `/usr/include`. FPGA mode does not support high bit-depth.
+
 ## Build documentation
 
 1. Make sure [doxygen](https://www.doxygen.nl/) and [graphviz](https://www.graphviz.org/) are installed.
@@ -126,7 +139,7 @@ The result can be found in `build/doc/html/`. An online version built from maste
 
 ## Decoder conformance tests (optional but encouraged)
 
-1. Download the argon conformance bitstreams from https://streams.videolan.org/argon/
+1. Download the argon conformance bitstreams from <https://streams.videolan.org/argon/>
 2. Extract into dav1d directory by running `tar -xvf argon.tar.zst`
 3. Execute tests with `tests/dav1d_argon.bash -d build/tools/dav1d -a argon`
 4. Expected outcome is `2763 files successfully verified in XXmYYs (dav1d 1.x.y-zz-gHHHHHHH filmgrain=1 cpumask=-1)`
@@ -136,7 +149,6 @@ The result can be found in `build/doc/html/`. An online version built from maste
 This project is partially funded by the *Alliance for Open Media*/**AOM** and is supported by TwoOrioles and VideoLabs.
 
 These companies can provide support and integration help, should you need it.
-
 
 # FAQ
 
