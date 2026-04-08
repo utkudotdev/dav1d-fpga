@@ -10,7 +10,7 @@ module identity_32      (   output signed [15:0] out_array [32],
                             input  load,
                             input  clk,
                             input  rst
-                        )
+                        );
 
     // for now this does nothing and just passes the array out every cycle (with latency 1)
     logic [15:0] internal_registers [32];
@@ -29,7 +29,7 @@ module identity_32      (   output signed [15:0] out_array [32],
         end
     end
     assign out_array = internal_registers;
-    assign done_array <= done_reg;
+    assign done_array = done_reg;
 endmodule
 
 `endif
