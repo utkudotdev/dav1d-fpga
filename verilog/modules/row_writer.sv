@@ -19,9 +19,13 @@ module row_writer  #(parameter int N = 32)
                     );
     // row array is the actual registers holding row
     logic signed [15:0] row_arr [N];
-    assign row = row_arr;
-    // 1-hot select logic for loading
-    logic [N-1:0] row_reg_sel;
+    always_ff @(posedge clk) begin
+        if (rst) begin
+            row_arr <= '{16'b0};
+        end
+        else // put in new row for writing only when flag is raised
+            row_arr <= start_write ? row : row_arr;
+    end
 
     assign mem_write_data = row_arr[mem_write_addr];
 
@@ -39,7 +43,6 @@ module row_writer  #(parameter int N = 32)
         end
         else begin
             if (start_write) begin
-                row_arr             <= row;
                 state_mem_write     <= 1;
                 mem_write_addr_reg  <= start_addr;
             end
