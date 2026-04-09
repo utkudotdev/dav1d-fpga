@@ -118,7 +118,7 @@ meson setup .. --cross-file=../package/crossfiles/i686-linux32.meson
 For 32-bit Linux on the DE1-SoC HPS, run
 
 ```sh
-meson setup build-arm/ --reconfigure --cross-file arm32_cross.ini --default-library=static -Denable_asm=true -Denable_tests=false -Denable_fpga=true -Dbitdepths=8
+meson setup .. --reconfigure --cross-file=../package/crossfiles/arm32_cross.ini --default-library=static -Denable_asm=true -Denable_tests=false -Denable_fpga=true -Dbitdepths=8
 ```
 
 Note that you will need the system root for the DE1-SoC. The important directories are probably `/usr/lib` and `/usr/include`. FPGA mode does not support high bit-depth. Linking statically is recommended to make copying the resulting binary easier.
