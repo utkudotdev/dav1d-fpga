@@ -7,16 +7,18 @@
 module arr_reader #(
     parameter int N = 32
 ) (
-    output signed [           15:0] array        [N],  // parallel output of N 16-bit items of array
-    output        [  $clog2(N*N):0] mem_read_addr,
-    output                          read_done,         // flag for done reading array
-    input  signed [           15:0] mem_read_data,
-    input         [$clog2(N*N)-1:0] start_addr,
-    input                           start_read,        // flag for starting read
-    input                           is_column,         // flag for column vs row
-    input                           clk,
-    input                           rst
+    output signed [          15:0] array        [N],  // parallel output of N 16-bit items of array
+    output        [ADDR_WIDTH-1:0] mem_read_addr,
+    output                         read_done,         // flag for done reading array
+    input  signed [          15:0] mem_read_data,
+    input         [ADDR_WIDTH-1:0] start_addr,
+    input                          start_read,        // flag for starting read
+    input                          is_column,         // flag for column vs row
+    input                          clk,
+    input                          rst
 );
+    localparam int ADDR_WIDTH = $clog2(N * N);
+
     // array internal is the actual register
     logic signed [15:0] arr_internal[N];
     assign array = arr_internal;
@@ -44,7 +46,7 @@ module arr_reader #(
     // fsm to read memory
     logic [N:0] state_mem_read;
     // this is just a counter for read addr
-    logic [$clog2(N*N)-1:0] mem_read_addr_reg;
+    logic [ADDR_WIDTH-1:0] mem_read_addr_reg;
     always_ff @(posedge clk) begin
         if (rst) begin
             state_mem_read <= 0;
@@ -55,7 +57,7 @@ module arr_reader #(
                 mem_read_addr_reg <= start_addr;
             end else begin
                 state_mem_read <= state_mem_read << 1;
-                mem_read_addr_reg <= is_column ? mem_read_addr_reg + N : mem_read_addr_reg + 1;
+                mem_read_addr_reg <= is_column ? mem_read_addr_reg + ADDR_WIDTH'(N) : mem_read_addr_reg + 1;
             end
         end
     end
@@ -73,7 +75,7 @@ module arr_reader #(
     always_ff @(posedge clk) begin
         ready_reg <= (state_mem_read == {1'b1, dummy});
     end
-    assign arr_ready = ready_reg;
+    assign read_done = ready_reg;
 
 endmodule
 
