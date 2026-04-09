@@ -70,7 +70,7 @@ module single_block_32   (
         else begin
             if (state == (INIT || START_JOB)) begin
                 arr_read_counter <= 0;
-            end else if (done_writing) begin
+            end else if (done_reading && done_compute) begin // TODO: ??
                 arr_read_counter <= arr_read_counter + 1;
             end
         end
@@ -123,6 +123,19 @@ module single_block_32   (
         else begin
             if (working) begin
                 pass;
+            end
+        end
+    end
+
+    logic [$clog2(N)-1:0] arr_write_counter;
+    always_ff @(posedge clk) begin
+        if (rst)
+            arr_write_counter <= 0;
+        else begin
+            if (state == (INIT || START_JOB)) begin
+                arr_write_counter <= 0;
+            end else if (done_writing) begin // TODO: ??
+                arr_write_counter <= arr_write_counter + 1;
             end
         end
     end
