@@ -217,6 +217,10 @@ static void inv_txfm_add_wht_wht_4x4_c(pixel *dst, const ptrdiff_t stride,
 #endif
 #endif
 
+#if HAVE_FPGA
+#include "src/fpga/itx.h"
+#endif
+
 COLD void bitfn(dav1d_itx_dsp_init)(Dav1dInvTxfmDSPContext *const c, int bpc) {
 #define assign_itx_all_fn64(w, h, pfx) \
     c->itxfm_add[pfx##TX_##w##X##h][DCT_DCT  ] = \
@@ -304,6 +308,10 @@ COLD void bitfn(dav1d_itx_dsp_init)(Dav1dInvTxfmDSPContext *const c, int bpc) {
 #if ARCH_X86
     itx_dsp_init_x86(c, bpc, &all_simd);
 #endif
+#endif
+
+#if HAVE_FPGA
+    itx_dsp_init_fpga(c, bpc);
 #endif
 
     if (!all_simd)

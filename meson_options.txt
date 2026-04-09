@@ -10,6 +10,11 @@ option('enable_asm',
     value: true,
     description: 'Build asm files, if available')
 
+option('enable_fpga',
+    type: 'boolean',
+    value: true,
+    description: 'Build FPGA target, if available')
+
 option('enable_tools',
     type: 'boolean',
     value: true,

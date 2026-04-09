@@ -294,7 +294,11 @@ if is_asm_enabled
     endif
 endif
 
-
+if is_fpga_enabled
+    libdav1d_tmpl_sources += files(
+        'fpga/fpga_iface.c'
+    )
+endif
 
 libdav1d_rc_obj = []
 libdav1d_flags = []

@@ -28,7 +28,7 @@ project('dav1d', ['c'],
                       'warning_level=2',
                       'buildtype=release',
                       'b_ndebug=if-release'],
-    meson_version: '>= 0.49.0')
+    meson_version: '>= 1.10.2')
 
 dav1d_src_root = meson.current_source_dir()
 cc = meson.get_compiler('c')
@@ -79,6 +79,10 @@ cdata.set10('HAVE_ASM', is_asm_enabled)
 if is_asm_enabled and get_option('b_sanitize') == 'memory'
     error('asm causes false positive with memory sanitizer. Use \'-Denable_asm=false\'.')
 endif
+
+# FPGA option
+is_fpga_enabled = get_option('enable_fpga') == true
+cdata.set10('HAVE_FPGA', is_fpga_enabled)
 
 cdata.set10('TRIM_DSP_FUNCTIONS', get_option('trim_dsp') == 'true' or
     (get_option('trim_dsp') == 'if-release' and get_option('buildtype') == 'release'))
