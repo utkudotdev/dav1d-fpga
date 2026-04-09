@@ -19,18 +19,17 @@ module single_block_32   (
                     );
 
     // load signal logic
-    typedef enum logic [2:0] {
+    typedef enum logic [1:0] {
         INIT,
         START_JOB,
         WORKING_ARR,
-        WRITE_ARR,
         SWAP_TO_COL
     } state_t;
     state_t state;
 
     logic done_rows;
     wire  done_compute;
-    wire  done_writing;
+    wire  done_all_writes;
     always_ff @(posedge clk) begin
         if (rst) begin
             done_rows <= 0;
@@ -46,12 +45,9 @@ module single_block_32   (
                     state       <= WORKING_ARR;
                 end
                 WORKING_ARR: begin
-                    state       <= done_compute ? WRITE_ARR : WORKING_ARR;
+                    state       <= done_all_writes ? SWAP_TO_COL : WORKING_ARR;
                 end
-                WRITE_ARR: begin
-                    state       <= done_writing ? (done_all ? SWAP_TO_COL : WORKING_ARR) : WRITE_ARR;
-                end
-                SWAP_TO_COL: begin
+                SWAP_TO_COL: begin // TODO: this state can disappear later
                     state       <= done_rows ? INIT : START_JOB;
                     done_rows   <= !done_rows;
                 end
@@ -67,30 +63,33 @@ module single_block_32   (
     // talk to qsys attached memory --> put in array
     localparam N = 32;
 
-    logic [$clog2(N)-1:0] arr_counter;
+    logic [$clog2(N)-1:0] arr_read_counter;
     always_ff @(posedge clk) begin
         if (rst)
-            arr_counter <= 0;
+            arr_read_counter <= 0;
         else begin
-            if (working) begin
-                pass;
+            if (state == (INIT || START_JOB)) begin
+                arr_read_counter <= 0;
+            end else if (done_writing) begin
+                arr_read_counter <= arr_read_counter + 1;
             end
         end
     end
 
     wire signed [15:0] arr [N];
-    wire arr_ready;
+    wire read_done;
     arr_reader  #(.N(N)) reader
                     (
                         .arr(arr),
                         .mem_read_addr(mem_read_addr),
-                        .arr_ready(arr_ready),
+                        .read_done(read_done),
                         .mem_read_data(mem_read_data),
-                        .start_addr(0),
+                        .start_addr(arr_read_counter),
                         .start_read(),
-                        .is_column(done_arrs)
+                        .is_column(done_rows),
+                        .clk(clk),
+                        .rst(rst)
                     );
-
 
 
     identity_32 iden    (   .out_array(arr_to_write),
@@ -102,7 +101,7 @@ module single_block_32   (
                         );
 
     wire [15:0] arr_to_write [N];
-    
+
     arr_writer  #(.N(N)) writer
                 (
                     .mem_write_addr(mem_write_addr),
@@ -110,14 +109,23 @@ module single_block_32   (
                     .write_done(done_writing),
                     .we(we),
                     .arr(arr_to_write),
-                    .start_addr(),
+                    .start_addr(arr_write_counter),
                     .start_write(),
-                    .is_column(),
-                    .clk(),
-                    .rst()
+                    .is_column(done_rows),
+                    .clk(clk),
+                    .rst(rst)
                 );
 
-    // write that stuff to a temporary memory
+    logic [$clog2(N)-1:0] arr_write_counter;
+    always_ff @(posedge clk) begin
+        if (rst)
+            arr_write_counter <= 0;
+        else begin
+            if (working) begin
+                pass;
+            end
+        end
+    end
 
 
     // read temp mem 

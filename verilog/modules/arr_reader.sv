@@ -8,7 +8,7 @@ module arr_reader  #(parameter int N = 32)
                     (
                         output  signed  [15:0]              array [N], // parallel output of N 16-bit items of array
                         output          [$clog2(N*N):0]     mem_read_addr,
-                        output                              arr_ready, // flag for done reading array
+                        output                              read_done, // flag for done reading array
                         input   signed  [15:0]              mem_read_data,
                         input           [$clog2(N*N):0]     start_addr,
                         input                               start_read, // flag for starting read
