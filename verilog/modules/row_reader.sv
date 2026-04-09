@@ -6,13 +6,13 @@
 // talk to qsys attached memory --> put in array
 module row_reader  #(parameter int N = 32)
                     (
-                        output  signed  [15:0]              row [N],
+                        output  signed  [15:0]              row [N], // parallel output of N 16-bit items of row
                         output          [$clog2(N*N):0]     mem_read_addr,
-                        output                              row_ready,
+                        output                              row_ready, // flag for done reading row
                         input   signed  [15:0]              mem_read_data,
                         input           [$clog2(N*N):0]     start_addr,
-                        input                               start_read,
-                        input                               is_column,
+                        input                               start_read, // flag for starting read
+                        input                               is_column, // flag for column vs row
                         input                               clk,
                         input                               rst
                     );
