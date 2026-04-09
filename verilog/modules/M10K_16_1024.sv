@@ -7,7 +7,7 @@
 // M10K module for testing
 //============================================================
 
-module M10K_1024_16( 
+module M10K_16_1024 (
     output reg [15:0] q,
     input [15:0] d,
     input [9:0] write_address, read_address,
