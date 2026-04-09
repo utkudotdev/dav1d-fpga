@@ -24,7 +24,7 @@ async def test_row_read(dut):
     cocotb.start_soon(Clock(dut.clk, 10, "ns").start())
     await reset(dut)
 
-    mem = {i: (i + 1) * 100 for i in range(N * N)}
+    mem = {i: i for i in range(N * N)}
 
     dut.start_read.value = 1
     dut.start_addr.value = 0
@@ -34,7 +34,7 @@ async def test_row_read(dut):
 
     for _ in range(N + 1):
         addr = dut.mem_read_addr.value.to_unsigned()
-        dut.mem_read_data.value = mem.get(addr, 0)
+        dut.mem_read_data.value = mem[addr]
         await RisingEdge(dut.clk)
 
     await RisingEdge(dut.clk)
@@ -51,18 +51,18 @@ async def test_column_read(dut):
     cocotb.start_soon(Clock(dut.clk, 10, "ns").start())
     await reset(dut)
 
-    start = 5
-    mem = {start + i * N: 0x1000 + i for i in range(N)}
+    column_idx = 5
+    mem = {column_idx + i * N: i for i in range(N)}
 
     dut.start_read.value = 1
-    dut.start_addr.value = start
+    dut.start_addr.value = column_idx
     dut.is_column.value = 1
     await RisingEdge(dut.clk)
     dut.start_read.value = 0
 
     for _ in range(N + 1):
         addr = dut.mem_read_addr.value.to_unsigned()
-        dut.mem_read_data.value = mem.get(addr, 0)
+        dut.mem_read_data.value = mem[addr]
         await RisingEdge(dut.clk)
 
     await RisingEdge(dut.clk)
@@ -70,7 +70,7 @@ async def test_column_read(dut):
 
     for i in range(N):
         val = dut.array[i].value.to_signed()
-        expected = mem[start + i * N]
+        expected = mem[column_idx + i * N]
         assert val == expected, f"array[{i}] = {val}, expected {expected}"
 
 
