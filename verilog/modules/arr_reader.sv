@@ -4,20 +4,21 @@
 /* verilog_format: on */
 
 // talk to qsys attached memory --> put in array
-module arr_reader  #(parameter int N = 32)
-                    (
-                        output  signed  [15:0]              array [N], // parallel output of N 16-bit items of array
-                        output          [$clog2(N*N):0]     mem_read_addr,
-                        output                              read_done, // flag for done reading array
-                        input   signed  [15:0]              mem_read_data,
-                        input           [$clog2(N*N):0]     start_addr,
-                        input                               start_read, // flag for starting read
-                        input                               is_column, // flag for column vs row
-                        input                               clk,
-                        input                               rst
-                    );
+module arr_reader #(
+    parameter int N = 32
+) (
+    output signed [           15:0] array        [N],  // parallel output of N 16-bit items of array
+    output        [  $clog2(N*N):0] mem_read_addr,
+    output                          read_done,         // flag for done reading array
+    input  signed [           15:0] mem_read_data,
+    input         [$clog2(N*N)-1:0] start_addr,
+    input                           start_read,        // flag for starting read
+    input                           is_column,         // flag for column vs row
+    input                           clk,
+    input                           rst
+);
     // array internal is the actual register
-    logic signed [15:0] arr_internal [N];
+    logic signed [15:0] arr_internal[N];
     assign array = arr_internal;
     // 1-hot select logic for loading
     logic [N-1:0] arr_reg_sel;
@@ -28,8 +29,7 @@ module arr_reader  #(parameter int N = 32)
             always_ff @(posedge clk) begin
                 if (rst) begin
                     arr_internal[i] <= 16'b0;
-                end
-                else begin
+                end else begin
                     arr_internal[i] <= arr_reg_sel[i] ? mem_read_data : arr_internal[i];
                 end
             end
@@ -49,13 +49,11 @@ module arr_reader  #(parameter int N = 32)
         if (rst) begin
             state_mem_read <= 0;
             mem_read_addr_reg <= 0;
-        end
-        else begin
+        end else begin
             if (start_read) begin
                 state_mem_read <= 1;
                 mem_read_addr_reg <= start_addr;
-            end
-            else begin
+            end else begin
                 state_mem_read <= state_mem_read << 1;
                 mem_read_addr_reg <= is_column ? mem_read_addr_reg + N : mem_read_addr_reg + 1;
             end
