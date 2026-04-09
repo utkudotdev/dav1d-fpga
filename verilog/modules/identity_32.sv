@@ -18,7 +18,7 @@ module identity_32      (   output signed [15:0] out_array [32],
 
     always_ff @(posedge clk) begin
         if (rst) begin
-            internal_registers <= '{16'b0};
+            internal_registers <= '{32{16'b0}};
             done_reg <= 0;
         end else begin
             if (load) begin

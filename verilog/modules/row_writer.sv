@@ -21,13 +21,13 @@ module row_writer  #(parameter int N = 32)
     logic signed [15:0] row_arr [N];
     always_ff @(posedge clk) begin
         if (rst) begin
-            row_arr <= '{16'b0};
+            row_arr <= '{N{16'b0}};
         end
         else // put in new row for writing only when flag is raised
             row_arr <= start_write ? row : row_arr;
     end
 
-    assign mem_write_data = row_arr[mem_write_addr];
+    assign mem_write_data = row_arr[mem_write_counter];
 
     // here's how this horrible logic works:
     // state = rst, waiting to start a write
@@ -36,6 +36,7 @@ module row_writer  #(parameter int N = 32)
     logic [N-1:0] state_mem_write;
     // this is just a counter for write addr
     logic [$clog2(N*N)-1:0] mem_write_addr_reg;
+    logic [$clog2(N)-1:0]   mem_write_counter;
     always_ff @(posedge clk) begin
         if (rst) begin
             state_mem_write <= 0;
@@ -45,16 +46,19 @@ module row_writer  #(parameter int N = 32)
             if (start_write) begin
                 state_mem_write     <= 1;
                 mem_write_addr_reg  <= start_addr;
+                mem_write_counter   <= 0;
             end
             else begin
                 state_mem_write     <= state_mem_write << 1;
                 mem_write_addr_reg  <= is_column ? mem_write_addr_reg + N : mem_write_addr_reg + 1;
+                mem_write_counter   <= mem_write_counter + 1;
             end
         end
     end
 
     // enable writes until state mem gets to all zeroes
     assign we = state_mem_write != 0;
+    assign write_done = state_mem_write == (1<<(N-1));
 
     // mem addr maps 1:1
     assign mem_write_addr = mem_write_addr_reg;
