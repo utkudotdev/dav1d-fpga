@@ -69,9 +69,11 @@ module arr_reader  #(parameter int N = 32)
     assign mem_read_addr = mem_read_addr_reg;
 
     // arrays are ready the cycle after FSM hits that last state
+    wire [N-1:0] dummy;
+    assign dummy = 0;
     logic ready_reg;
     always_ff @(posedge clk) begin
-        ready_reg <= state_mem_read == N;
+        ready_reg <= (state_mem_read == {1'b1, dummy});
     end
     assign arr_ready = ready_reg;
 
