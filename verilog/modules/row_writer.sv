@@ -6,16 +6,16 @@
 // talk to qsys attached memory --> put in array
 module row_writer  #(parameter int N = 32)
                     (
-                        output          [9:0]   mem_write_addr,
-                        output  signed  [15:0]  mem_write_data,
-                        output                  write_done,
-                        output                  we,
-                        input   signed  [15:0]  row [N],
-                        input           [9:0]   start_addr,
-                        input                   start_write,
-                        input                   is_column,
-                        input                   clk,
-                        input                   rst
+                        output          [$clog2(N*N):0]     mem_write_addr,
+                        output  signed  [15:0]              mem_write_data,
+                        output                              write_done,
+                        output                              we,
+                        input   signed  [15:0]              row [N],
+                        input           [$clog2(N*N):0]     start_addr,
+                        input                               start_write,
+                        input                               is_column,
+                        input                               clk,
+                        input                               rst
                     );
     // row array is the actual registers holding row
     logic signed [15:0] row_arr [N];
