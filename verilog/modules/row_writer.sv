@@ -13,7 +13,9 @@ module row_writer  #(parameter int N = 32)
                         input   signed  [15:0]  row [N],
                         input           [9:0]   start_addr,
                         input                   start_write,
-                        input                   is_column
+                        input                   is_column,
+                        input                   clk,
+                        input                   rst
                     );
     // row array is the actual registers holding row
     logic signed [15:0] row_arr [N];
