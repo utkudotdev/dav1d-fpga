@@ -4,11 +4,11 @@
 /* verilog_format: on */
 
 // talk to qsys attached memory --> put in array
-module row_reader  #(parameter int N = 32)
+module arr_reader  #(parameter int N = 32)
                     (
-                        output  signed  [15:0]              row [N], // parallel output of N 16-bit items of row
+                        output  signed  [15:0]              array [N], // parallel output of N 16-bit items of array
                         output          [$clog2(N*N):0]     mem_read_addr,
-                        output                              row_ready, // flag for done reading row
+                        output                              arr_ready, // flag for done reading array
                         input   signed  [15:0]              mem_read_data,
                         input           [$clog2(N*N):0]     start_addr,
                         input                               start_read, // flag for starting read
@@ -16,21 +16,21 @@ module row_reader  #(parameter int N = 32)
                         input                               clk,
                         input                               rst
                     );
-    // row array is the actual register
-    logic signed [15:0] row_arr [N];
-    assign row = row_arr;
+    // array internal is the actual register
+    logic signed [15:0] arr_internal [N];
+    assign array = arr_internal;
     // 1-hot select logic for loading
-    logic [N-1:0] row_reg_sel;
+    logic [N-1:0] arr_reg_sel;
 
     genvar i;
     generate
-        for (i = 0; i < N; i++) begin : gen_reg_row_in
+        for (i = 0; i < N; i++) begin : gen_reg_arr_in
             always_ff @(posedge clk) begin
                 if (rst) begin
-                    row_arr[i] <= 16'b0;
+                    arr_internal[i] <= 16'b0;
                 end
                 else begin
-                    row_arr[i] <= row_reg_sel[i] ? mem_read_data : row_arr[i];
+                    arr_internal[i] <= arr_reg_sel[i] ? mem_read_data : arr_internal[i];
                 end
             end
         end
@@ -64,16 +64,16 @@ module row_reader  #(parameter int N = 32)
 
 
     // reg select is off by one since reads have 1 latency
-    assign row_reg_sel[N-1:0] = state_mem_read[N:1];
+    assign arr_reg_sel[N-1:0] = state_mem_read[N:1];
     // mem addr maps 1:1
     assign mem_read_addr = mem_read_addr_reg;
 
-    // rows are ready the cycle after FSM hits that last state
+    // arrays are ready the cycle after FSM hits that last state
     logic ready_reg;
     always_ff @(posedge clk) begin
         ready_reg <= state_mem_read == N;
     end
-    assign row_ready = ready_reg;
+    assign arr_ready = ready_reg;
 
 endmodule
 

@@ -4,30 +4,30 @@
 /* verilog_format: on */
 
 // talk to qsys attached memory --> put in array
-module row_writer  #(parameter int N = 32)
+module arr_writer  #(parameter int N = 32)
                     (
                         output          [$clog2(N*N):0]     mem_write_addr,
                         output  signed  [15:0]              mem_write_data,
                         output                              write_done,
                         output                              we,
-                        input   signed  [15:0]              row [N],
+                        input   signed  [15:0]              arr [N],
                         input           [$clog2(N*N):0]     start_addr,
                         input                               start_write,
                         input                               is_column,
                         input                               clk,
                         input                               rst
                     );
-    // row array is the actual registers holding row
-    logic signed [15:0] row_arr [N];
+    // arr array is the actual registers holding arr
+    logic signed [15:0] arr_internal [N];
     always_ff @(posedge clk) begin
         if (rst) begin
-            row_arr <= '{N{16'b0}};
+            arr_internal <= '{N{16'b0}};
         end
-        else // put in new row for writing only when flag is raised
-            row_arr <= start_write ? row : row_arr;
+        else // put in new arr for writing only when flag is raised
+            arr_internal <= start_write ? arr : arr_internal;
     end
 
-    assign mem_write_data = row_arr[mem_write_counter];
+    assign mem_write_data = arr_internal[mem_write_counter];
 
     // here's how this horrible logic works:
     // state = rst, waiting to start a write

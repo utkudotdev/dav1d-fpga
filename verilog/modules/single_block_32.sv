@@ -22,14 +22,15 @@ module single_block_32   (
     typedef enum logic [2:0] {
         INIT,
         START_JOB,
-        WORKING_ROW,
-        WRITE_ROW,
+        WORKING_ARR,
+        WRITE_ARR,
         SWAP_TO_COL
     } state_t;
     state_t state;
 
     logic done_rows;
-
+    wire  done_compute;
+    wire  done_writing;
     always_ff @(posedge clk) begin
         if (rst) begin
             done_rows <= 0;
@@ -42,13 +43,13 @@ module single_block_32   (
                     done_rows   <= 0;
                 end
                 START_JOB: begin
-                    state       <= WORKING_ROW;
+                    state       <= WORKING_ARR;
                 end
-                WORKING_ROW: begin
-                    state       <= done_row ? WRITE_ROW : WORKING_ROW;
+                WORKING_ARR: begin
+                    state       <= done_compute ? WRITE_ARR : WORKING_ARR;
                 end
-                WRITE_ROW: begin
-                    state       <= done_writing ? (done_all ? SWAP_TO_COL : WORKING_ROW) : WAIT;
+                WRITE_ARR: begin
+                    state       <= done_writing ? (done_all ? SWAP_TO_COL : WORKING_ARR) : WRITE_ARR;
                 end
                 SWAP_TO_COL: begin
                     state       <= done_rows ? INIT : START_JOB;
@@ -66,40 +67,55 @@ module single_block_32   (
     // talk to qsys attached memory --> put in array
     localparam N = 32;
 
-    logic [$clog2(N)-1:0] row_counter;
+    logic [$clog2(N)-1:0] arr_counter;
     always_ff @(posedge clk) begin
         if (rst)
-            row_counter <= 0;
+            arr_counter <= 0;
         else begin
             if (working) begin
-                row;
+                pass;
             end
         end
     end
 
-    wire signed [15:0] row [N];
-    wire row_ready;
-    row_reader  #(.N(N)) reader
+    wire signed [15:0] arr [N];
+    wire arr_ready;
+    arr_reader  #(.N(N)) reader
                     (
-                        .row(row),
+                        .arr(arr),
                         .mem_read_addr(mem_read_addr),
-                        .row_ready(row_ready),
+                        .arr_ready(arr_ready),
                         .mem_read_data(mem_read_data),
                         .start_addr(0),
                         .start_read(),
-                        .is_column(done_rows)
+                        .is_column(done_arrs)
                     );
 
 
-    identity_32 iden    (   .out_array(),
-                            .done_array(),
-                            .in_array(row),
-                            .load(row_ready),
-                            .clk(),
-                            .rst()
+
+    identity_32 iden    (   .out_array(arr_to_write),
+                            .done(done_compute),
+                            .in_array(arr),
+                            .load(arr_ready),
+                            .clk(clk),
+                            .rst(rst)
                         );
 
-
+    wire [15:0] arr_to_write [N];
+    
+    arr_writer  #(.N(N)) writer
+                (
+                    .mem_write_addr(mem_write_addr),
+                    .mem_write_data(mem_write_addr),
+                    .write_done(done_writing),
+                    .we(we),
+                    .arr(arr_to_write),
+                    .start_addr(),
+                    .start_write(),
+                    .is_column(),
+                    .clk(),
+                    .rst()
+                );
 
     // write that stuff to a temporary memory
 
