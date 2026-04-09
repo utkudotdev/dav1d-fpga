@@ -27,7 +27,7 @@ module row_reader  #(parameter int N = 32)
         for (i = 0; i < N; i++) begin : gen_reg_row_in
             always_ff @(posedge clk) begin
                 if (rst) begin
-                    row_arr[i] <= 15'b0;
+                    row_arr[i] <= 16'b0;
                 end
                 else begin
                     row_arr[i] <= row_reg_sel[i] ? mem_read_data : row_arr[i];
@@ -44,7 +44,7 @@ module row_reader  #(parameter int N = 32)
     // fsm to read memory
     logic [N:0] state_mem_read;
     // this is just a counter for read addr
-    logic [$clog2(N)-1:0] mem_read_addr_reg;
+    logic [$clog2(N*N)-1:0] mem_read_addr_reg;
     always_ff @(posedge clk) begin
         if (rst) begin
             state_mem_read <= 0;

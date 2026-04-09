@@ -31,7 +31,7 @@ module row_writer  #(parameter int N = 32)
     // fsm to write memory
     logic [N-1:0] state_mem_write;
     // this is just a counter for write addr
-    logic [$clog2(N)-1:0] mem_write_addr_reg;
+    logic [$clog2(N*N)-1:0] mem_write_addr_reg;
     always_ff @(posedge clk) begin
         if (rst) begin
             state_mem_write <= 0;
