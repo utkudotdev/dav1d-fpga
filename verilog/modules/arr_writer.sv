@@ -1,6 +1,6 @@
-`ifndef READER_VH
+`ifndef WRITER_VH
 /* verilog_format: off */
-`define READER_VH
+`define WRITER_VH
 /* verilog_format: on */
 
 // talk to qsys attached memory --> put in array
@@ -73,6 +73,8 @@ module arr_writer  #(parameter int N = 32)
     // enable writes until state mem gets to all zeroes
     assign we = state_mem_write != 0;
 
+    wire [N-2:0] dummy;
+    assign dummy = 0;
     logic valid_reg;
     always_ff @(posedge clk) begin
         // valid goes high after we do last read and stops being valid when we start a new read
