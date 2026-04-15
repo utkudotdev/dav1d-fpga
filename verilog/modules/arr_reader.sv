@@ -80,12 +80,12 @@ module arr_reader #(
     assign mem_read_addr = mem_read_addr_reg;
 
     // arrays are ready the cycle after FSM hits that last state
-    wire [N-1:0] dummy;
-    assign dummy = 0;
+    //wire [N-1:0] dummy;
+    // assign dummy = 0;
     logic valid_reg;
     always_ff @(posedge clk) begin
         // valid goes high after we do last read and stops being valid when we start a new read
-        valid_reg <= (state_mem_read == {1'b1, dummy}) && !start_read;
+        valid_reg <= state_mem_read[N] && !start_read;
     end
     assign valid = valid_reg;
 

@@ -31,6 +31,7 @@ module single_block_32   (
 
     logic done_rows;
     wire  done_all_writes;
+    assign done_all_writes = (arr_write_counter == N-1) && write_valid;
     always_ff @(posedge clk) begin
         if (rst) begin
             done_rows <= 0;
@@ -74,7 +75,7 @@ module single_block_32   (
         if (rst)
             arr_read_counter <= 0;
         else begin
-            if (state == (INIT) || state == (START_JOB)) begin
+            if (state == (INIT)) begin
                 arr_read_counter <= 0;
                 start_read <= 1;
             end
@@ -95,7 +96,7 @@ module single_block_32   (
                         .valid(read_valid),
                         .ready(read_ready),
                         .mem_read_data(mem_read_data),
-                        .start_addr(arr_read_counter),
+                        .start_addr(done_rows ? arr_read_counter : arr_read_counter * N),
                         .start_read(start_read),
                         .is_column(done_rows),
                         .clk(clk),
@@ -134,7 +135,7 @@ module single_block_32   (
                     .ready(write_ready),
                     .we(we),
                     .arr(arr_to_write),
-                    .start_addr(arr_write_counter),
+                    .start_addr(done_rows ? arr_write_counter : arr_write_counter*N),
                     .start_write(start_write),
                     .is_column(done_rows),
                     .clk(clk),
@@ -146,7 +147,7 @@ module single_block_32   (
         if (rst)
             arr_write_counter <= 0;
         else begin
-            if (state == (INIT) || state == (START_JOB)) begin
+            if (state == (INIT)) begin
                 arr_write_counter <= 0;
             end else if (write_valid && !write_ready) begin // TODO: i have no idea if this will actually work ngl
                 arr_write_counter <= arr_write_counter + 1;
