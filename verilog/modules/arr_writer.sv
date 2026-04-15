@@ -8,7 +8,8 @@ module arr_writer  #(parameter int N = 32)
                     (
                         output          [$clog2(N*N)-1:0]     mem_write_addr,
                         output  signed  [15:0]              mem_write_data,
-                        output                              write_done,
+                        output                              valid,
+                        output                              ready,
                         output                              we,
                         input   signed  [15:0]              arr [N],
                         input           [$clog2(N*N)-1:0]     start_addr,
@@ -37,28 +38,47 @@ module arr_writer  #(parameter int N = 32)
     // this is just a counter for write addr
     logic [$clog2(N*N)-1:0] mem_write_addr_reg;
     logic [$clog2(N)-1:0]   mem_write_counter;
+    logic ready_reg;
     always_ff @(posedge clk) begin
         if (rst) begin
             state_mem_write <= 0;
             mem_write_addr_reg <= 0;
+            mem_write_counter   <= 0;
+            ready_reg <= 1;
         end
         else begin
             if (start_write) begin
                 state_mem_write     <= 1;
                 mem_write_addr_reg  <= start_addr;
                 mem_write_counter   <= 0;
+                ready_reg <= 0;
             end
             else begin
-                state_mem_write     <= state_mem_write << 1;
-                mem_write_addr_reg  <= is_column ? mem_write_addr_reg + N : mem_write_addr_reg + 1;
-                mem_write_counter   <= mem_write_counter + 1;
+                if (state_mem_write != 0) begin
+                    state_mem_write <= state_mem_write << 1;
+                    mem_write_addr_reg  <= is_column ? mem_write_addr_reg + N : mem_write_addr_reg + 1;
+                    mem_write_counter   <= mem_write_counter + 1;
+                    ready_reg <= 0;
+                end else begin
+                    state_mem_write <= 0;
+                    mem_write_addr_reg <= 0;
+                    ready_reg <= 1;
+                end
             end
         end
     end
 
+    assign ready = ready_reg;
+
     // enable writes until state mem gets to all zeroes
     assign we = state_mem_write != 0;
-    assign write_done = state_mem_write == (1<<(N-1));
+
+    logic valid_reg;
+    always_ff @(posedge clk) begin
+        // valid goes high after we do last read and stops being valid when we start a new read
+        valid_reg <= (state_mem_write == {1'b1, dummy}) && !start_write;
+    end
+    assign valid = valid_reg;
 
     // mem addr maps 1:1
     assign mem_write_addr = mem_write_addr_reg;

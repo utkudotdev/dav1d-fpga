@@ -28,7 +28,6 @@ module single_block_32   (
     state_t state;
 
     logic done_rows;
-    wire  done_compute;
     wire  done_all_writes;
     always_ff @(posedge clk) begin
         if (rst) begin
@@ -63,6 +62,11 @@ module single_block_32   (
     // talk to qsys attached memory --> put in array
     localparam N = 32;
 
+    wire signed [15:0] arr [N];
+    wire read_valid;
+    wire read_ready;
+    logic start_read;
+
     logic [$clog2(N)-1:0] arr_read_counter;
     always_ff @(posedge clk) begin
         if (rst)
@@ -70,47 +74,66 @@ module single_block_32   (
         else begin
             if (state == (INIT || START_JOB)) begin
                 arr_read_counter <= 0;
-            end else if (done_reading && done_compute) begin // TODO: ??
+                start_read <= 1;
+            end
+            // only go onto next read if there is no stalling ahead (compute and write and both good)
+            else if (read_valid && compute_ready && write_ready && !start_read) begin
                 arr_read_counter <= arr_read_counter + 1;
+                start_read <= 1;
+            end else begin
+                start_read <= 0;
             end
         end
     end
 
-    wire signed [15:0] arr [N];
-    wire read_done;
     arr_reader  #(.N(N)) reader
                     (
                         .arr(arr),
                         .mem_read_addr(mem_read_addr),
-                        .read_done(read_done),
+                        .valid(read_valid),
+                        .ready(read_ready),
                         .mem_read_data(mem_read_data),
                         .start_addr(arr_read_counter),
-                        .start_read(),
+                        .start_read(start_read),
                         .is_column(done_rows),
                         .clk(clk),
                         .rst(rst)
                     );
 
 
+    wire compute_valid;
+    wire compute_ready;
+    logic start_compute;
+
+    assign start_compute = (state == WORKING_ARR) && read_valid && compute_ready && write_ready;
+
     identity_32 iden    (   .out_array(arr_to_write),
-                            .done(done_compute),
+                            .valid(compute_valid),
+                            .ready(compute_ready),
                             .in_array(arr),
-                            .load(arr_ready),
+                            .load(start_compute),
                             .clk(clk),
                             .rst(rst)
                         );
 
     wire [15:0] arr_to_write [N];
 
+    wire write_valid;
+    wire write_ready;
+    wire start_write;
+
+    assign start_write = (state == WORKING_ARR) && compute_valid && write_ready;
+
     arr_writer  #(.N(N)) writer
                 (
                     .mem_write_addr(mem_write_addr),
                     .mem_write_data(mem_write_addr),
-                    .write_done(done_writing),
+                    .valid(write_valid),
+                    .ready(write_ready),
                     .we(we),
                     .arr(arr_to_write),
                     .start_addr(arr_write_counter),
-                    .start_write(),
+                    .start_write(start_write),
                     .is_column(done_rows),
                     .clk(clk),
                     .rst(rst)
@@ -121,40 +144,11 @@ module single_block_32   (
         if (rst)
             arr_write_counter <= 0;
         else begin
-            if (working) begin
-                pass;
-            end
-        end
-    end
-
-    logic [$clog2(N)-1:0] arr_write_counter;
-    always_ff @(posedge clk) begin
-        if (rst)
-            arr_write_counter <= 0;
-        else begin
             if (state == (INIT || START_JOB)) begin
                 arr_write_counter <= 0;
-            end else if (done_writing) begin // TODO: ??
+            end else if (write_valid && !write_ready) begin // TODO: i have no idea if this will actually work ngl
                 arr_write_counter <= arr_write_counter + 1;
             end
-        end
-    end
-
-
-    // read temp mem 
-    // pass that stuff into compute (the identity PL for now) (vertical)
-    // put an entire column (i.e. 0, 32, 64, 48)
-
-    // write temp mem back to qsys mem
-
-    logic ready_reg;
-    always_ff @(posedge clk) begin
-        if (rst)
-            ready_reg <= 1;
-        else begin
-            if (load)
-                ready_reg <= 0;
-            //else if ()
         end
     end
 

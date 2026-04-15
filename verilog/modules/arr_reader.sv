@@ -9,7 +9,8 @@ module arr_reader #(
 ) (
     output signed [          15:0] array        [N],  // parallel output of N 16-bit items of array
     output        [ADDR_WIDTH-1:0] mem_read_addr,
-    output                         read_done,         // flag for done reading array
+    output                         valid,         // flag for done reading array
+    output                         ready,
     input  signed [          15:0] mem_read_data,
     input         [ADDR_WIDTH-1:0] start_addr,
     input                          start_read,        // flag for starting read
@@ -47,21 +48,31 @@ module arr_reader #(
     logic [N:0] state_mem_read;
     // this is just a counter for read addr
     logic [ADDR_WIDTH-1:0] mem_read_addr_reg;
+    logic ready_reg;
     always_ff @(posedge clk) begin
         if (rst) begin
+            ready_reg <= 1;
             state_mem_read <= 0;
             mem_read_addr_reg <= 0;
         end else begin
             if (start_read) begin
+                ready_reg <= 0;
                 state_mem_read <= 1;
                 mem_read_addr_reg <= start_addr;
             end else begin
-                state_mem_read <= state_mem_read << 1;
-                mem_read_addr_reg <= is_column ? mem_read_addr_reg + ADDR_WIDTH'(N) : mem_read_addr_reg + 1;
+                if (state_mem_read != 0) begin
+                    state_mem_read <= state_mem_read << 1;
+                    mem_read_addr_reg <= is_column ? mem_read_addr_reg + ADDR_WIDTH'(N) : mem_read_addr_reg + 1;
+                    ready_reg <= 0;
+                end else begin
+                    state_mem_read <= 0;
+                    mem_read_addr_reg <= 0;
+                    ready_reg <= 1;
+                end
             end
         end
     end
-
+    assign ready = ready_reg;
 
     // reg select is off by one since reads have 1 latency
     assign arr_reg_sel[N-1:0] = state_mem_read[N:1];
@@ -71,11 +82,12 @@ module arr_reader #(
     // arrays are ready the cycle after FSM hits that last state
     wire [N-1:0] dummy;
     assign dummy = 0;
-    logic ready_reg;
+    logic valid_reg;
     always_ff @(posedge clk) begin
-        ready_reg <= (state_mem_read == {1'b1, dummy});
+        // valid goes high after we do last read and stops being valid when we start a new read
+        valid_reg <= (state_mem_read == {1'b1, dummy}) && !start_read;
     end
-    assign read_done = ready_reg;
+    assign valid = valid_reg;
 
 endmodule
 

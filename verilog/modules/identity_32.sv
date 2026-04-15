@@ -5,7 +5,8 @@
 
 // computes identity 32 on a 1-D array of 16-bit elements (i.e. a row or column)
 module identity_32      (   output signed [15:0] out_array [32],
-                            output done,
+                            output valid,
+                            output ready,
                             input  signed [15:0] in_array [32],
                             input  load,
                             input  clk,
@@ -14,22 +15,23 @@ module identity_32      (   output signed [15:0] out_array [32],
 
     // for now this does nothing and just passes the array out every cycle (with latency 1)
     logic [15:0] internal_registers [32];
-    logic done_reg;
+    logic valid_reg;
 
     always_ff @(posedge clk) begin
         if (rst) begin
             internal_registers <= '{32{16'b0}};
-            done_reg <= 0;
+            valid_reg <= 0;
         end else begin
             if (load) begin
                 internal_registers <= in_array;
-                done_reg <= 1;
-            end else
-                done_reg <= 0;
+                valid_reg <= 1;
+            end
         end
     end
     assign out_array = internal_registers;
-    assign done = done_reg;
+    assign valid = valid_reg;
+    // s-cycle so always ready
+    assign ready = 1;
 endmodule
 
 `endif
