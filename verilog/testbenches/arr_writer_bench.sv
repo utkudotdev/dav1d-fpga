@@ -90,8 +90,8 @@ module arr_writer_bench ();
 
  
     always @(posedge clk) begin
-            if (ready) begin
-                start_addr <= start_addr + 1; 
+            if (ready && !start_write) begin
+                start_addr <= is_column ? start_addr + 1 : start_addr + N; 
             end
             
             if (ready) begin
