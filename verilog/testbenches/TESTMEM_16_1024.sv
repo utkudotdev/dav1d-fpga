@@ -23,7 +23,7 @@ module TESTMEM_16_1024 (
     always @(posedge clk) begin
         if (rst) begin
             for (i = 0; i < 1024; i = i + 1) begin
-                mem[i] <= i;
+                mem[i] = i;
             end
         end
         else if (we) begin
