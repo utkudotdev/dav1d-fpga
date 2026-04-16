@@ -88,8 +88,6 @@ inv_dct4_1d_internal_c(int32_t *const c, const ptrdiff_t stride,
     c[1 * stride] = CLIP(t1 + t2);
     c[2 * stride] = CLIP(t1 - t2);
     c[3 * stride] = CLIP(t0 - t3);
-
-    atomic_fetch_add(&dav1d_tx1d_metrics[TX_4X4][DCT], 1);
 }
 
 static void inv_dct4_1d_c(int32_t *const c, const ptrdiff_t stride,
@@ -143,8 +141,6 @@ inv_dct8_1d_internal_c(int32_t *const c, const ptrdiff_t stride,
     c[5 * stride] = CLIP(t2 - t5);
     c[6 * stride] = CLIP(t1 - t6);
     c[7 * stride] = CLIP(t0 - t7);
-
-    atomic_fetch_add(&dav1d_tx1d_metrics[TX_8X8][DCT], 1);
 }
 
 static void inv_dct8_1d_c(int32_t *const c, const ptrdiff_t stride,
@@ -240,8 +236,6 @@ inv_dct16_1d_internal_c(int32_t *const c, const ptrdiff_t stride,
     c[13 * stride] = CLIP(t2 - t13a);
     c[14 * stride] = CLIP(t1 - t14);
     c[15 * stride] = CLIP(t0 - t15a);
-
-    atomic_fetch_add(&dav1d_tx1d_metrics[TX_16X16][DCT], 1);
 }
 
 static void inv_dct16_1d_c(int32_t *const c, const ptrdiff_t stride,
@@ -432,8 +426,6 @@ inv_dct32_1d_internal_c(int32_t *const c, const ptrdiff_t stride,
     c[29 * stride] = CLIP(t2  - t29);
     c[30 * stride] = CLIP(t1  - t30a);
     c[31 * stride] = CLIP(t0  - t31);
-
-    atomic_fetch_add(&dav1d_tx1d_metrics[TX_32X32][DCT], 1);
 }
 
 static void inv_dct32_1d_c(int32_t *const c, const ptrdiff_t stride,
@@ -787,8 +779,6 @@ static void inv_dct64_1d_c(int32_t *const c, const ptrdiff_t stride,
     c[61 * stride] = CLIP(t2  - t61a);
     c[62 * stride] = CLIP(t1  - t62);
     c[63 * stride] = CLIP(t0  - t63a);
-
-    atomic_fetch_add(&dav1d_tx1d_metrics[TX_64X64][DCT], 1);
 }
 
 static NOINLINE void
@@ -810,8 +800,6 @@ inv_adst4_1d_internal_c(const int32_t *const in, const ptrdiff_t in_s,
     out[3 * out_s] = (((3803 - 4096) * in0 + (2482 - 4096) * in2 -
                         1321         * in3 - (3344 - 4096) * in1 + 2048) >> 12) +
                      in0 + in2 - in1;
-
-    atomic_fetch_add(&dav1d_tx1d_metrics[TX_4X4][ADST], 1);
 }
 
 static NOINLINE void
@@ -861,8 +849,6 @@ inv_adst8_1d_internal_c(const int32_t *const in, const ptrdiff_t in_s,
     out[4 * out_s] =   ((t2 - t3) * 181 + 128) >> 8;
     out[2 * out_s] =   ((t6 + t7) * 181 + 128) >> 8;
     out[5 * out_s] = -(((t6 - t7) * 181 + 128) >> 8);
-
-    atomic_fetch_add(&dav1d_tx1d_metrics[TX_8X8][ADST], 1);
 }
 
 static NOINLINE void
@@ -974,8 +960,6 @@ inv_adst16_1d_internal_c(const int32_t *const in, const ptrdiff_t in_s,
     out[ 9 * out_s] = -(((t10  - t11)  * 181 + 128) >> 8);
     out[ 5 * out_s] = -(((t14a + t15a) * 181 + 128) >> 8);
     out[10 * out_s] =   ((t14a - t15a) * 181 + 128) >> 8;
-
-    atomic_fetch_add(&dav1d_tx1d_metrics[TX_16X16][ADST], 1);
 }
 
 #define inv_adst_1d(sz) \
@@ -1005,8 +989,6 @@ static void inv_identity4_1d_c(int32_t *const c, const ptrdiff_t stride,
         const int in = c[stride * i];
         c[stride * i] = in + ((in * 1697 + 2048) >> 12);
     }
-
-    atomic_fetch_add(&dav1d_tx1d_metrics[TX_4X4][IDENTITY], 1);
 }
 
 static void inv_identity8_1d_c(int32_t *const c, const ptrdiff_t stride,
@@ -1015,8 +997,6 @@ static void inv_identity8_1d_c(int32_t *const c, const ptrdiff_t stride,
     assert(stride > 0);
     for (int i = 0; i < 8; i++)
         c[stride * i] *= 2;
-
-    atomic_fetch_add(&dav1d_tx1d_metrics[TX_8X8][IDENTITY], 1);
 }
 
 static void inv_identity16_1d_c(int32_t *const c, const ptrdiff_t stride,
@@ -1027,8 +1007,6 @@ static void inv_identity16_1d_c(int32_t *const c, const ptrdiff_t stride,
         const int in = c[stride * i];
         c[stride * i] = 2 * in + ((in * 1697 + 1024) >> 11);
     }
-
-    atomic_fetch_add(&dav1d_tx1d_metrics[TX_16X16][IDENTITY], 1);
 }
 
 static void inv_identity32_1d_c(int32_t *const c, const ptrdiff_t stride,
@@ -1037,11 +1015,7 @@ static void inv_identity32_1d_c(int32_t *const c, const ptrdiff_t stride,
     assert(stride > 0);
     for (int i = 0; i < 32; i++)
         c[stride * i] *= 4;
-
-    atomic_fetch_add(&dav1d_tx1d_metrics[TX_32X32][IDENTITY], 1);
 }
-
-atomic_size_t dav1d_tx1d_metrics[N_TX_SIZES][N_TX_1D_TYPES] = { 0 };
 
 const itx_1d_fn dav1d_tx1d_fns[N_TX_SIZES][N_TX_1D_TYPES] = {
     [TX_4X4] = {

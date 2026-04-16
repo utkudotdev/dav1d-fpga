@@ -765,5 +765,6 @@ void dav1d_data_props_unref(Dav1dDataProps *const props) {
 struct dav1d_metrics_t dav1d_get_metrics(void) {
     struct dav1d_metrics_t result;
     memcpy(&result.info, dav1d_tx1d_metrics, sizeof(dav1d_tx1d_metrics));
+    memcpy(&result.time_info, dav1d_tx1d_metrics_time, sizeof(dav1d_tx1d_metrics_time));
     return result;
 }

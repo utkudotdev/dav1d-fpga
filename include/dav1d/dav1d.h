@@ -326,6 +326,7 @@ DAV1D_API int dav1d_get_frame_delay(const Dav1dSettings *s);
 
 struct dav1d_metrics_t {
     size_t info[N_TX_SIZES][N_TX_1D_TYPES];
+    uint64_t time_info[N_TX_SIZES][N_TX_1D_TYPES];
 };
 
 DAV1D_API struct dav1d_metrics_t dav1d_get_metrics(void);

@@ -27,10 +27,12 @@
 
 #include "config.h"
 
+#include <stdatomic.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "common/attributes.h"
 #include "common/intops.h"
@@ -39,6 +41,9 @@
 #include "src/itx_1d.h"
 #include "src/scan.h"
 #include "src/tables.h"
+
+atomic_size_t dav1d_tx1d_metrics[N_TX_SIZES][N_TX_1D_TYPES] = { 0 };
+atomic_uint_fast64_t dav1d_tx1d_metrics_time[N_TX_SIZES][N_TX_1D_TYPES] = { 0 };
 
 static NOINLINE void
 inv_txfm_add_c(pixel *dst, const ptrdiff_t stride, coef *const coeff,
@@ -55,6 +60,13 @@ inv_txfm_add_c(pixel *dst, const ptrdiff_t stride, coef *const coeff,
     const int is_rect2 = w * 2 == h || h * 2 == w;
     const int rnd = (1 << shift) >> 1;
 
+    const uint8_t *const txtps = dav1d_tx1d_types[txtp];
+    const itx_1d_fn first_1d_fn = dav1d_tx1d_fns[t_dim->lw][txtps[0]];
+    const itx_1d_fn second_1d_fn = dav1d_tx1d_fns[t_dim->lh][txtps[1]];
+
+    atomic_fetch_add(&dav1d_tx1d_metrics[t_dim->lw][txtps[0]], 1);
+    atomic_fetch_add(&dav1d_tx1d_metrics[t_dim->lh][txtps[1]], 1);
+
     if (eob < has_dconly) {
         int dc = coeff[0];
         coeff[0] = 0;
@@ -66,12 +78,10 @@ inv_txfm_add_c(pixel *dst, const ptrdiff_t stride, coef *const coeff,
         for (int y = 0; y < h; y++, dst += PXSTRIDE(stride))
             for (int x = 0; x < w; x++)
                 dst[x] = iclip_pixel(dst[x] + dc);
+
         return;
     }
 
-    const uint8_t *const txtps = dav1d_tx1d_types[txtp];
-    const itx_1d_fn first_1d_fn = dav1d_tx1d_fns[t_dim->lw][txtps[0]];
-    const itx_1d_fn second_1d_fn = dav1d_tx1d_fns[t_dim->lh][txtps[1]];
     const int sh = imin(h, 32), sw = imin(w, 32);
 #if BITDEPTH == 8
     const int row_clip_min = INT16_MIN;
@@ -93,6 +103,8 @@ inv_txfm_add_c(pixel *dst, const ptrdiff_t stride, coef *const coeff,
         last_nonzero_col = dav1d_last_nonzero_col_from_eob[tx][eob];
     }
     assert(last_nonzero_col < sh);
+
+    clock_t start = clock();
     for (int y = 0; y <= last_nonzero_col; y++, c += w) {
         if (is_rect2)
             for (int x = 0; x < sw; x++)
@@ -104,13 +116,18 @@ inv_txfm_add_c(pixel *dst, const ptrdiff_t stride, coef *const coeff,
     }
     if (last_nonzero_col + 1 < sh)
         memset(c, 0, sizeof(*c) * (sh - last_nonzero_col - 1) * w);
+    clock_t end = clock();
+    atomic_fetch_add(&dav1d_tx1d_metrics_time[t_dim->lw][txtps[0]], end - start);
 
     memset(coeff, 0, sizeof(*coeff) * sw * sh);
     for (int i = 0; i < w * sh; i++)
         tmp[i] = iclip((tmp[i] + rnd) >> shift, col_clip_min, col_clip_max);
 
+    start = clock();
     for (int x = 0; x < w; x++)
         second_1d_fn(&tmp[x], w, col_clip_min, col_clip_max);
+    end = clock();
+    atomic_fetch_add(&dav1d_tx1d_metrics_time[t_dim->lh][txtps[1]], end - start);
 
     c = tmp;
     for (int y = 0; y < h; y++, dst += PXSTRIDE(stride))

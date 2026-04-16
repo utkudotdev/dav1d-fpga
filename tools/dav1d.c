@@ -392,29 +392,29 @@ int main(const int argc, char *const *const argv) {
 
 
     struct dav1d_metrics_t metrics = dav1d_get_metrics();
-    printf("TX_4X4, DCT, %zu\n", metrics.info[TX_4X4][DCT]);
-    printf("TX_8X8, DCT, %zu\n", metrics.info[TX_8X8][DCT]);
-    printf("TX_16X16, DCT, %zu\n", metrics.info[TX_16X16][DCT]);
-    printf("TX_32X32, DCT, %zu\n", metrics.info[TX_32X32][DCT]);
-    printf("TX_64X64, DCT, %zu\n", metrics.info[TX_64X64][DCT]);
+    printf("4, DCT, %zu, %lu\n", metrics.info[TX_4X4][DCT], metrics.time_info[TX_4X4][DCT]);
+    printf("8, DCT, %zu, %lu\n", metrics.info[TX_8X8][DCT], metrics.time_info[TX_8X8][DCT]);
+    printf("16, DCT, %zu, %lu\n", metrics.info[TX_16X16][DCT], metrics.time_info[TX_16X16][DCT]);
+    printf("32, DCT, %zu, %lu\n", metrics.info[TX_32X32][DCT], metrics.time_info[TX_32X32][DCT]);
+    printf("64, DCT, %zu, %lu\n", metrics.info[TX_64X64][DCT], metrics.time_info[TX_64X64][DCT]);
 
-    printf("TX_4X4, ADST, %zu\n", metrics.info[TX_4X4][ADST]);
-    printf("TX_8X8, ADST, %zu\n", metrics.info[TX_8X8][ADST]);
-    printf("TX_16X16, ADST, %zu\n", metrics.info[TX_16X16][ADST]);
-    printf("TX_32X32, ADST, %zu\n", metrics.info[TX_32X32][ADST]);
-    printf("TX_64X64, ADST, %zu\n", metrics.info[TX_64X64][ADST]);
+    printf("4, ADST, %zu, %lu\n", metrics.info[TX_4X4][ADST], metrics.time_info[TX_4X4][ADST]);
+    printf("8, ADST, %zu, %lu\n", metrics.info[TX_8X8][ADST], metrics.time_info[TX_8X8][ADST]);
+    printf("16, ADST, %zu, %lu\n", metrics.info[TX_16X16][ADST], metrics.time_info[TX_16X16][ADST]);
+    printf("32, ADST, %zu, %lu\n", metrics.info[TX_32X32][ADST], metrics.time_info[TX_32X32][ADST]);
+    printf("64, ADST, %zu, %lu\n", metrics.info[TX_64X64][ADST], metrics.time_info[TX_64X64][ADST]);
 
-    printf("TX_4X4, FLIPADST, %zu\n", metrics.info[TX_4X4][FLIPADST]);
-    printf("TX_8X8, FLIPADST, %zu\n", metrics.info[TX_8X8][FLIPADST]);
-    printf("TX_16X16, FLIPADST, %zu\n", metrics.info[TX_16X16][FLIPADST]);
-    printf("TX_32X32, FLIPADST, %zu\n", metrics.info[TX_32X32][FLIPADST]);
-    printf("TX_64X64, FLIPADST, %zu\n", metrics.info[TX_64X64][FLIPADST]);
+    printf("4, FLIPADST, %zu, %lu\n", metrics.info[TX_4X4][FLIPADST], metrics.time_info[TX_4X4][FLIPADST]);
+    printf("8, FLIPADST, %zu, %lu\n", metrics.info[TX_8X8][FLIPADST], metrics.time_info[TX_8X8][FLIPADST]);
+    printf("16, FLIPADST, %zu, %lu\n", metrics.info[TX_16X16][FLIPADST], metrics.time_info[TX_16X16][FLIPADST]);
+    printf("32, FLIPADST, %zu, %lu\n", metrics.info[TX_32X32][FLIPADST], metrics.time_info[TX_32X32][FLIPADST]);
+    printf("64, FLIPADST, %zu, %lu\n", metrics.info[TX_64X64][FLIPADST], metrics.time_info[TX_64X64][FLIPADST]);
 
-    printf("TX_4X4, IDENTITY, %zu\n", metrics.info[TX_4X4][IDENTITY]);
-    printf("TX_8X8, IDENTITY, %zu\n", metrics.info[TX_8X8][IDENTITY]);
-    printf("TX_16X16, IDENTITY, %zu\n", metrics.info[TX_16X16][IDENTITY]);
-    printf("TX_32X32, IDENTITY, %zu\n", metrics.info[TX_32X32][IDENTITY]);
-    printf("TX_64X64, IDENTITY, %zu\n", metrics.info[TX_64X64][IDENTITY]);
+    printf("4, IDENTITY, %zu, %lu\n", metrics.info[TX_4X4][IDENTITY], metrics.time_info[TX_4X4][IDENTITY]);
+    printf("8, IDENTITY, %zu, %lu\n", metrics.info[TX_8X8][IDENTITY], metrics.time_info[TX_8X8][IDENTITY]);
+    printf("16, IDENTITY, %zu, %lu\n", metrics.info[TX_16X16][IDENTITY], metrics.time_info[TX_16X16][IDENTITY]);
+    printf("32, IDENTITY, %zu, %lu\n", metrics.info[TX_32X32][IDENTITY], metrics.time_info[TX_32X32][IDENTITY]);
+    printf("64, IDENTITY, %zu, %lu\n", metrics.info[TX_64X64][IDENTITY], metrics.time_info[TX_64X64][IDENTITY]);
 
     return (res == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
