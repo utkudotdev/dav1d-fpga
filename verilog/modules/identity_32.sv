@@ -18,9 +18,12 @@ module identity_32 (
     logic [15:0] internal_registers[32];
     logic valid_reg;
 
+    integer j;
     always_ff @(posedge clk) begin
         if (rst) begin
-            internal_registers <= '{32{16'b0}};
+            for (j = 0; j < 32; j = j + 1) begin
+                internal_registers[j] <= 0;
+            end
             valid_reg <= 0;
         end else begin
             if (start_compute) begin

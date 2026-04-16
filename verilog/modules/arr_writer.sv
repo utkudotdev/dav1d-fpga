@@ -18,11 +18,14 @@ module arr_writer #(
     input                           clk,
     input                           rst
 );
+    integer j;
     // arr array is the actual registers holding arr
     logic signed [15:0] arr_internal[N];
     always_ff @(posedge clk) begin
         if (rst) begin
-            arr_internal <= '{N{16'b0}};
+            for (j = 0; j < N; j = j + 1) begin
+                arr_internal[j] <= 0;
+            end
         end else  // put in new arr for writing only when flag is raised
             arr_internal <= start_write ? arr : arr_internal;
     end
