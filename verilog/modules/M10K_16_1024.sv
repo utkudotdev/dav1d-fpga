@@ -10,17 +10,19 @@
 module M10K_16_1024 (
     output reg [15:0] q,
     input [15:0] d,
-    input [9:0] write_address, read_address,
-    input we, clk
+    input [9:0] write_address,
+    input [9:0] read_address,
+    input we,
+    input clk
 );
     // force M10K ram style
-    reg [15:0] mem [1024]  /* synthesis ramstyle = "no_rw_check, M10K" */;
+    reg [15:0] mem[1024]  /* synthesis ramstyle = "no_rw_check, M10K" */;
 
-    always @ (posedge clk) begin
+    always @(posedge clk) begin
         if (we) begin
             mem[write_address] <= d;
         end
-        q <= mem[read_address]; // q doesn't get d in this clock cycle
+        q <= mem[read_address];  // q doesn't get d in this clock cycle
     end
 endmodule
 

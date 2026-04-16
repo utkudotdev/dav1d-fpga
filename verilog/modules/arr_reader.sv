@@ -9,11 +9,13 @@ module arr_reader #(
 ) (
     output signed [          15:0] array        [N],  // parallel output of N 16-bit items of array
     output        [ADDR_WIDTH-1:0] mem_read_addr,
-    output                         valid,         // flag for done reading array
+    output                         valid,             // flag for done reading array
     output                         ready,
     input  signed [          15:0] mem_read_data,
     input         [ADDR_WIDTH-1:0] start_addr,
-    input                          start_read,        // flag for starting read
+    // Flag for starting a read. Goes high when the client module is ready for a read and the input
+    // address is set correctly. Essentially can be thought of as (in_ready & in_valid)
+    input                          start_read,
     input                          is_column,         // flag for column vs row
     input                          clk,
     input                          rst
