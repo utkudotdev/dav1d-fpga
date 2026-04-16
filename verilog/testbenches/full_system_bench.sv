@@ -77,7 +77,7 @@ module full_system_bench ();
         .q(mem_read_q), 
         .d(mem_write_data), 
         .write_address(mem_write_addr), 
-        .read_address(10'b0), 
+        .read_address(mem_read_addr_out), 
         .we(we), 
         .clk(clk) 
     );
@@ -104,8 +104,8 @@ module full_system_bench ();
 
         //input
         .mem_read_data(mem_read_q),
-        .start_addr(start_addr),
-        .start_read(start_write),        // flag for starting read
+        .start_addr(0),
+        .start_read(ready_out),        // flag for starting read
         .is_column(is_column),         // flag for column vs row
         .clk(clk),
         .rst(rst)
