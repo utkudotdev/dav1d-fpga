@@ -67,9 +67,8 @@ module arr_writer #(
             end
         end
     end
-
+    
     assign ready = ready_reg;
-
     // enable writes until state mem gets to all zeroes
     assign we = state_mem_write != 0;
 

@@ -7,18 +7,18 @@
 module arr_reader #(
     parameter int N = 32
 ) (
-    output signed [          15:0] array        [N],  // parallel output of N 16-bit items of array
-    output        [ADDR_WIDTH-1:0] mem_read_addr,
-    output                         valid,             // flag for done reading array
-    output                         ready,
-    input  signed [          15:0] mem_read_data,
-    input         [ADDR_WIDTH-1:0] start_addr,
+    output wire signed [15:0] array[N],  // parallel output of N 16-bit items of array
+    output wire [ADDR_WIDTH-1:0] mem_read_addr,
+    output wire valid,  // flag for done reading array
+    output wire ready,
+    input wire signed [15:0] mem_read_data,
+    input wire [ADDR_WIDTH-1:0] start_addr,
     // Flag for starting a read. Goes high when the client module is ready for a read and the input
     // address is set correctly. Essentially can be thought of as (in_ready & in_valid)
-    input                          start_read,
-    input                          is_column,         // flag for column vs row
-    input                          clk,
-    input                          rst
+    input wire start_read,
+    input wire is_column,  // flag for column vs row
+    input wire clk,
+    input wire rst
 );
     localparam int ADDR_WIDTH = $clog2(N * N);
 
@@ -58,9 +58,9 @@ module arr_reader #(
             mem_read_addr_reg <= 0;
         end else begin
             if (start_read) begin
-                ready_reg <= 0;
                 state_mem_read <= 1;
                 mem_read_addr_reg <= start_addr;
+                ready_reg <= 0;
             end else begin
                 if (state_mem_read != 0) begin
                     state_mem_read <= state_mem_read << 1;
@@ -68,7 +68,7 @@ module arr_reader #(
                     ready_reg <= 0;
                 end else begin
                     state_mem_read <= 0;
-                    mem_read_addr_reg <= 0;
+                    mem_read_addr_reg <= start_addr;
                     ready_reg <= 1;
                 end
             end

@@ -1,7 +1,6 @@
 `timescale 1ns / 1ns
-`include "../modules/arr_writer.sv"
-`include "../modules/arr_reader.sv"
-`include "../modules/M10K_16_1024.sv"
+`include "../modules/single_block_32.sv"
+`include "../TESTMEM_16_1024.sv"
 
 module full_system_bench ();
     localparam N = 32;
@@ -73,40 +72,25 @@ module full_system_bench ();
 
     wire [15:0] mem_read_q; 
 
-    M10K_16_1024 test_mem (
+    M10K_16_1024 TESTMEM_16_1024
+     (
         .q(mem_read_q), 
         .d(mem_write_data), 
         .write_address(mem_write_addr), 
         .read_address(mem_read_addr_out), 
-        .we(we), 
+        .we(we),
+        .rst(rst),
         .clk(clk) 
     );
 
-    arr_writer #(.N(N)) uut (
-        .mem_write_addr(mem_write_addr), 
-        .mem_write_data(mem_write_data), 
-        .ready(ready),
-        .we(we), 
-        .arr(arr), 
-        .start_addr(start_addr), 
-        .start_write(start_write), 
-        .is_column(is_column), 
-        .clk(clk), 
-        .rst(rst) 
-    );
-    arr_reader #(.N(N)) dumb_reader (
-
-        //output
-        .array(arr_out),  // parallel output of N 16-bit items of array
+    single_block_32 DUT (
+        .mem_write_data(mem_write_data),
+        .mem_write_addr(mem_write_addr),
         .mem_read_addr(mem_read_addr_out),
-        .valid(valid_out),         // flag for done reading array
-        .ready(ready_out),
-
-        //input
+        .we(we),
+        .ready(ready),
         .mem_read_data(mem_read_q),
-        .start_addr(0),
-        .start_read(ready_out),        // flag for starting read
-        .is_column(is_column),         // flag for column vs row
+        .request(1),
         .clk(clk),
         .rst(rst)
     );
@@ -122,7 +106,7 @@ module full_system_bench ();
             else begin
                 start_write <= 0;
             end
-    end
+        end
 
 
 
