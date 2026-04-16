@@ -1,6 +1,6 @@
 `timescale 1ns / 1ns
-`include "arr_writer.sv"
-`include "M10K_16_1024.sv"
+`include "../modules/arr_writer.sv"
+`include "../modules/M10K_16_1024.sv"
 
 module arr_writer_bench ();
     localparam N = 32;
@@ -8,7 +8,7 @@ module arr_writer_bench ();
     localparam STOP = 1000;
 
     logic clk, rst; 
-    logic [15:0] count
+    logic [15:0] count;
 
     logic [ADDR_WIDTH-1:0] start_addr; 
 
