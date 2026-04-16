@@ -78,7 +78,6 @@ module arr_writer_bench ();
     arr_writer #(.N(N)) uut (
         .mem_write_addr(mem_write_addr), 
         .mem_write_data(mem_write_data), 
-        .valid(valid), 
         .ready(ready),
         .we(we), 
         .arr(arr), 
@@ -91,7 +90,7 @@ module arr_writer_bench ();
 
  
     always @(posedge clk) begin
-            if (valid) begin
+            if (ready) begin
                 start_addr += 1; 
             end
             
