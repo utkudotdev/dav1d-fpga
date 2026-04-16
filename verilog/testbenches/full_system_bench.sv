@@ -1,8 +1,9 @@
 `timescale 1ns / 1ns
 `include "../modules/arr_writer.sv"
+`include "../modules/arr_reader.sv"
 `include "../modules/M10K_16_1024.sv"
 
-module arr_writer_bench ();
+module full_system_bench ();
     localparam N = 32;
     localparam ADDR_WIDTH = $clog2(N * N);
     localparam STOP = 1000;
@@ -31,7 +32,6 @@ module arr_writer_bench ();
             start_addr <= 0;
             start_write <= 1;
             is_column <= 0;
-
         end
 
         else count <= count + 1; 
@@ -39,8 +39,8 @@ module arr_writer_bench ();
 
     // Initialize clocks and index
     initial begin
-        $dumpfile("arr_reader_dump.vcd");
-        $dumpvars(0, arr_reader_bench);
+        $dumpfile("full_system.vcd");
+        $dumpvars(0, full_system_bench);
     end
 
     always_comb begin
@@ -50,16 +50,13 @@ module arr_writer_bench ();
     end
 
     logic signed [15:0] arr [N]; 
-
-    logic signed [15:0] arr_out [N]; 
     logic is_column; 
     
     wire [ADDR_WIDTH-1:0] mem_write_addr; 
     wire signed [15:0] mem_write_data; 
-    wire valid_out; 
-    wire ready_out; 
+    wire valid; 
+    wire ready; 
     wire we; 
-    wire mem_read_addr_out;
 
     genvar i;
 
@@ -69,13 +66,37 @@ module arr_writer_bench ();
         end
     endgenerate
 
+    wire [15:0] mem_read_q; 
+
+    M10K_16_1024 test_mem (
+        .q(mem_read_q), 
+        .d(mem_write_data), 
+        .write_address(mem_write_addr), 
+        .read_address(10'b0), 
+        .we(we), 
+        .clk(clk) 
+    );
+
+    arr_writer #(.N(N)) uut (
+        .mem_write_addr(mem_write_addr), 
+        .mem_write_data(mem_write_data), 
+        .valid(valid), 
+        .ready(ready),
+        .we(we), 
+        .arr(arr), 
+        .start_addr(start_addr), 
+        .start_write(start_write), 
+        .is_column(is_column), 
+        .clk(clk), 
+        .rst(rst) 
+    );
 
     arr_reader #(.N(N)) dumb_reader (
-        .array(arr_out),  // parallel output of N 16-bit items of array
-        .mem_read_addr(mem_read_addr_out),
-        .valid(valid_out),         // flag for done reading array
-        .ready(ready_out),
-        .mem_read_data(arr),
+        .array(arr),  // parallel output of N 16-bit items of array
+        .mem_read_addr(mem_read_q),
+        .valid(valid),         // flag for done reading array
+        .ready(ready),
+        .mem_read_data(mem_read_q),
         .start_addr(start_addr),
         .start_read(start_write),        // flag for starting read
         .is_column(is_column),         // flag for column vs row
@@ -96,5 +117,7 @@ module arr_writer_bench ();
                 start_write <= 0;
             end
     end
+
+
 
 endmodule
