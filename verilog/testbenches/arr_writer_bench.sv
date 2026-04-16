@@ -10,6 +10,10 @@ module arr_writer_bench ();
     logic clk, rst; 
     logic [15:0] count
 
+    logic [ADDR_WIDTH-1:0] start_addr; 
+
+    logic start_write; 
+
     always begin
         #10 clk = !clk; 
     end 
@@ -22,7 +26,12 @@ module arr_writer_bench ();
     end 
 
     always @(posedge clk) begin
-        if (rst) count <= 0; 
+        if (rst) begin
+            count <= 0; 
+            start_addr <= 0;
+            start_write <= 1;
+        end
+
         else count <= count + 1; 
     end
 
@@ -39,8 +48,6 @@ module arr_writer_bench ();
     end
 
     logic signed [15:0] arr [N]; 
-    logic [ADDR_WIDTH-1:0] start_addr; 
-    logic start_write; 
     logic is_column; 
     
     wire [ADDR_WIDTH-1:0] mem_write_addr; 
@@ -49,8 +56,8 @@ module arr_writer_bench ();
     wire ready; 
     wire we; 
 
-//sam remove this if you want to do some otehr BS
     genvar i;
+
     generate
         for (i = 0; i < N; i++) begin : gen_test_data
             assign arr[i] = i * 4;
@@ -58,11 +65,12 @@ module arr_writer_bench ();
     endgenerate
 
     wire [15:0] mem_read_q; 
+
     M10K_16_1024 test_mem (
         .q(mem_read_q), 
         .d(mem_write_data), 
         .write_address(mem_write_addr), 
-        .read_address(10'b0), // Tied to 0 as we aren't testing reading here 
+        .read_address(10'b0), 
         .we(we), 
         .clk(clk) 
     );
@@ -81,8 +89,20 @@ module arr_writer_bench ();
         .rst(rst) 
     );
 
+ 
     always @(posedge clk) begin
-
+            if (valid) begin
+                start_addr += 1; 
+            end
+            
+            if (ready) begin
+                start_write <= 1;
+            end
+            else begin
+                start_write <= 0;
+            end
     end
+
+
 
 endmodule

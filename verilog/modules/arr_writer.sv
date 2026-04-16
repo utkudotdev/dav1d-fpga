@@ -6,7 +6,7 @@
 // talk to qsys attached memory --> put in array
 module arr_writer  #(parameter int N = 32)
                     (
-                        output          [$clog2(N*N)-1:0]     mem_write_addr,
+                        output          [$clog2(N*N)-1:0]   mem_write_addr,
                         output  signed  [15:0]              mem_write_data,
                         output                              valid,
                         output                              ready,
