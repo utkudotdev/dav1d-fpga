@@ -75,7 +75,7 @@ module single_block_32   (
         if (rst)
             arr_read_counter <= 0;
         else begin
-            if (state == (INIT)) begin
+            if (state == (INIT) || state == (START_JOB)) begin
                 arr_read_counter <= 0;
                 start_read <= 1;
             end
@@ -147,7 +147,7 @@ module single_block_32   (
         if (rst)
             arr_write_counter <= 0;
         else begin
-            if (state == (INIT)) begin
+            if (state == (INIT) || state == (START_JOB)) begin
                 arr_write_counter <= 0;
             end else if (write_valid && !write_ready) begin // TODO: i have no idea if this will actually work ngl
                 arr_write_counter <= arr_write_counter + 1;
