@@ -50,13 +50,18 @@ module full_system_bench ();
     end
 
     logic signed [15:0] arr [N]; 
+    logic signed [15:0] arr_out [N];
     logic is_column; 
     
     wire [ADDR_WIDTH-1:0] mem_write_addr; 
     wire signed [15:0] mem_write_data; 
-    wire valid; 
     wire ready; 
+
+    wire valid_out; 
+    wire ready_out; 
     wire we; 
+    wire mem_read_addr_out;
+
 
     genvar i;
 
@@ -80,7 +85,6 @@ module full_system_bench ();
     arr_writer #(.N(N)) uut (
         .mem_write_addr(mem_write_addr), 
         .mem_write_data(mem_write_data), 
-        .valid(valid), 
         .ready(ready),
         .we(we), 
         .arr(arr), 
@@ -90,12 +94,15 @@ module full_system_bench ();
         .clk(clk), 
         .rst(rst) 
     );
-
     arr_reader #(.N(N)) dumb_reader (
-        .array(arr),  // parallel output of N 16-bit items of array
-        .mem_read_addr(mem_read_q),
-        .valid(valid),         // flag for done reading array
-        .ready(ready),
+
+        //output
+        .array(arr_out),  // parallel output of N 16-bit items of array
+        .mem_read_addr(mem_read_addr_out),
+        .valid(valid_out),         // flag for done reading array
+        .ready(ready_out),
+
+        //input
         .mem_read_data(mem_read_q),
         .start_addr(start_addr),
         .start_read(start_write),        // flag for starting read
@@ -103,11 +110,10 @@ module full_system_bench ();
         .clk(clk),
         .rst(rst)
     );
-
  
-    always @(posedge clk) begin
-            if (valid) begin
-                start_addr += 1; 
+       always @(posedge clk) begin
+            if (ready && !start_write) begin
+                start_addr <= is_column ? start_addr + 1 : start_addr + N; 
             end
             
             if (ready) begin
