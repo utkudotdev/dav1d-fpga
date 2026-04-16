@@ -91,7 +91,7 @@ module arr_writer_bench ();
  
     always @(posedge clk) begin
             if (ready) begin
-                start_addr += 1; 
+                start_addr <= start_addr + 1; 
             end
             
             if (ready) begin
