@@ -60,7 +60,7 @@ module full_system_bench ();
     wire valid_out; 
     wire ready_out; 
     wire we; 
-    wire mem_read_addr_out;
+    wire [ADDR_WIDTH-1:0] mem_read_addr_out;
 
 
     genvar i;
