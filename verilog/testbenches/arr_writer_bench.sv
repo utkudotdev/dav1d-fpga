@@ -30,6 +30,7 @@ module arr_writer_bench ();
             count <= 0; 
             start_addr <= 0;
             start_write <= 1;
+            is_column <= 0;
         end
 
         else count <= count + 1; 
@@ -52,7 +53,6 @@ module arr_writer_bench ();
     
     wire [ADDR_WIDTH-1:0] mem_write_addr; 
     wire signed [15:0] mem_write_data; 
-    wire valid; 
     wire ready; 
     wire we; 
 
