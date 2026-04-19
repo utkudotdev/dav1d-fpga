@@ -12,8 +12,8 @@ return t
 */
 
 module brev #(parameter int N)) (
-    output logic out,
-    input logic in,
+    output logic [N-1:0] out,
+    input logic [N-1:0] in,
 );
     integer i;
 
