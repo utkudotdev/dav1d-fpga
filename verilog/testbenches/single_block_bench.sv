@@ -1,8 +1,8 @@
 `timescale 1ns / 1ns
-`include "../modules/single_block_32.sv"
-`include "../TESTMEM_16_1024.sv"
+`include "./modules/single_block_32.sv"
+`include "./testbenches/TESTMEM_16_1024.sv"
 
-module full_system_bench ();
+module single_block_bench ();
     localparam N = 32;
     localparam ADDR_WIDTH = $clog2(N * N);
     localparam STOP = 1000;
@@ -72,7 +72,7 @@ module full_system_bench ();
 
     wire [15:0] mem_read_q; 
 
-    M10K_16_1024 TESTMEM_16_1024
+    TESTMEM_16_1024 TESTMEM_16_1024
      (
         .q(mem_read_q), 
         .d(mem_write_data), 

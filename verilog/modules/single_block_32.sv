@@ -1,6 +1,6 @@
-`include "identity_32.sv"
-`include "arr_writer.sv"
-`include "arr_reader.sv"
+`include "modules/identity_32.sv"
+`include "modules/arr_writer.sv"
+`include "modules/arr_reader.sv"
 
 `ifndef BLOCK_32_VH_
 /* verilog_format: off */
@@ -32,7 +32,7 @@ module single_block_32 (
 
     logic done_rows;
     wire done_all_writes;
-    assign done_all_writes = (arr_write_counter == N - 1) && write_ready_edge;
+    assign done_all_writes = (arr_write_counter == N - 1) && write_ready_pos_edge;
     always_ff @(posedge clk) begin
         if (rst) begin
             done_rows <= 0;
@@ -125,7 +125,33 @@ module single_block_32 (
     wire write_ready;
     wire start_write;
 
-    assign start_write = (state == WORKING_ARR) && compute_valid && write_ready;
+    //TODO: this is supposed to somehow magically fix the start write logic but
+    // it DEFINITELY doesn't...
+    // we need some sort of "job number" to get carried with the compute
+    // and then to not write that twice-- simple if we just carry the read address with us
+    // idk why we trolled like this.
+    logic compute_valid_prev;
+    logic catch_compute_valid;
+    wire  write_ready_neg_edge = write_ready == 0 && write_ready_prev == 1;
+    always_ff @(posedge clk) begin
+        if (rst) begin
+            compute_valid_prev  <= 0;
+            catch_compute_valid <= 0;
+        end
+        else begin
+            compute_valid_prev <= compute_valid;
+            if (catch_compute_valid == 0)
+                catch_compute_valid <= compute_valid_prev == 0 && compute_valid == 1;
+            else if (write_ready_neg_edge)
+                catch_compute_valid <= 0;
+        end
+        
+    end 
+    
+
+    assign start_write = (state == WORKING_ARR) && catch_compute_valid && write_ready;
+    
+
 
     arr_writer #(
         .N(N)
@@ -148,14 +174,14 @@ module single_block_32 (
         else begin
             if (state == (INIT) || state == (START_JOB)) begin
                 arr_write_counter <= 0;
-            end else if (write_ready_edge) begin // TODO: i have no idea if this will actually work ngl
+            end else if (write_ready_pos_edge) begin // TODO: i have no idea if this will actually work ngl
                 arr_write_counter <= arr_write_counter + 1;
             end
         end
     end
     
     logic write_ready_prev;
-    wire  write_ready_edge = write_ready == 1 && write_ready_prev == 0;
+    wire  write_ready_pos_edge = write_ready == 1 && write_ready_prev == 0;
     always_ff @(posedge clk) begin
         if (rst)
             write_ready_prev <= 0;
