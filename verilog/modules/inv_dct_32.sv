@@ -38,6 +38,7 @@ typedef enum logic [4:0] {
 //n = 5 due to 32 point DCT, so we skip steps 2, 4, 7, 10, 11, 15, 16, 25, 28, 30, and 31.
 
 //state transistion shenanigans.
+//peter is about to go to the bridge
 always_ff @( clock ) begin
     case (state)
         IDLE: begin
