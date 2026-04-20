@@ -2,34 +2,222 @@
 import av1_helper_functions::*;
 //following https://aomediacodec.github.io/av1-spec/av1-spec.pdf page 298
 
-    typedef struct packed {
-        logic signed [15:0] a;
-        logic signed [15:0] b;
-    } butterfly_t;
 
-module inv_dct_32 #(parameter int N = 32) (
+    
+
+module inv_dct_32 #(parameter int N) (
     output logic signed [15:0] out [N],
     input logic signed [15:0] t_array [N],
+    input logic start_compute,
     input logic clk,
     input logic rst
+    
 );
+
+integer n;
+
+always_comb begin
+    n = N == 32 ? 5 : (N == 16 ? 4 : (N == 8 ? 3 : (N == 4 ? 2 : -1))));
+end
+
+typedef struct packed {
+    logic signed [15:0] a;
+    logic signed [15:0] b;
+} butterfly_t;
+
+//23 states needed 
+typedef enum logic [4:0] {
+        IDLE, 
+
+        STEP_1, STEP_3, STEP_5, STEP_6, STEP_8, STEP_9, STEP_10, STEP_12, STEP_13, STEP_14, STEP_15, STEP_17, STEP_18, STEP_19, 
+        STEP_20, STEP_22, STEP_23, STEP_24, STEP_26, STEP_27, STEP_29, 
+
+        DONE
+    } state_t;
 
 //n = 5 due to 32 point DCT, so we skip steps 2, 4, 7, 10, 11, 15, 16, 25, 28, 30, and 31.
 
-always_comb begin
+//state transistion shenanigans.
+always_ff @( clock ) begin
+    case (state)
+        IDLE: begin
+            if (start_compute) begin
+                state <= STEP_1; 
+            end
+            else begin
+                state <= IDLE;
+            end
+        end
+
+        STEP_1: begin
+            if (n >= 5) begin
+                state <= STEP_3; 
+            end else begin
+                state <= STEP_5;
+            end
+        end
+
+        STEP_3: begin
+                state <= STEP_5; 
+        end
+
+        STEP_5: begin
+                if (n >= 5) begin
+                    state <= STEP_6; 
+                end else begin
+                    state <= STEP_9;
+                end
+            end
+        
+        STEP_6: begin
+                state <= STEP_8; 
+        end
+
+        STEP_8: begin
+                if (n >= 4) begin
+                    state <= STEP_9; 
+                end else begin
+                    state <= STEP_12;
+                end
+        end
+
+        STEP_9: begin
+                if (n >= 5) begin
+                    state <= STEP_10; 
+                end else begin
+                    state <= STEP_12;
+                end
+        end
+
+        STEP_10: begin
+                state <= STEP_12;
+            end
+
+        STEP_12: begin
+                if (n >= 3) begin
+                    state <= STEP_13; 
+                end else begin
+                    state <= STEP_17;
+                end
+        end
+
+        STEP_13: begin
+                if (n >= 4) begin
+                    state <= STEP_14; 
+                end else begin
+                    state <= STEP_17;
+                end
+        end
+        
+        STEP_14: begin
+                if (n >= 5) begin 
+                    state <= STEP_15; 
+                end else begin
+                    state <= STEP_17;
+                end
+        end
+
+        STEP_15: begin
+                state <= STEP_17; 
+        end
+
+        STEP_17: begin
+                if (n >= 3) begin
+                    state <= STEP_18; 
+                end else begin
+                    state <= STEP_22;
+                end
+        end
+
+        STEP_18: begin
+                if (n >= 4) begin
+                    state <= STEP_19; 
+                end else begin
+                    state <= STEP_22;
+                end
+        end
+
+        STEP_19: begin
+                if (n >= 5) begin
+                    state <= STEP_20; 
+                end else begin
+                    state <= STEP_22;
+                end
+        end
+
+        STEP_20: begin
+                state <= STEP_22; 
+        end
+
+        STEP_22: begin
+                if (n >= 4) begin
+                    state <= STEP_23; 
+                end else begin
+                    state <= DONE;
+                end
+        end
+
+        STEP_23: begin
+                if (n >= 5) begin
+                    state <= STEP_24; 
+                end else begin
+                    state <= STEP_26;
+                end
+
+        end
+
+        STEP_24: begin
+                state <= STEP_26; 
+        end
+
+        STEP_26: begin
+                if (n >= 5) begin
+                    state <= STEP_27;
+                end else begin
+                    state <= DONE;
+                end
+        end
+
+        STEP_27: begin
+                state <= STEP_29; 
+        end
+
+        STEP_29: begin
+                state <= DONE; 
+        end
+
+        DONE: begin
+                state <= IDLE; 
+        end
+
+        default: state <= IDLE;
+
+
+    endcase
+end
+
+
+always_ff @( clock ) begin
     
-// 1. Invoke the inverse DCT permutation process as specified in section 7.13.2.2 with the input variable n.
-logic signed [15:0] T [N];
-butterfly_t b_res;
+    case (state_t)
+        IDLE: begin
+            if (rst) begin
+                state <= STEP_1; 
+            end else begin
+                state <= IDLE; 
+            end
+        end
 
-for (int i = 0; i < N; i++) begin
-        T[i] = t_array[brev(5, 16'(i))];
-    end
+        STEP_1: begin            
+            // 1. Invoke the inverse DCT permutation process as specified in section 7.13.2.2 with the input variable n.
+            logic signed [15:0] T [N];
+            butterfly_t b_res;
 
-
-
-// 2. If n is equal to 6, invoke B( 32 + i, 63 - i, 63 - 4 * brev( 4, i ), 0, r ) for i = 0..15.
-//skipped in 32 point DCT? and below? as n = 5?
+            for (int i = 0; i < N; i++) 
+            begin
+                T[i] = t_array[brev(5, 16'(i))];
+            end
+        end 
 
 
 
@@ -158,6 +346,7 @@ for (int i = 0; i <= 1; i++) begin
 
 // 31. If n is equal to 6, invoke H( i, 63 - i, 0, r ) for i = 0..31.
 //skip
-end
+end begin
+
 
 endmodule
