@@ -47,6 +47,8 @@ module inv_dct_32 #(
         DONE
     } state_t;
 
+    state_t state;
+
     //n = 5 due to 32 point DCT, so we skip steps 2, 4, 7, 10, 11, 15, 16, 25, 28, 30, and 31.
 
     //state transistion shenanigans.
@@ -211,13 +213,9 @@ module inv_dct_32 #(
     logic signed [15:0] T[N];
 
     always_ff @(clock) begin
-        case (state_t)
+        case (state)
             IDLE: begin
-                if (rst) begin
-                    state <= STEP_1;
-                end else begin
-                    state <= IDLE;
-                end
+                //do nothing lmao
             end
 
             STEP_1: begin
