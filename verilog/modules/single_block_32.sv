@@ -110,10 +110,13 @@ module single_block_32 (
 
     assign start_compute = (state == WORKING_ARR) && read_valid && compute_ready && write_ready;
 
+    wire [15:0] compute_job_id;
     identity_32 iden (
         .out_array(arr_to_write),
+        .job_id_out(compute_job_id),
         .valid(compute_valid),
         .ready(compute_ready),
+        .job_id_in(arr_read_counter),
         .in_array(arr),
         .start_compute(start_compute),
         .clk(clk),
@@ -121,35 +124,21 @@ module single_block_32 (
     );
 
     wire [15:0] arr_to_write[N];
+    logic [15:0] job_id_prev;
 
     wire write_ready;
     wire start_write;
 
-    //TODO: this is supposed to somehow magically fix the start write logic but
-    // it DEFINITELY doesn't...
-    // we need some sort of "job number" to get carried with the compute
-    // and then to not write that twice-- simple if we just carry the read address with us
-    // idk why we trolled like this.
-    logic compute_valid_prev;
-    logic catch_compute_valid;
-    wire  write_ready_neg_edge = write_ready == 0 && write_ready_prev == 1;
     always_ff @(posedge clk) begin
-        if (rst) begin
-            compute_valid_prev  <= 0;
-            catch_compute_valid <= 0;
-        end
-        else begin
-            compute_valid_prev <= compute_valid;
-            if (catch_compute_valid == 0)
-                catch_compute_valid <= compute_valid_prev == 0 && compute_valid == 1;
-            else if (write_ready_neg_edge)
-                catch_compute_valid <= 0;
-        end
-        
-    end 
+        if (rst)
+            job_id_prev <= 111; //some dummy id
+        else
+            job_id_prev <= start_write ? compute_job_id : job_id_prev; 
+    end
     
 
-    assign start_write = (state == WORKING_ARR) && catch_compute_valid && write_ready;
+    assign start_write = (state == WORKING_ARR) && compute_valid && 
+                         (job_id_prev != compute_job_id) && write_ready;
     
 
 
