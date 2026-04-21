@@ -87,7 +87,12 @@ module arr_reader #(
     logic valid_reg;
     always_ff @(posedge clk) begin
         // valid goes high after we do last read and stops being valid when we start a new read
-        valid_reg <= state_mem_read[N] && !start_read;
+        if (rst)
+            valid_reg <= 0;
+        else if (state_mem_read[N]) // && !start_read was here ??????
+            valid_reg <= 1;
+        else if (start_read)
+            valid_reg <= 0;
     end
     assign valid = valid_reg;
 

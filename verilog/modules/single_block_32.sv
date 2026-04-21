@@ -68,7 +68,7 @@ module single_block_32 (
     wire signed [15:0] arr[N];
     wire read_valid;
     wire read_ready;
-    logic start_read;
+    // logic start_read;
 
     logic [$clog2(N)-1:0] arr_read_counter;
     always_ff @(posedge clk) begin
@@ -76,17 +76,21 @@ module single_block_32 (
         else begin
             if (state == (INIT) || state == (START_JOB)) begin
                 arr_read_counter <= 0;
-                start_read <= 1;
+                // start_read <= 1;
             end
             // only go onto next read if there is no stalling ahead (compute and write and both good)
-            else if (read_valid && compute_ready && write_ready && !start_read) begin
+            else if (read_valid && compute_ready && write_ready && !start_read && !start_write) begin
                 arr_read_counter <= arr_read_counter + 1;
-                start_read <= 1;
+                //start_read <= 1;
             end else begin
-                start_read <= 0;
+                // start_read <= 0;
             end
         end
     end
+    wire start_read;
+    assign start_read = ((state == (INIT)) || (state == (START_JOB))) || 
+                        (read_valid && compute_ready && write_ready && !start_write);
+
 
     arr_reader #(
         .N(N)
@@ -127,7 +131,7 @@ module single_block_32 (
     logic [15:0] job_id_prev;
 
     wire write_ready;
-    wire start_write;
+    logic start_write;
 
     always_ff @(posedge clk) begin
         if (rst)
@@ -137,6 +141,7 @@ module single_block_32 (
     end
     
 
+    
     assign start_write = (state == WORKING_ARR) && compute_valid &&
                          (job_id_prev != compute_job_id) && write_ready &&
                          read_valid;
