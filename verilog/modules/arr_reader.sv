@@ -11,12 +11,14 @@ module arr_reader #(
     output wire [ADDR_WIDTH-1:0] mem_read_addr,
     output wire valid,  // flag for done reading array
     output wire ready,
+    output wire mem_lock_request,
     input wire signed [15:0] mem_read_data,
     input wire [ADDR_WIDTH-1:0] start_addr,
     // Flag for starting a read. Goes high when the client module is ready for a read and the input
     // address is set correctly. Essentially can be thought of as (in_ready & in_valid)
     input wire start_read,
     input wire is_column,  // flag for column vs row
+    input wire mem_lock,
     input wire clk,
     input wire rst
 );
@@ -48,6 +50,12 @@ module arr_reader #(
     // state is 1 hot i.e. first state after reset --> ...0001
     // fsm to read memory
     logic [N:0] state_mem_read;
+
+    // Before we start an actual read, we need to acquire the memory lock
+    logic try_get_lock;
+    logic mem_lock_request_reg;
+    assign mem_lock_request = mem_lock_request_reg;
+
     // this is just a counter for read addr
     logic [ADDR_WIDTH-1:0] mem_read_addr_reg;
     logic ready_reg;
@@ -58,9 +66,15 @@ module arr_reader #(
             mem_read_addr_reg <= 0;
         end else begin
             if (start_read) begin
-                state_mem_read <= 1;
-                mem_read_addr_reg <= start_addr;
-                ready_reg <= 0;
+                try_get_lock <= 1;
+                mem_lock_request_reg <= 1;
+            end else if (try_get_lock) begin
+                if (mem_lock) begin
+                    state_mem_read <= 1;
+                    mem_read_addr_reg <= start_addr;
+                    ready_reg <= 0;
+                    try_get_lock <= 0;
+                end
             end else begin
                 if (state_mem_read != 0) begin
                     state_mem_read <= state_mem_read << 1;
@@ -70,6 +84,7 @@ module arr_reader #(
                     state_mem_read <= 0;
                     mem_read_addr_reg <= start_addr;
                     ready_reg <= 1;
+                    mem_lock_request_reg <= 0;
                 end
             end
         end
@@ -87,12 +102,10 @@ module arr_reader #(
     logic valid_reg;
     always_ff @(posedge clk) begin
         // valid goes high after we do last read and stops being valid when we start a new read
-        if (rst)
-            valid_reg <= 0;
-        else if (state_mem_read[N]) // && !start_read was here ??????
+        if (rst) valid_reg <= 0;
+        else if (state_mem_read[N])  // && !start_read was here ??????
             valid_reg <= 1;
-        else if (start_read)
-            valid_reg <= 0;
+        else if (start_read) valid_reg <= 0;
     end
     assign valid = valid_reg;
 

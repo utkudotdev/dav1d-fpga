@@ -17,9 +17,9 @@
 
 #define AXI_BASE           0xC0000000
 #define AXI_SPAN           0x0C000000  // must be a multiple of page size, 4096
-#define AXI_M10K_START     0x00000000
 #define AXI_REQUEST_START  0x00000000
-#define AXI_RESPONSE_START 0x00000000
+#define AXI_RESPONSE_START 0x00000010
+#define AXI_M10K_START     0x00001000
 
 #define NUM_SLOTS 32
 typedef uint32_t slot_bitset_t;
