@@ -11,8 +11,10 @@ module arr_writer #(
     output signed [           15:0] mem_write_data,
     output                          ready,
     output                          we,
+    output                          mem_lock_request,
     input  signed [           15:0] arr           [N],
     input         [$clog2(N*N)-1:0] start_addr,
+    input                           mem_lock,
     input                           start_write,
     input                           is_column,
     input                           clk,
@@ -41,6 +43,9 @@ module arr_writer #(
     logic [$clog2(N*N)-1:0] mem_write_addr_reg;
     logic [$clog2(N)-1:0] mem_write_counter;
     logic ready_reg;
+    logic try_get_lock;
+    logic mem_lock_req_reg;
+    assign mem_lock_request = mem_lock_req_reg;
     always_ff @(posedge clk) begin
         if (rst) begin
             state_mem_write <= 0;
@@ -49,11 +54,19 @@ module arr_writer #(
             ready_reg <= 1;
         end else begin
             if (start_write) begin
-                state_mem_write    <= 1;
-                mem_write_addr_reg <= start_addr;
-                mem_write_counter  <= 0;
-                ready_reg          <= 0;
-            end else begin
+                try_get_lock <= 1;
+                mem_lock_req_reg <= 1;
+            end 
+            else if (try_get_lock) begin
+                if (mem_lock) begin
+                    state_mem_write    <= 1;
+                    mem_write_addr_reg <= start_addr;
+                    mem_write_counter  <= 0;
+                    ready_reg          <= 0;
+                    try_get_lock       <= 0;           
+                end
+            end
+            else begin
                 if (state_mem_write != 0) begin
                     state_mem_write <= state_mem_write << 1;
                     mem_write_addr_reg  <= is_column ? mem_write_addr_reg + N : mem_write_addr_reg + 1;
@@ -63,6 +76,7 @@ module arr_writer #(
                     state_mem_write <= 0;
                     mem_write_addr_reg <= 0;
                     ready_reg <= 1;
+                    mem_lock_req_reg <= 0;
                 end
             end
         end
