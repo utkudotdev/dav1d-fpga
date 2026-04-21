@@ -137,8 +137,9 @@ module single_block_32 (
     end
     
 
-    assign start_write = (state == WORKING_ARR) && compute_valid && 
-                         (job_id_prev != compute_job_id) && write_ready;
+    assign start_write = (state == WORKING_ARR) && compute_valid &&
+                         (job_id_prev != compute_job_id) && write_ready &&
+                         read_valid;
     
 
 

@@ -74,13 +74,8 @@ module Computer_System (
 	memory_mem_odt,
 	memory_mem_dm,
 	memory_oct_rzqin,
-	pp_in_axi_export,
-	pp_in_lw_axi_export,
-	pp_out_axi_export,
-	pp_out_lw_axi_export,
-	system_pll_ref_clk_clk,
-	system_pll_ref_reset_reset,
 	onchip_memory2_0_clk1_clk,
+	onchip_memory2_0_reset1_reset,
 	onchip_memory2_0_s1_address,
 	onchip_memory2_0_s1_clken,
 	onchip_memory2_0_s1_chipselect,
@@ -88,8 +83,12 @@ module Computer_System (
 	onchip_memory2_0_s1_readdata,
 	onchip_memory2_0_s1_writedata,
 	onchip_memory2_0_s1_byteenable,
-	onchip_memory2_0_reset1_reset,
-	onchip_memory2_0_reset1_reset_req);	
+	pp_in_lw_axi_export,
+	pp_out_lw_axi_export,
+	request_pio_external_connection_export,
+	response_pio_external_connection_export,
+	system_pll_ref_clk_clk,
+	system_pll_ref_reset_reset);	
 
 	input	[31:0]	arm_a9_hps_h2f_gp_gp_in;
 	output	[31:0]	arm_a9_hps_h2f_gp_gp_out;
@@ -165,13 +164,8 @@ module Computer_System (
 	output		memory_mem_odt;
 	output	[3:0]	memory_mem_dm;
 	input		memory_oct_rzqin;
-	input	[31:0]	pp_in_axi_export;
-	input	[31:0]	pp_in_lw_axi_export;
-	output	[31:0]	pp_out_axi_export;
-	output	[31:0]	pp_out_lw_axi_export;
-	input		system_pll_ref_clk_clk;
-	input		system_pll_ref_reset_reset;
 	input		onchip_memory2_0_clk1_clk;
+	input		onchip_memory2_0_reset1_reset;
 	input	[9:0]	onchip_memory2_0_s1_address;
 	input		onchip_memory2_0_s1_clken;
 	input		onchip_memory2_0_s1_chipselect;
@@ -179,6 +173,10 @@ module Computer_System (
 	output	[15:0]	onchip_memory2_0_s1_readdata;
 	input	[15:0]	onchip_memory2_0_s1_writedata;
 	input	[1:0]	onchip_memory2_0_s1_byteenable;
-	input		onchip_memory2_0_reset1_reset;
-	input		onchip_memory2_0_reset1_reset_req;
+	input	[31:0]	pp_in_lw_axi_export;
+	output	[31:0]	pp_out_lw_axi_export;
+	output	[31:0]	request_pio_external_connection_export;
+	input	[31:0]	response_pio_external_connection_export;
+	input		system_pll_ref_clk_clk;
+	input		system_pll_ref_reset_reset;
 endmodule
