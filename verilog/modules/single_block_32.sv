@@ -14,6 +14,8 @@ module single_block_32 (
     output        [ 9:0] mem_read_addr,
     output               we,
     output               ready,
+    output               reading,
+    output               writing,
     input  signed [15:0] mem_read_data,
     input                request,
     input                clk,
@@ -66,6 +68,9 @@ module single_block_32 (
     wire write_lock;
     wire read_request;
     wire write_request;
+
+    assign reading = read_lock;
+    assign writing = write_lock;
 
     fair_rw_lock_mgr lock_mgr 
                 (

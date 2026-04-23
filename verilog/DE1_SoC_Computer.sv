@@ -381,16 +381,40 @@ wire m10k_clk; //onchip_memory2_0_clk1_clk
 wire m10k_rst; //onchip_memory2_0_reset1_reset
 
 
+wire m10k_0_clk;
+logic [9:0] m10k_0_address;
+wire m10k_0_write;
+wire [15:0] m10k_0_readdata;
+wire [15:0] m10k_0_writedata;
+
+wire [9:0] block_write_addr;
+wire [9:0] block_read_addr;
+
+always_comb begin
+	if(reading)
+		m10k_0_address = block_read_addr;
+	else if (writing)
+		m10k_0_address = block_write_addr;
+	else
+		m10k_0_address = 0;
+end
+
+wire reading;
+wire writing;
+
+
 single_block_32 test_block (
-    mem_write_data(),
-    mem_write_addr(),
-    mem_read_addr(),
-    we(),
-    ready(), // held high until request received
-    mem_read_data(),
-    request(), // pulse input of request
-    clk(CLOCK_50),
-    rst(~KEY[0])
+    .mem_write_data(m10k_0_writedata),
+    .mem_write_addr(block_write_addr),
+    .mem_read_addr(block_read_addr),
+    .we(m10k_0_write),
+    .ready(), // held high until request received
+    .mem_read_data(m10k_0_readdata),
+	.reading(reading),
+	.writing(writing),
+    .request(), // pulse input of request
+    .clk(CLOCK_50),
+    .rst(~KEY[0])
 );
 
 //=======================================================
@@ -399,6 +423,14 @@ single_block_32 test_block (
 // From Qsys
 
 Computer_System The_System (
+
+	// M10K garbage
+	.onchip_memory2_0_clk1_clk		(m10k_0_clk),
+	.onchip_memory2_0_s1_address	(m10k_0_address),
+	.onchip_memory2_0_s1_write		(m10k_0_write),
+	.onchip_memory2_0_s1_readdata	(m10k_0_readdata),
+	.onchip_memory2_0_s1_writedata	(m10k_0_writedata),
+
 	////////////////////////////////////
 	// FPGA Side
 	////////////////////////////////////
