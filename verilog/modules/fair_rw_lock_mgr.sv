@@ -20,12 +20,14 @@ module fair_rw_lock_mgr
 
     logic read_lock_reg;
     logic write_lock_reg;
+    assign read_lock = read_lock_reg;
+    assign write_lock = write_lock_reg;
     always_ff @(posedge clk) begin
         if (rst) begin
             read_lock_reg   <= 0;
             write_lock_reg  <= 0;
         end
-        else if (read_request && write_request) begin
+        else if (read_request && write_request && !(read_lock || write_lock)) begin
             read_lock_reg   <= ~read_last;
             write_lock_reg  <= read_last;
         end

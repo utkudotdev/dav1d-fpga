@@ -79,6 +79,8 @@ module arr_writer_bench ();
         .mem_write_addr(mem_write_addr), 
         .mem_write_data(mem_write_data), 
         .ready(ready),
+        .mem_lock(1'b1),
+        .mem_lock_request(),
         .we(we), 
         .arr(arr), 
         .start_addr(start_addr), 

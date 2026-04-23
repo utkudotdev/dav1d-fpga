@@ -76,6 +76,7 @@ module arr_writer_bench ();
         .valid(valid_out),         // flag for done reading array
         .ready(ready_out),
         .mem_read_data(arr),
+        .mem_lock(1'b1),
         .start_addr(start_addr),
         .start_read(start_write),        // flag for starting read
         .is_column(is_column),         // flag for column vs row

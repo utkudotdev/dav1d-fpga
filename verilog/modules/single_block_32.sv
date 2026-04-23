@@ -1,6 +1,7 @@
 `include "modules/identity_32.sv"
 `include "modules/arr_writer.sv"
 `include "modules/arr_reader.sv"
+`include "modules/fair_rw_lock_mgr.sv"
 
 `ifndef BLOCK_32_VH_
 /* verilog_format: off */
@@ -61,6 +62,20 @@ module single_block_32 (
         end
     end
 
+    wire read_lock;
+    wire write_lock;
+    wire read_request;
+    wire write_request;
+
+    fair_rw_lock_mgr lock_mgr 
+                (
+                    .read_lock(read_lock),
+                    .write_lock(write_lock),
+                    .read_request(read_request),
+                    .write_request(write_request),
+                    .clk(clk),
+                    .rst(rst)
+                );
 
     // talk to qsys attached memory --> put in array
     localparam N = 32;
@@ -79,7 +94,7 @@ module single_block_32 (
                 // start_read <= 1;
             end
             // only go onto next read if there is no stalling ahead (compute and write and both good)
-            else if (read_valid && compute_ready && write_ready && !start_read && !start_write) begin
+            else if (read_valid && compute_ready && write_ready && !start_read) begin
                 arr_read_counter <= arr_read_counter + 1;
                 //start_read <= 1;
             end else begin
@@ -100,6 +115,8 @@ module single_block_32 (
         .valid(read_valid),
         .ready(read_ready),
         .mem_read_data(mem_read_data),
+        .mem_lock_request(read_request),
+        .mem_lock(read_lock),
         .start_addr(done_rows ? arr_read_counter : arr_read_counter * N),
         .start_read(start_read),
         .is_column(done_rows),
@@ -112,7 +129,7 @@ module single_block_32 (
     wire  compute_ready;
     logic start_compute;
 
-    assign start_compute = (state == WORKING_ARR) && read_valid && compute_ready && write_ready;
+    assign start_compute = (state == WORKING_ARR) && read_valid && compute_ready && write_ready && !(start_write);
 
     wire [15:0] compute_job_id;
     identity_32 iden (
@@ -155,6 +172,8 @@ module single_block_32 (
         .mem_write_data(mem_write_data),
         .ready(write_ready),
         .we(we),
+        .mem_lock_request(write_request),
+        .mem_lock(write_lock),
         .arr(arr_to_write),
         .start_addr(done_rows ? arr_write_counter : arr_write_counter * N),
         .start_write(start_write),

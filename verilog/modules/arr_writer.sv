@@ -53,7 +53,7 @@ module arr_writer #(
             mem_write_counter <= 0;
             ready_reg <= 1;
         end else begin
-            if (start_write) begin
+            if (start_write && !try_get_lock) begin
                 try_get_lock <= 1;
                 mem_lock_req_reg <= 1;
             end 
