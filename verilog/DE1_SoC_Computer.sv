@@ -1,4 +1,4 @@
-`include "modules/single_block_32.v"
+`include "modules/single_block_32.sv"
 
 module DE1_SoC_Computer (
 	////////////////////////////////////
@@ -371,7 +371,6 @@ HexDigit Digit5(HEX5, h5);
 // PIO state machine
 //=======================================================
 // OUTPUTs from the FPGA, INPUT to HPS
-wire [31:0] request_pio, response_pio;
 // INPUTS to the FPGA, OUTPUT from HPS
 wire [31:0] pp_out_axi, pp_out_lw_axi ;
 // in/out from HPS to FPGA direct
@@ -402,17 +401,58 @@ end
 wire reading;
 wire writing;
 
+wire [31:0] request_pio, response_pio;
+
+
+// load signal logic
+typedef enum logic [1:0] {
+	COPY_TO_FPGA,
+	COMPUTE,
+	COPY_FROM_FPGA
+} req_resp_state_t;
+req_resp_state_t req_resp_state;
+
+wire clk;
+wire rst;
+assign clk = CLOCK_50;
+assign rst = ~KEY[0];
+assign m10k_0_clk = clk;
+
+always_ff @(posedge clk) begin
+	if (rst)
+		req_resp_state <= COPY_TO_FPGA;
+	else if (req_resp_state == COPY_TO_FPGA)
+		req_resp_state <= request_pio[0] ? COMPUTE : COPY_TO_FPGA;
+	else if (req_resp_state == COMPUTE)
+		req_resp_state <= block_ready ? COPY_FROM_FPGA : COMPUTE;
+	else if (req_resp_state == COPY_FROM_FPGA)
+		req_resp_state <= !request_pio[0] ? COPY_TO_FPGA : COPY_FROM_FPGA;
+end
+
+assign response_pio[0] = req_resp_state == COPY_FROM_FPGA;
+
+wire block_ready;
+wire block_request;
+
+req_resp_state_t prev_cycle_state;
+always_ff @(posedge clk) begin
+	if (rst)
+		prev_cycle_state <= COPY_FROM_FPGA;
+	else prev_cycle_state <= req_resp_state;
+end
+
+assign block_request = (prev_cycle_state == COPY_TO_FPGA) && (req_resp_state == COMPUTE);
 
 single_block_32 test_block (
     .mem_write_data(m10k_0_writedata),
     .mem_write_addr(block_write_addr),
     .mem_read_addr(block_read_addr),
     .we(m10k_0_write),
-    .ready(), // held high until request received
+    .ready(block_ready), // held high until request received
     .mem_read_data(m10k_0_readdata),
 	.reading(reading),
 	.writing(writing),
-    .request(), // pulse input of request
+    .request(block_request), // pulse input of request
     .clk(CLOCK_50),
     .rst(~KEY[0])
 );

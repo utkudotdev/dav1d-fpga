@@ -1,3 +1,9 @@
+
+`ifndef FAIR_LOCK_VH_
+/* verilog_format: off */
+`define FAIR_LOCK_VH_
+/* verilog_format: on */
+
 module fair_rw_lock_mgr 
                     (
                         output read_lock,
@@ -38,3 +44,5 @@ module fair_rw_lock_mgr
     end
 
 endmodule
+
+`endif
