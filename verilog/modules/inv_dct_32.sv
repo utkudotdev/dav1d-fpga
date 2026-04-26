@@ -18,7 +18,6 @@ module inv_dct_32 #(
 );
     logic [15:0] job_id;
     assign job_id_out = job_id;
-    assign ready = state == IDLE;
     logic valid_reg;
     assign valid = valid_reg;
     localparam int n = $clog2(N);
@@ -60,6 +59,8 @@ module inv_dct_32 #(
     } state_t;
 
     state_t state;
+
+    assign ready = state == IDLE;
 
     
     //a variable res that specifies the intermediate clamping range
@@ -275,8 +276,7 @@ module inv_dct_32 #(
                     b_res = h(T[16 + 2 * i], T[17 + 2 * i], (i & 1));
                     T[16 + 2 * i] <= b_res.a;
                     T[17 + 2 * i] <= b_res.b;
-                 end
-                
+                 end 
             end
 
             STEP_8: begin
