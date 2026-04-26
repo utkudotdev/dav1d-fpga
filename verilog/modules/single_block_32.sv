@@ -149,7 +149,7 @@ module single_block_32 (
         .rst(rst)
     );
 
-    wire [15:0] arr_to_write[N];
+    wire signed [15:0] arr_to_write[N];
     logic [15:0] job_id_prev;
 
     wire write_ready;

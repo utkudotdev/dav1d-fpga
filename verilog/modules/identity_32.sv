@@ -17,7 +17,7 @@ module identity_32 (
 );
 
     // for now this does nothing and just passes the array out every cycle (with latency 1)
-    logic [15:0] internal_registers[32];
+    logic signed [15:0] internal_registers[32];
     logic valid_reg;
     logic [15:0] internal_job_id;
 

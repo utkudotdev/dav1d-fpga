@@ -5,10 +5,10 @@
 module single_block_bench ();
     localparam N = 32;
     localparam ADDR_WIDTH = $clog2(N * N);
-    localparam STOP = 3000;
+    localparam STOP = 6000;
 
     logic clk, rst; 
-    logic [15:0] count;
+    logic [31:0] count;
 
     logic [ADDR_WIDTH-1:0] start_addr; 
 
@@ -82,6 +82,8 @@ module single_block_bench ();
         .rst(rst),
         .clk(clk) 
     );
+    wire writing;
+    wire reading;
 
     single_block_32 DUT (
         .mem_write_data(mem_write_data),
@@ -89,6 +91,8 @@ module single_block_bench ();
         .mem_read_addr(mem_read_addr_out),
         .we(we),
         .ready(ready),
+        .writing(writing),
+        .reading(reading),
         .mem_read_data(mem_read_q),
         .request(1),
         .clk(clk),
