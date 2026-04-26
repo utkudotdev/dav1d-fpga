@@ -1,3 +1,8 @@
+`ifndef HELPER_VH_
+/* verilog_format: off */
+`define HELPER_VH_
+/* verilog_format: on */
+
 package av1_helper_functions;
 
     typedef struct packed {
@@ -88,3 +93,4 @@ package av1_helper_functions;
     endfunction
 endpackage
 
+`endif
