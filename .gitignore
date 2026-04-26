@@ -76,3 +76,4 @@ fpga-arm/
 Thumbs.db
 
 a.out
+*.vcd
