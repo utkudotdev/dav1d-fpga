@@ -5,15 +5,15 @@
 
 // computes identity 32 on a 1-D array of 16-bit elements (i.e. a row or column)
 module identity_32 (
-    output signed [15:0] out_array[32],
-    output valid,
+    output signed [15:0] out_array    [32],
+    output               valid,
     output        [15:0] job_id_out,
-    output ready,
-    input signed [15:0] in_array[32],
-    input        [15:0] job_id_in,
-    input start_compute,
-    input clk,
-    input rst
+    output               ready,
+    input  signed [15:0] in_array     [32],
+    input         [15:0] job_id_in,
+    input                start_compute,
+    input                clk,
+    input                rst
 );
 
     // for now this does nothing and just passes the array out every cycle (with latency 1)
@@ -31,7 +31,9 @@ module identity_32 (
             internal_job_id <= 0;
         end else begin
             if (start_compute) begin
-                internal_registers <= in_array;
+                for (j = 0; j < 32; j = j + 1) begin
+                    internal_registers[j] <= in_array[j];
+                end
                 valid_reg <= 1;
                 internal_job_id <= job_id_in;
             end

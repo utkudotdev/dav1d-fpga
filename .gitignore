@@ -74,3 +74,5 @@ fpga-arm/
 # System/OS generated files
 .DS_Store
 Thumbs.db
+
+a.out

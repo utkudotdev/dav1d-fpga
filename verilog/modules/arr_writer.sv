@@ -12,7 +12,7 @@ module arr_writer #(
     output                          ready,
     output                          we,
     output                          mem_lock_request,
-    input  signed [           15:0] arr           [N],
+    input  signed [           15:0] arr             [N],
     input         [$clog2(N*N)-1:0] start_addr,
     input                           mem_lock,
     input                           start_write,
@@ -28,11 +28,13 @@ module arr_writer #(
             for (j = 0; j < N; j = j + 1) begin
                 arr_internal[j] <= 0;
             end
-        end else  // put in new arr for writing only when flag is raised
-            arr_internal <= start_write ? arr : arr_internal;
+        end else begin  // put in new arr for writing only when flag is raised
+            for (j = 0; j < 32; j = j + 1) begin
+                arr_internal[j] <= start_write ? arr[j] : arr_internal[j];
+            end
+        end
     end
 
-    assign mem_write_data = arr_internal[mem_write_counter];
 
     // here's how this horrible logic works:
     // state = rst, waiting to start a write
@@ -45,7 +47,10 @@ module arr_writer #(
     logic ready_reg;
     logic try_get_lock;
     logic mem_lock_req_reg;
+
     assign mem_lock_request = mem_lock_req_reg;
+    assign mem_write_data   = arr_internal[mem_write_counter];
+
     always_ff @(posedge clk) begin
         if (rst) begin
             state_mem_write <= 0;
@@ -56,17 +61,15 @@ module arr_writer #(
             if (start_write && !try_get_lock) begin
                 try_get_lock <= 1;
                 mem_lock_req_reg <= 1;
-            end 
-            else if (try_get_lock) begin
+            end else if (try_get_lock) begin
                 if (mem_lock) begin
                     state_mem_write    <= 1;
                     mem_write_addr_reg <= start_addr;
                     mem_write_counter  <= 0;
                     ready_reg          <= 0;
-                    try_get_lock       <= 0;           
+                    try_get_lock       <= 0;
                 end
-            end
-            else begin
+            end else begin
                 if (state_mem_write != 0) begin
                     state_mem_write <= state_mem_write << 1;
                     mem_write_addr_reg  <= is_column ? mem_write_addr_reg + N : mem_write_addr_reg + 1;
@@ -81,7 +84,7 @@ module arr_writer #(
             end
         end
     end
-    
+
     assign ready = ready_reg;
     // enable writes until state mem gets to all zeroes
     assign we = state_mem_write != 0;

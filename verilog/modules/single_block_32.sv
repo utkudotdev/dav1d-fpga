@@ -21,6 +21,8 @@ module single_block_32 (
     input                clk,
     input                rst
 );
+    // talk to qsys attached memory --> put in array
+    localparam N = 32;
 
     // load signal logic
     typedef enum logic [1:0] {
@@ -35,7 +37,15 @@ module single_block_32 (
 
     logic done_rows;
     wire done_all_writes;
+
+    wire compute_ready;
+    wire write_ready;
+    logic start_write;
+    logic write_ready_prev;
+    wire write_ready_pos_edge = write_ready == 1 && write_ready_prev == 0;
+    logic [$clog2(N)-1:0] arr_write_counter;
     assign done_all_writes = (arr_write_counter == N - 1) && write_ready_pos_edge;
+
     always_ff @(posedge clk) begin
         if (rst) begin
             done_rows <= 0;
@@ -43,17 +53,17 @@ module single_block_32 (
         end else begin
             case (state)
                 INIT: begin
-                    state     <= request ? START_JOB : INIT;
+                    state     <= state_t'(request ? START_JOB : INIT);
                     done_rows <= 0;
                 end
                 START_JOB: begin
                     state <= WORKING_ARR;
                 end
                 WORKING_ARR: begin
-                    state <= done_all_writes ? SWAP_TO_COL : WORKING_ARR;
+                    state <= state_t'(done_all_writes ? SWAP_TO_COL : WORKING_ARR);
                 end
                 SWAP_TO_COL: begin  // TODO: this state can disappear later
-                    state     <= done_rows ? INIT : START_JOB;
+                    state     <= state_t'(done_rows ? INIT : START_JOB);
                     done_rows <= !done_rows;
                 end
                 default: begin
@@ -72,23 +82,19 @@ module single_block_32 (
     assign reading = read_lock;
     assign writing = write_lock;
 
-    fair_rw_lock_mgr lock_mgr 
-                (
-                    .read_lock(read_lock),
-                    .write_lock(write_lock),
-                    .read_request(read_request),
-                    .write_request(write_request),
-                    .clk(clk),
-                    .rst(rst)
-                );
-
-    // talk to qsys attached memory --> put in array
-    localparam N = 32;
+    fair_rw_lock_mgr lock_mgr (
+        .read_lock(read_lock),
+        .write_lock(write_lock),
+        .read_request(read_request),
+        .write_request(write_request),
+        .clk(clk),
+        .rst(rst)
+    );
 
     wire signed [15:0] arr[N];
     wire read_valid;
     wire read_ready;
-    // logic start_read;
+    wire start_read;
 
     logic [$clog2(N)-1:0] arr_read_counter;
     always_ff @(posedge clk) begin
@@ -107,7 +113,6 @@ module single_block_32 (
             end
         end
     end
-    wire start_read;
     assign start_read = ((state == (INIT)) || (state == (START_JOB))) || 
                         (read_valid && compute_ready && write_ready && !start_write);
 
@@ -131,11 +136,11 @@ module single_block_32 (
 
 
     wire  compute_valid;
-    wire  compute_ready;
     logic start_compute;
 
     assign start_compute = (state == WORKING_ARR) && read_valid && compute_ready && write_ready && !(start_write);
 
+    wire signed [15:0] arr_to_write[N];
     wire [15:0] compute_job_id;
     identity_32 iden (
         .out_array(arr_to_write),
@@ -149,25 +154,19 @@ module single_block_32 (
         .rst(rst)
     );
 
-    wire signed [15:0] arr_to_write[N];
     logic [15:0] job_id_prev;
 
-    wire write_ready;
-    logic start_write;
-
     always_ff @(posedge clk) begin
-        if (rst)
-            job_id_prev <= 111; //some dummy id
-        else
-            job_id_prev <= start_write ? compute_job_id : job_id_prev; 
+        if (rst) job_id_prev <= 111;  //some dummy id
+        else job_id_prev <= start_write ? compute_job_id : job_id_prev;
     end
-    
 
-    
+
+
     assign start_write = (state == WORKING_ARR) && compute_valid &&
                          (job_id_prev != compute_job_id) && write_ready &&
                          read_valid;
-    
+
 
 
     arr_writer #(
@@ -187,7 +186,6 @@ module single_block_32 (
         .rst(rst)
     );
 
-    logic [$clog2(N)-1:0] arr_write_counter;
     always_ff @(posedge clk) begin
         if (rst) arr_write_counter <= 0;
         else begin
@@ -198,14 +196,10 @@ module single_block_32 (
             end
         end
     end
-    
-    logic write_ready_prev;
-    wire  write_ready_pos_edge = write_ready == 1 && write_ready_prev == 0;
+
     always_ff @(posedge clk) begin
-        if (rst)
-            write_ready_prev <= 0;
-        else
-            write_ready_prev <= write_ready;
+        if (rst) write_ready_prev <= 0;
+        else write_ready_prev <= write_ready;
     end
 
 endmodule

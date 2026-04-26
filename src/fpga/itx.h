@@ -32,15 +32,90 @@
 #include <stdio.h>
 #include <sys/mman.h>
 
+#include "common/attributes.h"
+#include "common/bitdepth.h"
+#include "common/intops.h"
 #include "levels.h"
 #include "src/fpga/fpga_iface.h"
 #include "src/itx.h"
+#include "src/itx_1d.h"
+#include "src/scan.h"
+#include "src/tables.h"
+
+static NOINLINE void inv_txfm_add_c_dumb(pixel* dst, const ptrdiff_t stride, coef* const coeff,
+    const int eob, const /*enum RectTxfmSize*/ int tx, const int shift,
+    const enum TxfmType txtp HIGHBD_DECL_SUFFIX) {
+    const TxfmInfo* const t_dim = &dav1d_txfm_dimensions[tx];
+    const int w = 4 * t_dim->w, h = 4 * t_dim->h;
+    const int has_dconly = txtp == DCT_DCT;
+    assert(w >= 4 && w <= 64);
+    assert(h >= 4 && h <= 64);
+    assert(eob >= 0);
+
+    const int is_rect2 = w * 2 == h || h * 2 == w;
+    const int rnd = (1 << shift) >> 1;
+
+    if (eob < has_dconly) {
+        int dc = coeff[0];
+        coeff[0] = 0;
+        if (is_rect2) dc = (dc * 181 + 128) >> 8;
+        dc = (dc * 181 + 128) >> 8;
+        dc = (dc + rnd) >> shift;
+        dc = (dc * 181 + 128 + 2048) >> 12;
+        for (int y = 0; y < h; y++, dst += PXSTRIDE(stride))
+            for (int x = 0; x < w; x++) dst[x] = iclip_pixel(dst[x] + dc);
+        return;
+    }
+
+    const uint8_t* const txtps = dav1d_tx1d_types[txtp];
+    const itx_1d_fn first_1d_fn = dav1d_tx1d_fns[t_dim->lw][txtps[0]];
+    const itx_1d_fn second_1d_fn = dav1d_tx1d_fns[t_dim->lh][txtps[1]];
+    const int sh = imin(h, 32), sw = imin(w, 32);
+#if BITDEPTH == 8
+    const int row_clip_min = INT16_MIN;
+    const int col_clip_min = INT16_MIN;
+#else
+    const int row_clip_min = (int)((unsigned)~bitdepth_max << 7);
+    const int col_clip_min = (int)((unsigned)~bitdepth_max << 5);
+#endif
+    const int row_clip_max = ~row_clip_min;
+    const int col_clip_max = ~col_clip_min;
+
+    int32_t tmp[64 * 64], *c = tmp;
+    int last_nonzero_col;  // in first 1d itx
+    if (txtps[1] == IDENTITY && txtps[0] != IDENTITY) {
+        last_nonzero_col = imin(sh - 1, eob);
+    } else if (txtps[0] == IDENTITY && txtps[1] != IDENTITY) {
+        last_nonzero_col = eob >> (t_dim->lw + 2);
+    } else {
+        last_nonzero_col = dav1d_last_nonzero_col_from_eob[tx][eob];
+    }
+    assert(last_nonzero_col < sh);
+    for (int y = 0; y <= last_nonzero_col; y++, c += w) {
+        if (is_rect2)
+            for (int x = 0; x < sw; x++) c[x] = (coeff[y + x * sh] * 181 + 128) >> 8;
+        else
+            for (int x = 0; x < sw; x++) c[x] = coeff[y + x * sh];
+        first_1d_fn(c, 1, row_clip_min, row_clip_max);
+    }
+    if (last_nonzero_col + 1 < sh) memset(c, 0, sizeof(*c) * (sh - last_nonzero_col - 1) * w);
+
+    memset(coeff, 0, sizeof(*coeff) * sw * sh);
+    for (int i = 0; i < w * sh; i++)
+        tmp[i] = iclip((tmp[i] + rnd) >> shift, col_clip_min, col_clip_max);
+
+    for (int x = 0; x < w; x++) second_1d_fn(&tmp[x], w, col_clip_min, col_clip_max);
+
+    c = tmp;
+    for (int y = 0; y < h; y++, dst += PXSTRIDE(stride))
+        for (int x = 0; x < w; x++) dst[x] = iclip_pixel(dst[x] + ((*c++ + 8) >> 4));
+}
 
 // for 8bpc, pixel is uint8_t and coef is int16_t
 // we're not gonna worry about any of the HIGHBD_DECL_SUFFIX stuff as that's only for high bit depth
-static void dav1d_inv_txfm_add_identity_identity_32x32_8bpc_fpga(pixel* dst, const ptrdiff_t stride,
+static void dav1d_inv_txfm_add_dct_dct_32x32_8bpc_fpga(pixel* dst, const ptrdiff_t stride,
     coef* const coeff, const int eob HIGHBD_DECL_SUFFIX) {
-    inv_txfm_add_fpga(dst, stride, coeff, eob, TX_32X32, 2, IDTX);
+    inv_txfm_add_fpga(dst, stride, coeff, eob, TX_32X32, 2, DCT_DCT);
 }
 
 static void itx_dsp_init_fpga(Dav1dInvTxfmDSPContext* const c, int const bpc) {
@@ -49,5 +124,5 @@ static void itx_dsp_init_fpga(Dav1dInvTxfmDSPContext* const c, int const bpc) {
         return;
     }
 
-    assign_itx_fn(, 32, 32, identity_identity, IDTX, fpga);
+    assign_itx_fn(, 32, 32, dct_dct, DCT_DCT, fpga);
 }

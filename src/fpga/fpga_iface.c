@@ -44,6 +44,7 @@ bool fpga_init(void) {
     if (fd == -1) {
         return false;
     }
+    printf("FPGA initialization\n");
 
     volatile uint8_t* axi_virtual_base = mmap(NULL, AXI_SPAN, (PROT_READ | PROT_WRITE), MAP_SHARED,
         fd, AXI_BASE);
@@ -102,11 +103,12 @@ static void slot_bitset_unset_vol(volatile slot_bitset_t* bitset, size_t slot) {
 }
 
 static bool slot_bitset_get_vol(volatile slot_bitset_t* bitset, size_t slot) {
-    return (*bitset & ~(1 << slot)) > 0;
+    return (*bitset & (1 << slot)) > 0;
 }
 
 void inv_txfm_add_fpga(pixel* dst, const ptrdiff_t stride, coef* const coeff, const int eob,
     const /*enum RectTxfmSize*/ int tx, const int shift, const enum TxfmType txtp) {
+    printf("inv transform\n");
     const TxfmInfo* const t_dim = &dav1d_txfm_dimensions[tx];
     const int w = 4 * t_dim->w, h = 4 * t_dim->h;
     const int sh = imin(h, 32), sw = imin(w, 32);
@@ -118,6 +120,7 @@ void inv_txfm_add_fpga(pixel* dst, const ptrdiff_t stride, coef* const coeff, co
     }
     slot_bitset_unset(&global_ctx.slot_available, slot);
     pthread_mutex_unlock(&global_ctx.in_use_lock);
+    printf("cooked1\n");
 
     // for now we are just passing the coefficients back and forth
     // coeffs are in column-major order but we expect row-major
@@ -125,15 +128,20 @@ void inv_txfm_add_fpga(pixel* dst, const ptrdiff_t stride, coef* const coeff, co
     for (int i = 0; i < sh * sw; i++) {
         global_ctx.m10k_ptr[slot][i] = coeff[i];
     }
+    printf("cooked2\n");
 
     // send request
     pthread_mutex_lock(&global_ctx.request_lock);
     slot_bitset_set_vol(global_ctx.request_ptr, slot);
     pthread_mutex_unlock(&global_ctx.request_lock);
+    printf("cooked3\n");
+
+    printf("%zu\n", slot);
 
     // wait response
     // TODO: for now we will busy wait, but interrupts or something would be nice...
     while (!slot_bitset_get_vol(global_ctx.response_ptr, slot));
+    printf("cooked4\n");
 
     for (int i = 0; i < sh * sw; i++) {
         coeff[i] = global_ctx.m10k_ptr[slot][i];
@@ -143,12 +151,15 @@ void inv_txfm_add_fpga(pixel* dst, const ptrdiff_t stride, coef* const coeff, co
     pthread_mutex_lock(&global_ctx.request_lock);
     slot_bitset_unset_vol(global_ctx.request_ptr, slot);
     pthread_mutex_unlock(&global_ctx.request_lock);
+    printf("cooked5\n");
 
     // wait complete
     while (slot_bitset_get_vol(global_ctx.response_ptr, slot));
+    printf("cooked6\n");
 
     pthread_mutex_lock(&global_ctx.in_use_lock);
     slot_bitset_set(&global_ctx.slot_available, slot);
     pthread_cond_signal(&global_ctx.slot_available_cond);
     pthread_mutex_unlock(&global_ctx.in_use_lock);
+    printf("cooked7\n");
 }

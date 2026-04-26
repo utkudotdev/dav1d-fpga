@@ -5,7 +5,8 @@
 
 // talk to qsys attached memory --> put in array
 module arr_reader #(
-    parameter int N = 32
+    parameter int N = 32,
+    parameter int ADDR_WIDTH = $clog2(N * N)
 ) (
     output wire signed [15:0] array[N],  // parallel output of N 16-bit items of array
     output wire [ADDR_WIDTH-1:0] mem_read_addr,
@@ -22,8 +23,6 @@ module arr_reader #(
     input wire clk,
     input wire rst
 );
-    localparam int ADDR_WIDTH = $clog2(N * N);
-
     // array internal is the actual register
     logic signed [15:0] arr_internal[N];
     assign array = arr_internal;
