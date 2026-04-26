@@ -116,6 +116,7 @@ static NOINLINE void inv_txfm_add_c_dumb(pixel* dst, const ptrdiff_t stride, coe
 static void dav1d_inv_txfm_add_dct_dct_32x32_8bpc_fpga(pixel* dst, const ptrdiff_t stride,
     coef* const coeff, const int eob HIGHBD_DECL_SUFFIX) {
     inv_txfm_add_fpga(dst, stride, coeff, eob, TX_32X32, 2, DCT_DCT);
+    inv_txfm_add_c_dumb(dst, stride, coeff, eob, TX_32X32, 2, DCT_DCT);
 }
 
 static void itx_dsp_init_fpga(Dav1dInvTxfmDSPContext* const c, int const bpc) {

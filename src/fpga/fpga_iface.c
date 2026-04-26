@@ -58,6 +58,9 @@ bool fpga_init(void) {
     global_ctx.request_ptr = (volatile uint32_t*)axi_request_addr;
     global_ctx.response_ptr = (volatile uint32_t*)axi_response_addr;
 
+    *global_ctx.request_ptr = 0;
+    *global_ctx.response_ptr = 0;
+
     int result = pthread_mutex_init(&global_ctx.in_use_lock, NULL);
     if (result != 0) {
         return false;
@@ -79,7 +82,7 @@ bool fpga_init(void) {
 static bool find_open_slot(size_t* slot) {
     slot_bitset_t mask = (slot_bitset_t)((1ull << NUM_SLOTS) - 1);
     int first_open = ffs(global_ctx.slot_available & mask);
-    if (first_open == 0) {
+    if (first_open == 0 || first_open > 1) {
         return false;
     }
     *slot = (size_t)(first_open - 1);
@@ -108,7 +111,6 @@ static bool slot_bitset_get_vol(volatile slot_bitset_t* bitset, size_t slot) {
 
 void inv_txfm_add_fpga(pixel* dst, const ptrdiff_t stride, coef* const coeff, const int eob,
     const /*enum RectTxfmSize*/ int tx, const int shift, const enum TxfmType txtp) {
-    printf("inv transform\n");
     const TxfmInfo* const t_dim = &dav1d_txfm_dimensions[tx];
     const int w = 4 * t_dim->w, h = 4 * t_dim->h;
     const int sh = imin(h, 32), sw = imin(w, 32);
@@ -120,46 +122,43 @@ void inv_txfm_add_fpga(pixel* dst, const ptrdiff_t stride, coef* const coeff, co
     }
     slot_bitset_unset(&global_ctx.slot_available, slot);
     pthread_mutex_unlock(&global_ctx.in_use_lock);
-    printf("cooked1\n");
+
+    coef arr[32 * 32];
 
     // for now we are just passing the coefficients back and forth
     // coeffs are in column-major order but we expect row-major
     // dst is row-major
     for (int i = 0; i < sh * sw; i++) {
+        arr[i] = coeff[i];
         global_ctx.m10k_ptr[slot][i] = coeff[i];
     }
-    printf("cooked2\n");
 
     // send request
     pthread_mutex_lock(&global_ctx.request_lock);
     slot_bitset_set_vol(global_ctx.request_ptr, slot);
     pthread_mutex_unlock(&global_ctx.request_lock);
-    printf("cooked3\n");
-
-    printf("%zu\n", slot);
 
     // wait response
     // TODO: for now we will busy wait, but interrupts or something would be nice...
     while (!slot_bitset_get_vol(global_ctx.response_ptr, slot));
-    printf("cooked4\n");
 
     for (int i = 0; i < sh * sw; i++) {
         coeff[i] = global_ctx.m10k_ptr[slot][i];
+        if (coeff[i] != arr[i]) {
+            printf("wrong value\n");
+        }
     }
 
     // ack response
     pthread_mutex_lock(&global_ctx.request_lock);
     slot_bitset_unset_vol(global_ctx.request_ptr, slot);
     pthread_mutex_unlock(&global_ctx.request_lock);
-    printf("cooked5\n");
 
     // wait complete
     while (slot_bitset_get_vol(global_ctx.response_ptr, slot));
-    printf("cooked6\n");
 
     pthread_mutex_lock(&global_ctx.in_use_lock);
     slot_bitset_set(&global_ctx.slot_available, slot);
     pthread_cond_signal(&global_ctx.slot_available_cond);
     pthread_mutex_unlock(&global_ctx.in_use_lock);
-    printf("cooked7\n");
 }
