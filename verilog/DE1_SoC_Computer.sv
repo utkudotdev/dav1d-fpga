@@ -441,7 +441,8 @@ always_ff @(posedge clk) begin
 	else prev_cycle_state <= req_resp_state;
 end
 
-assign block_request = (prev_cycle_state == COPY_TO_FPGA) && (req_resp_state == COMPUTE);
+// TODO: synchronizer on pio
+assign block_request = (prev_cycle_state == COPY_TO_FPGA) && request_pio[0];//(req_resp_state == COMPUTE);
 
 single_block_32 test_block (
     .mem_write_data(m10k_0_writedata),
