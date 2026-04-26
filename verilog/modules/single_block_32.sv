@@ -2,6 +2,7 @@
 `include "modules/arr_writer.sv"
 `include "modules/arr_reader.sv"
 `include "modules/fair_rw_lock_mgr.sv"
+`include "modules/inv_dct_32.sv"
 
 `ifndef BLOCK_32_VH_
 /* verilog_format: off */
@@ -142,16 +143,29 @@ module single_block_32 (
 
     wire signed [15:0] arr_to_write[N];
     wire [15:0] compute_job_id;
-    identity_32 iden (
-        .out_array(arr_to_write),
-        .job_id_out(compute_job_id),
-        .valid(compute_valid),
-        .ready(compute_ready),
-        .job_id_in(arr_read_counter),
-        .in_array(arr),
-        .start_compute(start_compute),
-        .clk(clk),
-        .rst(rst)
+    // identity_32 iden (
+    //     .out_array(arr_to_write),
+    //     .job_id_out(compute_job_id),
+    //     .valid(compute_valid),
+    //     .ready(compute_ready),
+    //     .job_id_in(arr_read_counter),
+    //     .in_array(arr),
+    //     .start_compute(start_compute),
+    //     .clk(clk),
+    //     .rst(rst)
+    // );
+
+    inv_dct_32 inv_dct (
+    .out(arr_to_write),
+    .valid(compute_valid), //TODO
+    .ready(compute_ready), //TODO
+    .job_id_out(compute_job_id),
+    .in_array(arr),
+    .job_id_in(arr_read_counter),
+    .start_compute(start_compute),
+    .clk(clk),
+    .rst(rst)
+
     );
 
     logic [15:0] job_id_prev;
