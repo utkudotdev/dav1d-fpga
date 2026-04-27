@@ -86,9 +86,13 @@ package av1_helper_functions;
 
     function automatic butterfly_t h(input logic signed [15:0] t_a, input logic signed [15:0] t_b,
                                      input logic c);
+        butterfly_t temp;
+        temp.a = c ? t_b : t_a;
+        temp.b = c ? t_a : t_b;
+
         butterfly_t res;
-        res.a = c ? t_b : t_a;
-        res.b = c ? t_a : t_b;
+        res.a = temp.a + temp.b;
+        res.b = temp.a - temp.b;
         return res;
     endfunction
 endpackage
