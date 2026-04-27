@@ -1,4 +1,4 @@
-`include "modules/identity_32.sv"
+//`include "modules/identity_32.sv"
 `include "modules/arr_writer.sv"
 `include "modules/arr_reader.sv"
 `include "modules/fair_rw_lock_mgr.sv"
@@ -183,11 +183,13 @@ module single_block_32 (
 
 
 
+    wire writer_out;
+    assign mem_write_data =  done_rows ? writer_out : ((writer_out + 2) >>> 2);
     arr_writer #(
         .N(N)
     ) writer (
         .mem_write_addr(mem_write_addr),
-        .mem_write_data(mem_write_data),
+        .mem_write_data(writer_out),
         .ready(write_ready),
         .we(we),
         .mem_lock_request(write_request),
