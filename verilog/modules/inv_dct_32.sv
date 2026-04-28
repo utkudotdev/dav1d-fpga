@@ -315,7 +315,7 @@ module inv_dct_32 #(
             // 12. Invoke B( 2 * i, 2 * i + 1, 32 + 16 * i, 1 - i, r ) for i = 0..1.
                 for (int i = 0; i <= 1; i++) begin
                     butterfly_t b_res;
-                    b_res = (1 - i) ? b_1(T[2 * i], T[2 * i + 1], 8'(32 + 16 * i)) : b_0(T[2 * i], T[2 * i + 1], 8'(32 + 16 * i));
+                    b_res = (i == 0) ? b_1(T[2 * i], T[2 * i + 1], 8'(32 + 16 * i)) : b_0(T[2 * i], T[2 * i + 1], 8'(32 + 16 * i));
                     T[2 * i] <= b_res.a;
                     T[2 * i + 1] <= b_res.b;
                 end
