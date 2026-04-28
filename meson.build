@@ -620,3 +620,5 @@ subdir('tools')
 subdir('examples')
 
 subdir('tests')
+
+# subdir('scripts')

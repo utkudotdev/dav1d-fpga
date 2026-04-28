@@ -13,6 +13,10 @@
 #include <sys/mman.h>
 
 #include "common/bitdepth.h"
+#include "common/intops.h"
+#include "src/itx_1d.h"
+#include "src/levels.h"
+#include "src/scan.h"
 #include "src/tables.h"
 
 #define AXI_BASE           0xC0000000
@@ -123,14 +127,35 @@ void inv_txfm_add_fpga(pixel* dst, const ptrdiff_t stride, coef* const coeff, co
     slot_bitset_unset(&global_ctx.slot_available, slot);
     pthread_mutex_unlock(&global_ctx.in_use_lock);
 
-    coef arr[32 * 32];
+    const uint8_t* const txtps = dav1d_tx1d_types[IDTX];
+    int last_nonzero_col;  // in first 1d itx
+    if (txtps[1] == IDENTITY && txtps[0] != IDENTITY) {
+        last_nonzero_col = imin(sh - 1, eob);
+    } else if (txtps[0] == IDENTITY && txtps[1] != IDENTITY) {
+        last_nonzero_col = eob >> (t_dim->lw + 2);
+    } else {
+        last_nonzero_col = dav1d_last_nonzero_col_from_eob[TX_32X32][eob];
+    }
+    assert(last_nonzero_col < sh);
 
-    // for now we are just passing the coefficients back and forth
     // coeffs are in column-major order but we expect row-major
     // dst is row-major
-    for (int i = 0; i < sh * sw; i++) {
-        arr[i] = coeff[i];
-        global_ctx.m10k_ptr[slot][i] = coeff[i];
+    printf("Pre coeffs from FPGA:\n");
+    volatile int16_t* m10k_ptr = global_ctx.m10k_ptr[slot];
+    for (int y = 0; y <= last_nonzero_col; y++, m10k_ptr += w) {
+        for (int x = 0; x < sw; x++) {
+            m10k_ptr[x] = coeff[y + x * sh];
+            printf("%d ", coeff[y + x * sh]);
+        }
+        printf("\n");
+    }
+    if (last_nonzero_col + 1 < sh) {
+        // set rest to 0
+        // equivalent of memset(c, 0, sizeof(*c) * (sh - last_nonzero_col - 1) * w) from og code
+        printf("setting rest to 0\n");
+        for (int i = 0; i < (sh - last_nonzero_col - 1) * w; i++, m10k_ptr++) {
+            *m10k_ptr = 0;
+        }
     }
 
     // send request
@@ -138,21 +163,31 @@ void inv_txfm_add_fpga(pixel* dst, const ptrdiff_t stride, coef* const coeff, co
     slot_bitset_set_vol(global_ctx.request_ptr, slot);
     pthread_mutex_unlock(&global_ctx.request_lock);
 
+    int16_t tmp[64 * 64] = {0};
+    memset(coeff, 0, sizeof(*coeff) * sw * sh);
     // wait response
     // TODO: for now we will busy wait, but interrupts or something would be nice...
     while (!slot_bitset_get_vol(global_ctx.response_ptr, slot));
 
+    // TODO: only copy necessary coeffs
     for (int i = 0; i < sh * sw; i++) {
-        coeff[i] = global_ctx.m10k_ptr[slot][i];
-        if (coeff[i] != arr[i]) {
-            printf("wrong value\n");
-        }
+        tmp[i] = global_ctx.m10k_ptr[slot][i];
     }
 
     // ack response
     pthread_mutex_lock(&global_ctx.request_lock);
     slot_bitset_unset_vol(global_ctx.request_ptr, slot);
     pthread_mutex_unlock(&global_ctx.request_lock);
+
+    int16_t* c2 = tmp;
+    printf("Transformed coeffs from FPGA:\n");
+    for (int y = 0; y < h; y++, dst += PXSTRIDE(stride)) {
+        for (int x = 0; x < w; x++) {
+            printf("%d ", *c2);
+            dst[x] = iclip_pixel(dst[x] + ((*c2++ + 8) >> 4));
+        }
+        printf("\n");
+    }
 
     // wait complete
     while (slot_bitset_get_vol(global_ctx.response_ptr, slot));
