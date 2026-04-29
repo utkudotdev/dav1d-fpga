@@ -32,7 +32,7 @@ module identity_32 (
         end else begin
             if (start_compute) begin
                 for (j = 0; j < 32; j = j + 1) begin
-                    internal_registers[j] <= in_array[j] << 2;
+                    internal_registers[j] <= in_array[j] <<< 2;
                 end
                 valid_reg <= 1;
                 internal_job_id <= job_id_in;
