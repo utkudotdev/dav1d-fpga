@@ -185,8 +185,8 @@ module single_block_32 (
 
 
 
-    wire writer_out;
-    assign mem_write_data =  done_rows ? writer_out : round2(writer_out, 2);
+    wire signed [15:0] writer_out;
+    assign mem_write_data = done_rows ? writer_out : round2(writer_out, 2);
     arr_writer #(
         .N(N)
     ) writer (
