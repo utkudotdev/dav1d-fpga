@@ -35,6 +35,13 @@ module single_block_32 (
         SWAP_TO_COL
     } state_t;
     state_t state;
+    state_t prev_state;
+    always_ff @(posedge clk) begin
+        if (rst)
+            prev_state <= INIT;
+        else
+            prev_state <= state;
+    end
 
     assign ready = state == INIT;
 
@@ -116,7 +123,7 @@ module single_block_32 (
             end
         end
     end
-    assign start_read = ((state == (START_JOB))) || 
+    assign start_read = ((prev_state == (START_JOB))) || 
                         (read_valid && compute_ready && write_ready && !start_write);
     wire neg_edge_start_read;
     logic start_read_prev;
@@ -144,7 +151,7 @@ module single_block_32 (
         .start_read(start_read),
         .is_column(done_rows),
         .clk(clk),
-        .rst(rst)
+        .rst(rst || (state == START_JOB))
     );
 
 
@@ -164,7 +171,7 @@ module single_block_32 (
         .in_array(arr),
         .start_compute(start_compute),
         .clk(clk),
-        .rst(rst)
+        .rst(rst || (state == START_JOB))
     );
 
     localparam ROWSHIFT = 2;
@@ -222,7 +229,7 @@ module single_block_32 (
         .start_write(start_write),
         .is_column(done_rows),
         .clk(clk),
-        .rst(rst)
+        .rst(rst || (state == START_JOB))
     );
 
     always_ff @(posedge clk) begin
