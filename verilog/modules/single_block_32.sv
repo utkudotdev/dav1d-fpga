@@ -108,7 +108,7 @@ module single_block_32 (
                 // start_read <= 1;
             end
             // only go onto next read if there is no stalling ahead (compute and write and both good)
-            else if (read_valid && compute_ready && write_ready && !start_read) begin
+            else if (neg_edge_start_read) begin // && !start_read ?????
                 arr_read_counter <= arr_read_counter + 1;
                 //start_read <= 1;
             end else begin
@@ -116,8 +116,18 @@ module single_block_32 (
             end
         end
     end
-    assign start_read = ((state == (INIT)) || (state == (START_JOB))) || 
+    assign start_read = ((state == (START_JOB))) || 
                         (read_valid && compute_ready && write_ready && !start_write);
+    wire neg_edge_start_read;
+    logic start_read_prev;
+    always_ff @(posedge clk) begin
+        if (rst)
+            start_read_prev <= 0;
+        else
+            start_read_prev <= start_read;
+    end
+
+    assign neg_edge_start_read = start_read_prev && !start_read; 
 
 
     arr_reader #(
@@ -195,8 +205,8 @@ module single_block_32 (
 
 
     assign start_write = (state == WORKING_ARR) && compute_valid &&
-                         (job_id_prev != compute_job_id) && write_ready &&
-                         read_valid;
+                         (job_id_prev != compute_job_id) && write_ready;
+                         //read_valid;
 
     arr_writer #(
         .N(N)

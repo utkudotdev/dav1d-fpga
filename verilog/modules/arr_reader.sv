@@ -69,11 +69,11 @@ module arr_reader #(
             if (start_read && !try_get_lock) begin
                 try_get_lock <= 1;
                 mem_lock_request_reg <= 1;
+                ready_reg <= 0;
+                mem_read_addr_reg <= start_addr;
             end else if (try_get_lock) begin
                 if (mem_lock) begin
                     state_mem_read <= 1;
-                    mem_read_addr_reg <= start_addr;
-                    ready_reg <= 0;
                     try_get_lock <= 0;
                 end
             end else begin

@@ -63,12 +63,12 @@ module arr_writer #(
             if (start_write && !try_get_lock) begin
                 try_get_lock <= 1;
                 mem_lock_req_reg <= 1;
+                ready_reg <= 0;
+                mem_write_addr_reg <= start_addr;
             end else if (try_get_lock) begin
                 if (mem_lock) begin
                     state_mem_write    <= 1;
-                    mem_write_addr_reg <= start_addr;
                     mem_write_counter  <= 0;
-                    ready_reg          <= 0;
                     try_get_lock       <= 0;
                 end
             end else begin
