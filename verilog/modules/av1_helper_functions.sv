@@ -12,7 +12,7 @@ package av1_helper_functions;
 
 
     /* verilog_format: off */
-    const logic signed [15:0] Cos128_Lookup [0:64] = '{
+    const logic signed [15:0] Cos128_Lookup [65] = '{
         4096, 4095, 4091, 4085, 4076, 4065, 4052, 4036,
         4017, 3996, 3973, 3948, 3920, 3889, 3857, 3822,
         3784, 3745, 3703, 3659, 3612, 3564, 3513, 3461,
@@ -25,14 +25,14 @@ package av1_helper_functions;
     /* verilog_format: on */
 
     function automatic logic signed [15:0] cos128(input logic [7:0] angle);
-        if (angle >= 0 && angle <= 64) begin
-            return Cos128_Lookup[angle];
+        if (angle <= 64) begin
+            return Cos128_Lookup[7'(angle)];
         end else if (angle > 64 && angle <= 128) begin
-            return -Cos128_Lookup[128-angle];
+            return -Cos128_Lookup[7'(128-angle)];
         end else if (angle > 128 && angle <= 192) begin
-            return -Cos128_Lookup[angle-128];
+            return -Cos128_Lookup[7'(angle-128)];
         end else begin
-            return Cos128_Lookup[256-angle];
+            return Cos128_Lookup[7'(256-angle)];
         end
     endfunction
 

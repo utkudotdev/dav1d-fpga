@@ -74,7 +74,7 @@ module arr_writer #(
             end else begin
                 if (state_mem_write != 0) begin
                     state_mem_write <= state_mem_write << 1;
-                    mem_write_addr_reg  <= is_column ? mem_write_addr_reg + N : mem_write_addr_reg + 1;
+                    mem_write_addr_reg  <= is_column ? mem_write_addr_reg + ($clog2(N*N))'(N) : mem_write_addr_reg + 1;
                     mem_write_counter <= mem_write_counter + 1;
                     ready_reg <= 0;
                 end else begin
