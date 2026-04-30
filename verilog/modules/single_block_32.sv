@@ -143,10 +143,10 @@ module single_block_32 (
 
     assign start_compute = (state == WORKING_ARR) && read_valid && compute_ready && write_ready && !(start_write);
 
-    wire signed [15:0] arr_to_write[N];
+    wire signed [15:0] tf_out_arr[N];
     wire [15:0] compute_job_id;
     identity_32 iden (
-        .out_array(arr_to_write),
+        .out_array(tf_out_arr),
         .job_id_out(compute_job_id),
         .valid(compute_valid),
         .ready(compute_ready),
@@ -156,6 +156,21 @@ module single_block_32 (
         .clk(clk),
         .rst(rst)
     );
+
+    localparam ROWSHIFT = 2;
+    localparam COLSHIFT = 4;
+
+    wire signed [15:0] arr_to_write[N];
+    genvar i;
+    generate
+        for (i = 0; i < N; i++) begin
+            assign arr_to_write[i] = done_rows ? round2(
+                tf_out_arr[i], COLSHIFT
+            ) : round2(
+                tf_out_arr[i], ROWSHIFT
+            );
+        end
+    endgenerate
 
     // inv_dct_32 inv_dct (
     // .out(arr_to_write),
@@ -183,15 +198,11 @@ module single_block_32 (
                          (job_id_prev != compute_job_id) && write_ready &&
                          read_valid;
 
-
-
-    wire signed [15:0] writer_out;
-    assign mem_write_data = done_rows ? writer_out : round2(writer_out, 2);
     arr_writer #(
         .N(N)
     ) writer (
         .mem_write_addr(mem_write_addr),
-        .mem_write_data(writer_out),
+        .mem_write_data(mem_write_data),
         .ready(write_ready),
         .we(we),
         .mem_lock_request(write_request),

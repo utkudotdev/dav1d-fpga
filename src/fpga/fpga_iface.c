@@ -184,7 +184,7 @@ void inv_txfm_add_fpga(pixel* dst, const ptrdiff_t stride, coef* const coeff, co
     for (int y = 0; y < h; y++, dst += PXSTRIDE(stride)) {
         for (int x = 0; x < w; x++) {
             printf("%d ", *c2);
-            dst[x] = iclip_pixel(dst[x] + ((*c2++ + 8) >> 4));
+            dst[x] = iclip_pixel(dst[x] + *c2++);
         }
         printf("\n");
     }
