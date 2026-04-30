@@ -163,7 +163,7 @@ module single_block_32 (
     wire signed [15:0] arr_to_write[N];
     genvar i;
     generate
-        for (i = 0; i < N; i++) begin
+        for (i = 0; i < N; i++) begin : write_assign
             assign arr_to_write[i] = done_rows ? round2(
                 tf_out_arr[i], COLSHIFT
             ) : round2(
