@@ -383,8 +383,8 @@ wire m10k_rst; //onchip_memory2_0_reset1_reset
 wire m10k_0_clk;
 logic [9:0] m10k_0_address;
 wire m10k_0_write;
-wire [15:0] m10k_0_readdata;
-wire [15:0] m10k_0_writedata;
+wire signed [15:0] m10k_0_readdata;
+wire signed [15:0] m10k_0_writedata;
 
 wire [9:0] block_write_addr;
 wire [9:0] block_read_addr;
@@ -469,8 +469,11 @@ Computer_System The_System (
 	.onchip_memory2_0_clk1_clk		(m10k_0_clk),
 	.onchip_memory2_0_s1_address	(m10k_0_address),
 	.onchip_memory2_0_s1_write		(m10k_0_write),
+	.onchip_memory2_0_s1_clken		(1'b1),
 	.onchip_memory2_0_s1_readdata	(m10k_0_readdata),
 	.onchip_memory2_0_s1_writedata	(m10k_0_writedata),
+	.onchip_memory2_0_s1_byteenable (2'b11),
+	.onchip_memory2_0_s1_chipselect (1'b1),
 
 	////////////////////////////////////
 	// FPGA Side
