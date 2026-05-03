@@ -1,4 +1,5 @@
-`include "modules/identity_32.sv"
+// `include "modules/identity_32.sv"
+`include "modules/inv_dct_32.sv"
 `include "modules/arr_writer.sv"
 `include "modules/arr_reader.sv"
 `include "modules/fair_rw_lock_mgr.sv"
