@@ -38,7 +38,7 @@ module single_block_bench ();
     // Initialize clocks and index
     initial begin
         $dumpfile("single_block.vcd");
-        $dumpvars(0, single_block_bench);
+        $dumpvars(0);
     end
 
     always_comb begin

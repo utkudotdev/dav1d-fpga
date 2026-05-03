@@ -244,7 +244,7 @@ module inv_dct_32 #(
             STEP_1: begin
             // 1. Invoke the inverse DCT permutation process as specified in section 7.13.2.2 with the input variable n.
                 for (int i = 0; i < N; i++) begin
-                    T[i] <= t_array[brev(5, 16'(i))];
+                    T[i] <= t_array[5'(brev(5, 16'(i)))];
                 end
             end
 
@@ -273,7 +273,7 @@ module inv_dct_32 #(
             // 6. If n is greater than or equal to 5, invoke H( 16 + 2 * i, 17 + 2 * i, i & 1, r ) for i = 0..7.
                 for (int i = 0; i <= 7; i++) begin
                     butterfly_t b_res;
-                    b_res = h(T[16 + 2 * i], T[17 + 2 * i], (i & 1));
+                    b_res = h(T[16 + 2 * i], T[17 + 2 * i], 1'(i & 1));
                     T[16 + 2 * i] <= b_res.a;
                     T[17 + 2 * i] <= b_res.b;
                  end 
@@ -293,7 +293,7 @@ module inv_dct_32 #(
             // 9. If n is greater than or equal to 4, invoke H( 8 + 2 * i, 9 + 2 * i, i & 1, r ) for i = 0..3.
                 for (int i = 0; i <= 3; i++) begin
                     butterfly_t b_res;
-                    b_res = h(T[8 + 2 * i], T[9 + 2 * i], (i & 1));
+                    b_res = h(T[8 + 2 * i], T[9 + 2 * i], 1'(i & 1));
                     T[8 + 2 * i] <= b_res.a;
                     T[9 + 2 * i] <= b_res.b;
                 end
@@ -325,7 +325,7 @@ module inv_dct_32 #(
             // 13. If n is greater than or equal to 3, invoke H( 4 + 2 * i, 5 + 2 * i, i, r ) for i = 0..1.
                 for (int i = 0; i <= 1; i++) begin
                     butterfly_t b_res;
-                    b_res = h(T[4 + 2 * i], T[5 + 2 * i], i);
+                    b_res = h(T[4 + 2 * i], T[5 + 2 * i], 1'(i));
                     T[4 + 2 * i] <= b_res.a;
                     T[5 + 2 * i] <= b_res.b;
                 end
@@ -346,7 +346,7 @@ module inv_dct_32 #(
                 for (int i = 0; i <= 3; i++) begin
                     for (int j = 0; j <= 1; j++) begin
                         butterfly_t b_res;
-                        b_res = h(T[16 + 4 * i + j], T[19 + 4 * i - j], (i & 1));
+                        b_res = h(T[16 + 4 * i + j], T[19 + 4 * i - j], 1'((i & 1)));
                         T[16 + 4 * i + j] <= b_res.a;
                         T[19 + 4 * i - j] <= b_res.b;
                     end
@@ -376,7 +376,7 @@ module inv_dct_32 #(
                 for (int i = 0; i <= 1; i++) begin
                     for (int j = 0; j <= 1; j++) begin
                         butterfly_t b_res;
-                        b_res = h(T[8 + 4 * i + j], T[11 + 4 * i - j], i);
+                        b_res = h(T[8 + 4 * i + j], T[11 + 4 * i - j], 1'(i));
                         T[8 + 4 * i + j] <= b_res.a;
                         T[11 + 4 * i - j] <= b_res.b;
                     end
@@ -418,7 +418,7 @@ module inv_dct_32 #(
                 for (int i = 0; i <= 1; i++) begin
                     for (int j = 0; j <= 3; j++) begin
                         butterfly_t b_res;
-                        b_res = h(T[16 + i * 8 + j], T[23 + i * 8 - j], i);
+                        b_res = h(T[16 + i * 8 + j], T[23 + i * 8 - j], 1'(i));
                         T[16 + i * 8 + j] <= b_res.a;
                         T[23 + i * 8 - j] <= b_res.b;
                     end
