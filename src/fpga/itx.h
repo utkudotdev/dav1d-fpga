@@ -45,20 +45,19 @@
 
 // for 8bpc, pixel is uint8_t and coef is int16_t
 // we're not gonna worry about any of the HIGHBD_DECL_SUFFIX stuff as that's only for high bit depth
-// static void dav1d_inv_txfm_add_dct_dct_32x32_8bpc_fpga(pixel* dst, const ptrdiff_t stride,
-//     coef* const coeff, const int eob HIGHBD_DECL_SUFFIX) {
-//     inv_txfm_add_fpga(dst, stride, coeff, eob, TX_32X32, 2, DCT_DCT);
-// }
+static void dav1d_inv_txfm_add_dct_dct_32x32_8bpc_fpga(pixel* dst, const ptrdiff_t stride,
+    coef* const coeff, const int eob HIGHBD_DECL_SUFFIX) {
+    inv_txfm_add_fpga(dst, stride, coeff, eob, TX_32X32, 2, DCT_DCT);
+}
 
 static void dav1d_inv_txfm_add_idtx_32x32_8bpc_fpga(pixel* dst, const ptrdiff_t stride,
     coef* const coeff, const int eob HIGHBD_DECL_SUFFIX) {
     // printf("Running identity\n");
-    //
+
     // const TxfmInfo* const t_dim = &dav1d_txfm_dimensions[TX_32X32];
     // const int w = 4 * t_dim->w, h = 4 * t_dim->h;
-    //
-    // assert(PXSTRIDE(stride) == 1);
-    // pixel* dst_copy = malloc(PXSTRIDE(stride) * w * h);
+
+    // pixel* dst_copy = malloc(sizeof(pixel) * PXSTRIDE(stride) * w * h);
     // pixel* dst_ptr = dst;
     // pixel* dst_copy_ptr = dst_copy;
     // for (int y = 0; y < h; y++, dst_ptr += PXSTRIDE(stride), dst_copy_ptr += PXSTRIDE(stride))
@@ -79,28 +78,13 @@ static void dav1d_inv_txfm_add_idtx_32x32_8bpc_fpga(pixel* dst, const ptrdiff_t 
     //
     // for (int y = 0; y <= last_nonzero_col; y++) {
     //     for (int x = 0; x < sw; x++) {
-    //         coeff_copy[y + x * sw] = coeff[y + x * sw];
+    //         coeff_copy[y + x * sh] = coeff[y + x * sh];
     //     }
     // }
-    //
-    // printf("ORIGINAL COEFFS:\n");
-    // for (int y = 0; y <= last_nonzero_col; y++) {
-    //     for (int x = 0; x < sw; x++) {
-    //         printf("%d ", coeff[y + x * sw]);
-    //     }
-    //     printf("\n");
-    // }
-    //
-    // printf("ORIGINAL COEFFS 2:\n");
-    // for (int y = 0; y <= last_nonzero_col; y++) {
-    //     for (int x = 0; x < sw; x++) {
-    //         printf("%d ", coeff_copy[y + x * sw]);
-    //     }
-    //     printf("\n");
-    // }
-    //
+
     // inv_txfm_add_c(dst_copy, stride, coeff_copy, eob, TX_32X32, 2, IDTX);
     inv_txfm_add_fpga(dst, stride, coeff, eob, TX_32X32, 2, IDTX);
+    // inv_txfm_add_c(dst, stride, coeff, eob, TX_32X32, 2, IDTX);
 
     // dst_ptr = dst;
     // dst_copy_ptr = dst_copy;
@@ -111,7 +95,7 @@ static void dav1d_inv_txfm_add_idtx_32x32_8bpc_fpga(pixel* dst, const ptrdiff_t 
     //         }
     //     }
     // }
-    //
+
     // free(dst_copy);
 }
 
@@ -122,5 +106,6 @@ static void itx_dsp_init_fpga(Dav1dInvTxfmDSPContext* const c, int const bpc) {
     }
 
     // assign_itx_fn(, 32, 32, dct_dct, DCT_DCT, fpga);
+    // printf("bpc: %d\n", bpc);
     assign_itx_fn(, 32, 32, idtx, IDTX, fpga);
 }

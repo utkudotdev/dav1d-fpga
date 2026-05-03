@@ -25,6 +25,9 @@
 #define AXI_RESPONSE_START 0x00000010
 #define AXI_M10K_START     0x00001000
 
+#define M10K_WIDTH  32
+#define M10K_HEIGHT 32
+
 #define NUM_SLOTS 32
 typedef uint32_t slot_bitset_t;
 #define SLOT_BITSET_ALL_SET UINT32_MAX
@@ -94,27 +97,29 @@ static bool find_open_slot(size_t* slot) {
 }
 
 static void slot_bitset_set(slot_bitset_t* bitset, size_t slot) {
-    *bitset |= (1 << slot);
+    *bitset |= (1u << slot);
 }
 
 static void slot_bitset_unset(slot_bitset_t* bitset, size_t slot) {
-    *bitset &= ~(1 << slot);
+    *bitset &= ~(1u << slot);
 }
 
 static void slot_bitset_set_vol(volatile slot_bitset_t* bitset, size_t slot) {
-    *bitset |= (1 << slot);
+    *bitset |= (1u << slot);
 }
 
 static void slot_bitset_unset_vol(volatile slot_bitset_t* bitset, size_t slot) {
-    *bitset &= ~(1 << slot);
+    *bitset &= ~(1u << slot);
 }
 
 static bool slot_bitset_get_vol(volatile slot_bitset_t* bitset, size_t slot) {
-    return (*bitset & (1 << slot)) > 0;
+    return (*bitset & (1u << slot)) > 0;
 }
 
 void inv_txfm_add_fpga(pixel* dst, const ptrdiff_t stride, coef* const coeff, const int eob,
     const /*enum RectTxfmSize*/ int tx, const int shift, const enum TxfmType txtp) {
+    assert(txtp == IDTX);
+
     const TxfmInfo* const t_dim = &dav1d_txfm_dimensions[tx];
     const int w = 4 * t_dim->w, h = 4 * t_dim->h;
     const int sh = imin(h, 32), sw = imin(w, 32);
@@ -143,15 +148,16 @@ void inv_txfm_add_fpga(pixel* dst, const ptrdiff_t stride, coef* const coeff, co
     // coeffs are in column-major order but we expect row-major
     // dst is row-major
     volatile int16_t* m10k_ptr = global_ctx.m10k_ptr[slot];
-    for (int y = 0; y <= last_nonzero_col; y++, m10k_ptr += w) {
+    for (int y = 0; y <= last_nonzero_col; y++, m10k_ptr += M10K_WIDTH) {
         for (int x = 0; x < sw; x++) {
+            printf("%d ", coeff[y + x * sh]);
             m10k_ptr[x] = coeff[y + x * sh];
         }
     }
     if (last_nonzero_col + 1 < sh) {
         // set rest to 0
         // equivalent of memset(c, 0, sizeof(*c) * (sh - last_nonzero_col - 1) * w) from og code
-        for (int i = 0; i < (sh - last_nonzero_col - 1) * w; i++, m10k_ptr++) {
+        for (int i = 0; i < (sh - last_nonzero_col - 1) * M10K_WIDTH; i++, m10k_ptr++) {
             *m10k_ptr = 0;
         }
     }
@@ -161,14 +167,14 @@ void inv_txfm_add_fpga(pixel* dst, const ptrdiff_t stride, coef* const coeff, co
     slot_bitset_set_vol(global_ctx.request_ptr, slot);
     pthread_mutex_unlock(&global_ctx.request_lock);
 
-    int32_t tmp[64 * 64] = {0};
+    int16_t tmp[M10K_WIDTH * M10K_HEIGHT] = {10};
     memset(coeff, 0, sizeof(*coeff) * sw * sh);
     // wait response
     // TODO: for now we will busy wait, but interrupts or something would be nice...
     while (!slot_bitset_get_vol(global_ctx.response_ptr, slot));
 
     // TODO: only copy necessary coeffs
-    for (int i = 0; i < sh * sw; i++) {
+    for (int i = 0; i < M10K_WIDTH * M10K_HEIGHT; i++) {
         tmp[i] = global_ctx.m10k_ptr[slot][i];
     }
 
@@ -177,10 +183,11 @@ void inv_txfm_add_fpga(pixel* dst, const ptrdiff_t stride, coef* const coeff, co
     slot_bitset_unset_vol(global_ctx.request_ptr, slot);
     pthread_mutex_unlock(&global_ctx.request_lock);
 
-    int32_t* c = tmp;
+    printf("pxstride: %d\n", PXSTRIDE(stride));
+    int16_t* c = tmp;
     printf("Transformed coeffs from FPGA:\n");
-    for (int y = 0; y < h; y++, dst += PXSTRIDE(stride)) {
-        for (int x = 0; x < w; x++) {
+    for (int y = 0; y < M10K_HEIGHT; y++, dst += PXSTRIDE(stride)) {
+        for (int x = 0; x < M10K_WIDTH; x++) {
             printf("%d ", *c);
             dst[x] = iclip_pixel(dst[x] + *c++);
         }
