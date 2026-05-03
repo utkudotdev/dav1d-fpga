@@ -77,3 +77,4 @@ Thumbs.db
 
 a.out
 *.vcd
+/verilog/obj_dir/
