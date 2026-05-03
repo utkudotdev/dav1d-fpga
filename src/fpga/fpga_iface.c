@@ -138,21 +138,19 @@ void inv_txfm_add_fpga(pixel* dst, const ptrdiff_t stride, coef* const coeff, co
     }
     assert(last_nonzero_col < sh);
 
+    assert(sizeof(coef) == sizeof(int16_t));
+
     // coeffs are in column-major order but we expect row-major
     // dst is row-major
-    printf("Pre coeffs from FPGA:\n");
     volatile int16_t* m10k_ptr = global_ctx.m10k_ptr[slot];
     for (int y = 0; y <= last_nonzero_col; y++, m10k_ptr += w) {
         for (int x = 0; x < sw; x++) {
             m10k_ptr[x] = coeff[y + x * sh];
-            printf("%d ", coeff[y + x * sh]);
         }
-        printf("\n");
     }
     if (last_nonzero_col + 1 < sh) {
         // set rest to 0
         // equivalent of memset(c, 0, sizeof(*c) * (sh - last_nonzero_col - 1) * w) from og code
-        printf("setting rest to 0\n");
         for (int i = 0; i < (sh - last_nonzero_col - 1) * w; i++, m10k_ptr++) {
             *m10k_ptr = 0;
         }
@@ -163,7 +161,7 @@ void inv_txfm_add_fpga(pixel* dst, const ptrdiff_t stride, coef* const coeff, co
     slot_bitset_set_vol(global_ctx.request_ptr, slot);
     pthread_mutex_unlock(&global_ctx.request_lock);
 
-    int16_t tmp[64 * 64] = {0};
+    int32_t tmp[64 * 64] = {0};
     memset(coeff, 0, sizeof(*coeff) * sw * sh);
     // wait response
     // TODO: for now we will busy wait, but interrupts or something would be nice...
@@ -179,12 +177,12 @@ void inv_txfm_add_fpga(pixel* dst, const ptrdiff_t stride, coef* const coeff, co
     slot_bitset_unset_vol(global_ctx.request_ptr, slot);
     pthread_mutex_unlock(&global_ctx.request_lock);
 
-    int16_t* c2 = tmp;
+    int32_t* c = tmp;
     printf("Transformed coeffs from FPGA:\n");
     for (int y = 0; y < h; y++, dst += PXSTRIDE(stride)) {
         for (int x = 0; x < w; x++) {
-            printf("%d ", *c2);
-            dst[x] = iclip_pixel(dst[x] + *c2++);
+            printf("%d ", *c);
+            dst[x] = iclip_pixel(dst[x] + *c++);
         }
         printf("\n");
     }
