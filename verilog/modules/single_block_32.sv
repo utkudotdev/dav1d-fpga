@@ -1,11 +1,10 @@
-// `include "modules/identity_32.sv"
-`include "modules/inv_dct_32.sv"
+`include "modules/identity_32.sv"
+// `include "modules/inv_dct_32.sv"
 `include "modules/arr_writer.sv"
 `include "modules/arr_reader.sv"
 `include "modules/fair_rw_lock_mgr.sv"
 `include "modules/av1_helper_functions.sv"
 import av1_helper_functions::*;
-//`include "modules/inv_dct_32.sv"
 
 `ifndef BLOCK_32_VH_
 /* verilog_format: off */
@@ -163,17 +162,17 @@ module single_block_32 (
 
     wire signed [15:0] tf_out_arr[N];
     wire [15:0] compute_job_id;
-    // identity_32 iden (
-    //     .out_array(tf_out_arr),
-    //     .job_id_out(compute_job_id),
-    //     .valid(compute_valid),
-    //     .ready(compute_ready),
-    //     .job_id_in(arr_read_counter),
-    //     .in_array(arr),
-    //     .start_compute(start_compute),
-    //     .clk(clk),
-    //     .rst(rst || (state == START_JOB))
-    // );
+    identity_32 iden (
+        .out_array(tf_out_arr),
+        .job_id_out(compute_job_id),
+        .valid(compute_valid),
+        .ready(compute_ready),
+        .job_id_in(arr_read_counter),
+        .in_array(arr),
+        .start_compute(start_compute),
+        .clk(clk),
+        .rst(rst || (state == START_JOB))
+    );
 
     localparam ROWSHIFT = 2;
     localparam COLSHIFT = 4;
@@ -190,18 +189,18 @@ module single_block_32 (
         end
     endgenerate
 
-    inv_dct_32 inv_dct (
-    .out(tf_out_arr),
-    .valid(compute_valid), //TODO
-    .ready(compute_ready), //TODO
-    .job_id_out(compute_job_id),
-    .in_array(arr),
-    .job_id_in(arr_read_counter),
-    .start_compute(start_compute),
-    .clk(clk),
-    .rst(rst || (state == START_JOB))
+    // inv_dct_32 inv_dct (
+    // .out(tf_out_arr),
+    // .valid(compute_valid), //TODO
+    // .ready(compute_ready), //TODO
+    // .job_id_out(compute_job_id),
+    // .in_array(arr),
+    // .job_id_in(arr_read_counter),
+    // .start_compute(start_compute),
+    // .clk(clk),
+    // .rst(rst || (state == START_JOB))
 
-    );
+    // );
 
     logic [15:0] job_id_prev;
 
