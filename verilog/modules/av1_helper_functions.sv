@@ -58,6 +58,24 @@ package av1_helper_functions;
         return out_val;
     endfunction
 
+    function automatic butterfly_t b(input logic signed [15:0] t_a, input logic signed [15:0] t_b, 
+                                       input logic c, input logic [7:0] angle);
+        butterfly_t res;
+        logic signed [31:0] x, y;
+        
+        x = (t_a * cos128(angle)) - (t_b * sin128(angle));
+        y = (t_a * sin128(angle)) + (t_b * cos128(angle));
+
+        if (c == 0) begin
+            res.a = round2(x, 12);
+            res.b = round2(y, 12);
+        end else begin
+            res.b = round2(x, 12);
+            res.a = round2(y, 12);
+        end
+        return res;
+    endfunction
+
     function automatic butterfly_t b_0(input logic signed [15:0] t_a, input logic signed [15:0] t_b,
                                        input logic [7:0] angle);
         butterfly_t res;

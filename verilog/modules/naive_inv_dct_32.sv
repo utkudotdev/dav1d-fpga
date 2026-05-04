@@ -263,7 +263,7 @@ module inv_dct_32 #(
                 // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
                     for (int i = 0; i <= 7; i++) begin
                         butterfly_t b_res;
-                        b_res = b(T[16+i], T[31-i], 1'b0, 8'(6 + (brev(3, 16'(7 - i)) << 3)));
+                        b_res = b_0(T[16+i], T[31-i], 8'(6 + (brev(3, 16'(7 - i)) << 3)));
                         T[16+i] <= b_res.a;
                         T[31-i] <= b_res.b;
                     end
@@ -274,7 +274,7 @@ module inv_dct_32 #(
                 // 5. If n is greater than or equal to 4, invoke B( 8 + i, 15 - i, 12 + ( brev( 2, 3 - i ) << 4 ), 0, r ) for i = 0..3.
                     for (int i = 0; i <= 3; i++) begin
                         butterfly_t b_res;
-                        b_res = b(T[8 + i], T[15 - i], 1'b0, 8'(12 + (brev(2, 16'(3 - i)) << 4)));
+                        b_res = b_0(T[8 + i], T[15 - i], 8'(12 + (brev(2, 16'(3 - i)) << 4)));
                         T[8 + i] <= b_res.a;
                         T[15 - i] <= b_res.b;
                     end
@@ -294,7 +294,7 @@ module inv_dct_32 #(
                 // 8. If n is greater than or equal to 3, invoke B( 4 + i, 7 - i, 56 - 32 * i, 0, r ) for i = 0..1.
                     for (int i = 0; i <= 1; i++) begin
                             butterfly_t b_res;
-                            b_res = b(T[4 + i], T[7 - i], 1'b0, 8'(56 - 32 * i));
+                            b_res = b_0(T[4 + i], T[7 - i], 8'(56 - 32 * i));
                             T[4 + i] <= b_res.a;
                             T[7 - i] <= b_res.b;
                     end
@@ -315,7 +315,7 @@ module inv_dct_32 #(
                     for (int i = 0; i <= 1; i++) begin
                         for (int j = 0; j <= 1; j++) begin
                             butterfly_t b_res;
-                            b_res = b(T[30 - 4 * i - j], T[17 + 4 * i + j], 1'b1, 8'(24 + (j << 6) + ( ( 1 - i ) << 5 )));
+                            b_res = b_1(T[30 - 4 * i - j], T[17 + 4 * i + j], 8'(24 + (j << 6) + ( ( 1 - i ) << 5 )));
                             T[30 - 4 * i - j] <= b_res.a;
                             T[17 + 4 * i + j] <= b_res.b;
                         end
@@ -326,7 +326,7 @@ module inv_dct_32 #(
                 // 12. Invoke B( 2 * i, 2 * i + 1, 32 + 16 * i, 1 - i, r ) for i = 0..1.
                     for (int i = 0; i <= 1; i++) begin
                         butterfly_t b_res;
-                        b_res = (i == 0) ? b(T[2 * i], T[2 * i + 1], 1'b1, 8'(32 + 16 * i)) : b(T[2 * i], T[2 * i + 1], 1'b0, 8'(32 + 16 * i));
+                        b_res = (i == 0) ? b_1(T[2 * i], T[2 * i + 1], 8'(32 + 16 * i)) : b_0(T[2 * i], T[2 * i + 1], 8'(32 + 16 * i));
                         T[2 * i] <= b_res.a;
                         T[2 * i + 1] <= b_res.b;
                     end
@@ -346,7 +346,7 @@ module inv_dct_32 #(
                 // 14. If n is greater than or equal to 4, invoke B( 14 - i, 9 + i, 48 + 64 * i, 1, r ) for i = 0..1.
                     for (int i = 0; i <= 1; i++) begin
                         butterfly_t b_res;
-                        b_res = b(T[14 - i], T[9 + i], 1'b1, 8'(48 + 64 * i));
+                        b_res = b_1(T[14 - i], T[9 + i], 8'(48 + 64 * i));
                         T[14 - i] <= b_res.a;
                         T[9 + i] <= b_res.b;
                     end
@@ -377,7 +377,7 @@ module inv_dct_32 #(
                 STEP_18: begin
                 // 18. If n is greater than or equal to 3, invoke B( 6, 5, 32, 1, r ).
                     butterfly_t b_res;
-                    b_res = b(T[6], T[5], 1'b1, 8'(32));
+                    b_res = b_1(T[6], T[5], 8'(32));
                     T[6] <= b_res.a;
                     T[5] <= b_res.b;
                 end
@@ -398,7 +398,7 @@ module inv_dct_32 #(
                 // 20. If n is greater than or equal to 5, invoke B( 29 - i, 18 + i, 48 + ( i >> 1 ) * 64, 1, r ) for i = 0..3.
                     for (int i = 0; i <= 3; i++) begin
                         butterfly_t b_res;
-                        b_res = b(T[29 - i], T[18 + i], 1'b1, 8'(48 + (i >> 1) * 64));
+                        b_res = b_1(T[29 - i], T[18 + i], 8'(48 + (i >> 1) * 64));
                         T[29 - i] <= b_res.a;
                         T[18 + i] <= b_res.b;
                     end
@@ -418,7 +418,7 @@ module inv_dct_32 #(
                 // 23. If n is greater than or equal to 4, invoke B( 13 - i, 10 + i, 32, 1, r ) for i = 0..1.
                     for (int i = 0; i <= 1; i++) begin
                         butterfly_t b_res;
-                        b_res = b(T[13 - i], T[10 + i], 1'b1, 8'(32));
+                        b_res = b_1(T[13 - i], T[10 + i], 8'(32));
                         T[13 - i] <= b_res.a;
                         T[10 + i] <= b_res.b;
                     end
@@ -450,7 +450,7 @@ module inv_dct_32 #(
                 // 27. If n is greater than or equal to 5, invoke B( 27 - i, 20 + i, 32, 1, r ) for i = 0..3.
                     for (int i = 0; i <= 3; i++) begin
                         butterfly_t b_res;
-                        b_res = b(T[27 - i], T[20 + i], 1'b1, 8'(32));
+                        b_res = b_1(T[27 - i], T[20 + i], 8'(32));
                         T[27 - i] <= b_res.a;
                         T[20 + i] <= b_res.b;
                     end
