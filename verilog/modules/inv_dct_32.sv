@@ -31,16 +31,16 @@ module inv_dct_32 #(
     } butterfly_t;
 
 
-    logic signed [15:0] x [4];
-    logic signed [15:0] y [4];
-    logic signed [15:0] t_a [4];
-    logic signed [15:0] t_y [4];
-    logic c [4];
-    logic [7:0] angle [4];
+    logic signed [15:0] x [2];
+    logic signed [15:0] y [2];
+    logic signed [15:0] t_a [2];
+    logic signed [15:0] t_y [2];
+    logic c [2];
+    logic [7:0] angle [2];
 
     genvar k;
     generate 
-        for (k = 0; k < 4; k += 1) begin : gen_b
+        for (k = 0; k < 2; k += 1) begin : gen_b
             b_transform b_module (  .x      (x[k]), 
                                     .y      (y[k]), 
                                     .t_a    (t_a[k]), 
@@ -221,71 +221,71 @@ module inv_dct_32 #(
                 STEP_3_A: begin
                 // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
                     for (int i = 0; i <= 1; i++) begin
-                        t_a[k]      = T[16+i];
-                        t_y[k]      = T[31-i];
-                        c[k]        = 1'b0;
-                        angle[k]    = 8'(6 + (brev(3, 16'(7 - i)) << 3));
-                        T[16+i]     <= x[k];
-                        T[31-i]     <= y[k];
+                        t_a[i]      = T[16+i];
+                        t_y[i]      = T[31-i];
+                        c[i]        = 1'b0;
+                        angle[i]    = 8'(6 + (brev(3, 16'(7 - i)) << 3));
+                        T[16+i]     <= x[i];
+                        T[31-i]     <= y[i];
                     end
                 end
 
                 STEP_3_B: begin
                 // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
                     for (int i = 2; i <= 3; i++) begin
-                        t_a[k]      = T[16+i];
-                        t_y[k]      = T[31-i];
-                        c[k]        = 1'b0;
-                        angle[k]    = 8'(6 + (brev(3, 16'(7 - i)) << 3));
-                        T[16+i]     <= x[k];
-                        T[31-i]     <= y[k];
+                        t_a[i-2]     = T[16+i];
+                        t_y[i-2]     = T[31-i];
+                        c[i-2]       = 1'b0;
+                        angle[i-2]   = 8'(6 + (brev(3, 16'(7 - i)) << 3));
+                        T[16+i]     <= x[i-2];
+                        T[31-i]     <= y[i-2];
                     end
                 end
 
                 STEP_3_C: begin
                 // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
                     for (int i = 4; i <= 5; i++) begin
-                        t_a[k]      = T[16+i];
-                        t_y[k]      = T[31-i];
-                        c[k]        = 1'b0;
-                        angle[k]    = 8'(6 + (brev(3, 16'(7 - i)) << 3));
-                        T[16+i]     <= x[k];
-                        T[31-i]     <= y[k];
+                        t_a[i-4]      = T[16+i];
+                        t_y[i-4]      = T[31-i];
+                        c[i-4]        = 1'b0;
+                        angle[i-4]    = 8'(6 + (brev(3, 16'(7 - i)) << 3));
+                        T[16+i]     <= x[i-4];
+                        T[31-i]     <= y[i-4];
                     end
                 end
 
                 STEP_3_D: begin
                 // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
                     for (int i = 6; i <= 7; i++) begin
-                        t_a[k]      = T[16+i];
-                        t_y[k]      = T[31-i];
-                        c[k]        = 1'b0;
-                        angle[k]    = 8'(6 + (brev(3, 16'(7 - i)) << 3));
-                        T[16+i]     <= x[k];
-                        T[31-i]     <= y[k];
+                        t_a[i-6]      = T[16+i];
+                        t_y[i-6]      = T[31-i];
+                        c[i-6]        = 1'b0;
+                        angle[i-6]    = 8'(6 + (brev(3, 16'(7 - i)) << 3));
+                        T[16+i]     <= x[i-6];
+                        T[31-i]     <= y[i-6];
                     end
                 end
 
                 STEP_5_A: begin
                 // 5. If n is greater than or equal to 4, invoke B( 8 + i, 15 - i, 12 + ( brev( 2, 3 - i ) << 4 ), 0, r ) for i = 0..3.
                     for (int i = 0; i <= 1; i++) begin
-                        t_a[k]      = T[8 + i];
-                        t_y[k]      = T[15 - i];
-                        c[k]        = 1'b0;
-                        angle[k]    = 8'(12 + (brev(2, 16'(3 - i)) << 4));
-                        T[8+i]     <= x[k];
-                        T[15-i]     <= y[k];
+                        t_a[i]      = T[8 + i];
+                        t_y[i]      = T[15 - i];
+                        c[i]        = 1'b0;
+                        angle[i]    = 8'(12 + (brev(2, 16'(3 - i)) << 4));
+                        T[8+i]     <= x[i];
+                        T[15-i]     <= y[i];
                     end
                 end
                 STEP_5_B: begin
                 // 5. If n is greater than or equal to 4, invoke B( 8 + i, 15 - i, 12 + ( brev( 2, 3 - i ) << 4 ), 0, r ) for i = 0..3.
                     for (int i = 2; i <= 3; i++) begin
-                        t_a[k]      = T[8 + i];
-                        t_y[k]      = T[15 - i];
-                        c[k]        = 1'b0;
-                        angle[k]    = 8'(12 + (brev(2, 16'(3 - i)) << 4));
-                        T[8+i]     <= x[k];
-                        T[15-i]     <= y[k];
+                        t_a[i-2]      = T[8 + i];
+                        t_y[i-2]      = T[15 - i];
+                        c[i-2]        = 1'b0;
+                        angle[i-2]    = 8'(12 + (brev(2, 16'(3 - i)) << 4));
+                        T[8+i]     <= x[i-2];
+                        T[15-i]     <= y[i-2];
                     end
                 end
 
@@ -298,12 +298,12 @@ module inv_dct_32 #(
                         T[17 + 2 * i] <= b_res.b;
                     end 
                     for (int i = 0; i <= 1; i++) begin
-                            t_a[k]      = T[4 + i];
-                            t_y[k]      = T[7 - i];
-                            c[k]        = 1'b0;
-                            angle[k]    = 8'(56 - 32 * i);
-                            T[4+i]     <= x[k];
-                            T[7-i]     <= y[k];
+                            t_a[i]      = T[4 + i];
+                            t_y[i]      = T[7 - i];
+                            c[i]        = 1'b0;
+                            angle[i]    = 8'(56 - 32 * i);
+                            T[4+i]     <= x[i];
+                            T[7-i]     <= y[i];
                     end
                     for (int i = 0; i <= 3; i++) begin
                         butterfly_t b_res;
@@ -317,12 +317,12 @@ module inv_dct_32 #(
                 // 10. If n is greater than or equal to 5, invoke B( 30 - 4 * i - j, 17 + 4 * i + j, 24 + (j << 6) + ( ( 1 - i ) << 5 ), 1, r ) for i = 0..1, for j=0..1.
                     for (int i = 0; i <= 0; i++) begin
                         for (int j = 0; j <= 1; j++) begin
-                            t_a[k]      = T[30 - 4 * i - j];
-                            t_y[k]      = T[17 + 4 * i + j];
-                            c[k]        = 1'b1;
-                            angle[k]    = 8'(24 + (j << 6) + ( ( 1 - i ) << 5 ));
-                            T[30 - 4 * i - j]     <= x[k];
-                            T[17 + 4 * i + j]     <= y[k];
+                            t_a[j]      = T[30 - 4 * i - j];
+                            t_y[j]      = T[17 + 4 * i + j];
+                            c[j]        = 1'b1;
+                            angle[j]    = 8'(24 + (j << 6) + ( ( 1 - i ) << 5 ));
+                            T[30 - 4 * i - j]     <= x[j];
+                            T[17 + 4 * i + j]     <= y[j];
                         end
                     end
                 end
@@ -330,12 +330,12 @@ module inv_dct_32 #(
                 // 10. If n is greater than or equal to 5, invoke B( 30 - 4 * i - j, 17 + 4 * i + j, 24 + (j << 6) + ( ( 1 - i ) << 5 ), 1, r ) for i = 0..1, for j=0..1.
                     for (int i = 1; i <= 1; i++) begin
                         for (int j = 0; j <= 1; j++) begin
-                            t_a[k]      = T[30 - 4 * i - j];
-                            t_y[k]      = T[17 + 4 * i + j];
-                            c[k]        = 1'b1;
-                            angle[k]    = 8'(24 + (j << 6) + ( ( 1 - i ) << 5 ));
-                            T[30 - 4 * i - j]     <= x[k];
-                            T[17 + 4 * i + j]     <= y[k];
+                            t_a[j]      = T[30 - 4 * i - j];
+                            t_y[j]      = T[17 + 4 * i + j];
+                            c[j]        = 1'b1;
+                            angle[j]    = 8'(24 + (j << 6) + ( ( 1 - i ) << 5 ));
+                            T[30 - 4 * i - j]     <= x[j];
+                            T[17 + 4 * i + j]     <= y[j];
                         end
                     end
                 end
@@ -343,12 +343,12 @@ module inv_dct_32 #(
                 STEP_12_13: begin
                 // 12. Invoke B( 2 * i, 2 * i + 1, 32 + 16 * i, 1 - i, r ) for i = 0..1.
                     for (int i = 0; i <= 1; i++) begin
-                        t_a[k]           = T[2 * i];
-                        t_y[k]           = T[2 * i + 1];
-                        c[k]             = (i == 0) ? 1'b1 : 1'b0;
-                        angle[k]         = 8'(32 + 16 * i);
-                        T[2 * i]        <= x[k];
-                        T[2 * i + 1]    <= y[k];
+                        t_a[i]           = T[2 * i];
+                        t_y[i]           = T[2 * i + 1];
+                        c[i]             = (i == 0) ? 1'b1 : 1'b0;
+                        angle[i]         = 8'(32 + 16 * i);
+                        T[2 * i]        <= x[i];
+                        T[2 * i + 1]    <= y[i];
                     end
                     for (int i = 0; i <= 1; i++) begin
                         butterfly_t b_res;
@@ -361,12 +361,12 @@ module inv_dct_32 #(
                 STEP_14_15_17: begin
                 // 14. If n is greater than or equal to 4, invoke B( 14 - i, 9 + i, 48 + 64 * i, 1, r ) for i = 0..1.
                     for (int i = 0; i <= 1; i++) begin
-                        t_a[k]           = T[14 - i];
-                        t_y[k]           = T[9 + i];
-                        c[k]             = 1'b1;
-                        angle[k]         = 8'(48 + 64 * i);
-                        T[14 - i]       <= x[k];
-                        T[9 + i]        <= y[k];
+                        t_a[i]           = T[14 - i];
+                        t_y[i]           = T[9 + i];
+                        c[i]             = 1'b1;
+                        angle[i]         = 8'(48 + 64 * i);
+                        T[14 - i]       <= x[i];
+                        T[9 + i]        <= y[i];
                     end
                     for (int i = 0; i <= 3; i++) begin
                         for (int j = 0; j <= 1; j++) begin
@@ -386,12 +386,12 @@ module inv_dct_32 #(
 
                 STEP_18_19: begin
                 // 18. If n is greater than or equal to 3, invoke B( 6, 5, 32, 1, r ).
-                    t_a[k]           = T[6];
-                    t_y[k]           = T[5];
-                    c[k]             = 1'b1;
-                    angle[k]         = 8'(32);
-                    T[6]            <= x[k];
-                    T[5]            <= y[k];
+                    t_a[0]           = T[6];
+                    t_y[0]           = T[5];
+                    c[0]             = 1'b1;
+                    angle[0]         = 8'(32);
+                    T[6]            <= x[0];
+                    T[5]            <= y[0];
                     for (int i = 0; i <= 1; i++) begin
                         for (int j = 0; j <= 1; j++) begin
                             butterfly_t b_res_19;
@@ -405,24 +405,24 @@ module inv_dct_32 #(
                 STEP_20_A: begin
                 // 20. If n is greater than or equal to 5, invoke B( 29 - i, 18 + i, 48 + ( i >> 1 ) * 64, 1, r ) for i = 0..3.
                     for (int i = 0; i <= 1; i++) begin
-                        t_a[k]           = T[29-i];
-                        t_y[k]           = T[18+i];
-                        c[k]             = 1'b1;
-                        angle[k]         = 8'(48 + (i >> 1) * 64);
-                        T[29-i]         <= x[k];
-                        T[18+i]         <= y[k];
+                        t_a[i]           = T[29-i];
+                        t_y[i]           = T[18+i];
+                        c[i]             = 1'b1;
+                        angle[i]         = 8'(48 + (i >> 1) * 64);
+                        T[29-i]         <= x[i];
+                        T[18+i]         <= y[i];
                     end
                 end
 
                 STEP_20_B: begin
                 // 20. If n is greater than or equal to 5, invoke B( 29 - i, 18 + i, 48 + ( i >> 1 ) * 64, 1, r ) for i = 0..3.
                     for (int i = 2; i <= 3; i++) begin
-                        t_a[k]           = T[29-i];
-                        t_y[k]           = T[18+i];
-                        c[k]             = 1'b1;
-                        angle[k]         = 8'(48 + (i >> 1) * 64);
-                        T[29-i]         <= x[k];
-                        T[18+i]         <= y[k];
+                        t_a[i-2]           = T[29-i];
+                        t_y[i-2]           = T[18+i];
+                        c[i-2]             = 1'b1;
+                        angle[i-2]         = 8'(48 + (i >> 1) * 64);
+                        T[29-i]         <= x[i-2];
+                        T[18+i]         <= y[i-2];
                     end
                 end
 
@@ -435,12 +435,12 @@ module inv_dct_32 #(
                         T[7 - i] <= b_res.b;
                     end
                     for (int i = 0; i <= 1; i++) begin
-                        t_a[k]           = T[13-i];
-                        t_y[k]           = T[10+i];
-                        c[k]             = 1'b1;
-                        angle[k]         = 8'(32);
-                        T[13-i]         <= x[k];
-                        T[10+i]         <= y[k];
+                        t_a[i]           = T[13-i];
+                        t_y[i]           = T[10+i];
+                        c[i]             = 1'b1;
+                        angle[i]         = 8'(32);
+                        T[13-i]         <= x[i];
+                        T[10+i]         <= y[i];
                     end
                     for (int i = 0; i <= 1; i++) begin
                         for (int j = 0; j <= 3; j++) begin
@@ -461,24 +461,24 @@ module inv_dct_32 #(
                         T[15 - i] <= b_res.b;
                     end
                     for (int i = 0; i <= 1; i++) begin
-                        t_a[k]           = T[27-i];
-                        t_y[k]           = T[20+i];
-                        c[k]             = 1'b1;
-                        angle[k]         = 8'(32);
-                        T[27-i]         <= x[k];
-                        T[20+i]         <= y[k];
+                        t_a[i]           = T[27-i];
+                        t_y[i]           = T[20+i];
+                        c[i]             = 1'b1;
+                        angle[i]         = 8'(32);
+                        T[27-i]         <= x[i];
+                        T[20+i]         <= y[i];
                     end
                 end
 
                 STEP_27_B: begin
                 // 27. If n is greater than or equal to 5, invoke B( 27 - i, 20 + i, 32, 1, r ) for i = 0..3.
                     for (int i = 2; i <= 3; i++) begin
-                        t_a[k]           = T[27-i];
-                        t_y[k]           = T[20+i];
-                        c[k]             = 1'b1;
-                        angle[k]         = 8'(32);
-                        T[27-i]         <= x[k];
-                        T[20+i]         <= y[k];
+                        t_a[i-2]           = T[27-i];
+                        t_y[i-2]           = T[20+i];
+                        c[i-2]             = 1'b1;
+                        angle[i-2]         = 8'(32);
+                        T[27-i]         <= x[i-2];
+                        T[20+i]         <= y[i-2];
                     end
                 end
 
