@@ -30,30 +30,48 @@ module inv_dct_32 #(
         logic signed [15:0] b;
     } butterfly_t;
 
+
+    logic signed [15:0] x [4];
+    logic signed [15:0] y [4];
+    wire signed [15:0] t_a [4];
+    wire signed [15:0] t_y [4];
+    wire c [4];
+    wire [7:0] angle;
+
+    genvar k;
+    generate 
+        for (k = 0; k < 4; k += 1) begin : gen_b
+            b_transform b_module (  .x(x[k]), 
+                                    .y(y[k]), 
+                                    .t_a(t_a[k]), 
+                                    .t_b(t_y[k]), 
+                                    .c(c[k]), 
+                                    .angle(angle[k]));
+        end
+    endgenerate
+
     //23 states needed 
     typedef enum logic [4:0] {
         IDLE,
 
         STEP_1,
-        STEP_3,
-        STEP_5,
-        STEP_6,
-        STEP_8,
-        STEP_9,
-        STEP_10,
-        STEP_12,
-        STEP_13,
-        STEP_14,
-        STEP_15,
-        STEP_17,
-        STEP_18,
-        STEP_19,
-        STEP_20,
-        STEP_22,
-        STEP_23,
-        STEP_24,
-        STEP_26,
-        STEP_27,
+        STEP_3_A,
+        STEP_3_B,
+        STEP_3_C,
+        STEP_3_D,
+        STEP_5_A,
+        STEP_5_B,
+        STEP_6_8_9,
+        STEP_10_A,
+        STEP_10_B,
+        STEP_12_13,
+        STEP_14_15_17,
+        STEP_18_19,
+        STEP_20_A,
+        STEP_20_B,
+        STEP_22_23_24,
+        STEP_26_27_A,
+        STEP_27_B,
         STEP_29,
 
         DONE
@@ -87,134 +105,74 @@ module inv_dct_32 #(
 
                 STEP_1: begin
                     if (n >= 5) begin
-                        state <= STEP_3;
+                        state <= STEP_3_A;
                     end else begin
-                        state <= STEP_5;
+                        state <= STEP_5_A;
                     end
                 end
 
-                STEP_3: begin
-                    state <= STEP_5;
+                STEP_3_A: begin
+                    state <= STEP_3_B;
+                end
+                STEP_3_B: begin
+                    state <= STEP_3_C;
+                end
+                STEP_3_C: begin
+                    state <= STEP_3_D;
+                end
+                STEP_3_D: begin
+                    state <= STEP_5_A;
                 end
 
-                STEP_5: begin
-                    if (n >= 5) begin
-                        state <= STEP_6;
-                    end else begin
-                        state <= STEP_9;
-                    end
+                STEP_5_A: begin
+                    state <= STEP_5_B;
                 end
 
-                STEP_6: begin
-                    state <= STEP_8;
+                STEP_5_B: begin
+                    state <= STEP_6_8_9;
                 end
 
-                STEP_8: begin
-                    if (n >= 4) begin
-                        state <= STEP_9;
-                    end else begin
-                        state <= STEP_12;
-                    end
+                STEP_6_8_9: begin
+                    state <= STEP_10_A;
                 end
 
-                STEP_9: begin
-                    if (n >= 5) begin
-                        state <= STEP_10;
-                    end else begin
-                        state <= STEP_12;
-                    end
+                STEP_10_A: begin
+                    state <= STEP_10_B;
                 end
 
-                STEP_10: begin
-                    state <= STEP_12;
+                STEP_10_B: begin
+                    state <= STEP_12_13;
                 end
 
-                STEP_12: begin
-                    if (n >= 3) begin
-                        state <= STEP_13;
-                    end else begin
-                        state <= STEP_17;
-                    end
+                STEP_12_13: begin
+                    state <= STEP_14_15_17;
                 end
 
-                STEP_13: begin
-                    if (n >= 4) begin
-                        state <= STEP_14;
-                    end else begin
-                        state <= STEP_17;
-                    end
+                STEP_14_15_17: begin
+                    state <= STEP_18_19;
                 end
 
-                STEP_14: begin
-                    if (n >= 5) begin
-                        state <= STEP_15;
-                    end else begin
-                        state <= STEP_17;
-                    end
+                STEP_18_19: begin
+                    state <= STEP_20_A;
                 end
 
-                STEP_15: begin
-                    state <= STEP_17;
+                STEP_20_A: begin
+                    state <= STEP_20_B;
                 end
 
-                STEP_17: begin
-                    if (n >= 3) begin
-                        state <= STEP_18;
-                    end else begin
-                        state <= STEP_22;
-                    end
+                STEP_20_B: begin
+                    state <= STEP_22_23_24;
                 end
 
-                STEP_18: begin
-                    if (n >= 4) begin
-                        state <= STEP_19;
-                    end else begin
-                        state <= STEP_22;
-                    end
+                STEP_22_23_24: begin
+                    state <= STEP_26_27_A;
                 end
 
-                STEP_19: begin
-                    if (n >= 5) begin
-                        state <= STEP_20;
-                    end else begin
-                        state <= STEP_22;
-                    end
+                STEP_26_27_A: begin
+                    state <= STEP_27_B;
                 end
 
-                STEP_20: begin
-                    state <= STEP_22;
-                end
-
-                STEP_22: begin
-                    if (n >= 4) begin
-                        state <= STEP_23;
-                    end else begin
-                        state <= DONE;
-                    end
-                end
-
-                STEP_23: begin
-                    if (n >= 5) begin
-                        state <= STEP_24;
-                    end else begin
-                        state <= STEP_26;
-                    end
-
-                end
-
-                STEP_24: begin
-                    state <= STEP_26;
-                end
-
-                STEP_26: begin
-                    if (n >= 5) begin
-                        state <= STEP_27;
-                    end else begin
-                        state <= DONE;
-                    end
-                end
-
-                STEP_27: begin
+                STEP_27_B: begin
                     state <= STEP_29;
                 end
 
@@ -260,9 +218,9 @@ module inv_dct_32 #(
                     end
                 end
 
-                STEP_3: begin
+                STEP_3_A: begin
                 // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
-                    for (int i = 0; i <= 7; i++) begin
+                    for (int i = 0; i <= 1; i++) begin
                         butterfly_t b_res;
                         b_res = b(T[16+i], T[31-i], 1'b0, 8'(6 + (brev(3, 16'(7 - i)) << 3)));
                         T[16+i] <= b_res.a;
@@ -270,10 +228,48 @@ module inv_dct_32 #(
                     end
                 end
 
+                STEP_3_B: begin
+                // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
+                    for (int i = 2; i <= 3; i++) begin
+                        butterfly_t b_res;
+                        b_res = b(T[16+i], T[31-i], 1'b0, 8'(6 + (brev(3, 16'(7 - i)) << 3)));
+                        T[16+i] <= b_res.a;
+                        T[31-i] <= b_res.b;
+                    end
+                end
 
-                STEP_5: begin
+                STEP_3_C: begin
+                // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
+                    for (int i = 4; i <= 5; i++) begin
+                        butterfly_t b_res;
+                        b_res = b(T[16+i], T[31-i], 1'b0, 8'(6 + (brev(3, 16'(7 - i)) << 3)));
+                        T[16+i] <= b_res.a;
+                        T[31-i] <= b_res.b;
+                    end
+                end
+
+                STEP_3_D: begin
+                // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
+                    for (int i = 6; i <= 7; i++) begin
+                        butterfly_t b_res;
+                        b_res = b(T[16+i], T[31-i], 1'b0, 8'(6 + (brev(3, 16'(7 - i)) << 3)));
+                        T[16+i] <= b_res.a;
+                        T[31-i] <= b_res.b;
+                    end
+                end
+
+                STEP_5_A: begin
                 // 5. If n is greater than or equal to 4, invoke B( 8 + i, 15 - i, 12 + ( brev( 2, 3 - i ) << 4 ), 0, r ) for i = 0..3.
-                    for (int i = 0; i <= 3; i++) begin
+                    for (int i = 0; i <= 1; i++) begin
+                        butterfly_t b_res;
+                        b_res = b(T[8 + i], T[15 - i], 1'b0, 8'(12 + (brev(2, 16'(3 - i)) << 4)));
+                        T[8 + i] <= b_res.a;
+                        T[15 - i] <= b_res.b;
+                    end
+                end
+                STEP_5_B: begin
+                // 5. If n is greater than or equal to 4, invoke B( 8 + i, 15 - i, 12 + ( brev( 2, 3 - i ) << 4 ), 0, r ) for i = 0..3.
+                    for (int i = 2; i <= 3; i++) begin
                         butterfly_t b_res;
                         b_res = b(T[8 + i], T[15 - i], 1'b0, 8'(12 + (brev(2, 16'(3 - i)) << 4)));
                         T[8 + i] <= b_res.a;
@@ -281,7 +277,7 @@ module inv_dct_32 #(
                     end
                 end
 
-                STEP_6: begin
+                STEP_6_8_9: begin
                 // 6. If n is greater than or equal to 5, invoke H( 16 + 2 * i, 17 + 2 * i, i & 1, r ) for i = 0..7.
                     for (int i = 0; i <= 7; i++) begin
                         butterfly_t b_res;
@@ -289,20 +285,12 @@ module inv_dct_32 #(
                         T[16 + 2 * i] <= b_res.a;
                         T[17 + 2 * i] <= b_res.b;
                     end 
-                end
-
-                STEP_8: begin
-                // 8. If n is greater than or equal to 3, invoke B( 4 + i, 7 - i, 56 - 32 * i, 0, r ) for i = 0..1.
                     for (int i = 0; i <= 1; i++) begin
                             butterfly_t b_res;
                             b_res = b(T[4 + i], T[7 - i], 1'b0, 8'(56 - 32 * i));
                             T[4 + i] <= b_res.a;
                             T[7 - i] <= b_res.b;
                     end
-                end
-
-                STEP_9: begin
-                // 9. If n is greater than or equal to 4, invoke H( 8 + 2 * i, 9 + 2 * i, i & 1, r ) for i = 0..3.
                     for (int i = 0; i <= 3; i++) begin
                         butterfly_t b_res;
                         b_res = h(T[8 + 2 * i], T[9 + 2 * i], 1'(i & 1));
@@ -311,9 +299,20 @@ module inv_dct_32 #(
                     end
                 end
 
-                STEP_10: begin
+                STEP_10_A: begin
                 // 10. If n is greater than or equal to 5, invoke B( 30 - 4 * i - j, 17 + 4 * i + j, 24 + (j << 6) + ( ( 1 - i ) << 5 ), 1, r ) for i = 0..1, for j=0..1.
-                    for (int i = 0; i <= 1; i++) begin
+                    for (int i = 0; i <= 0; i++) begin
+                        for (int j = 0; j <= 1; j++) begin
+                            butterfly_t b_res;
+                            b_res = b(T[30 - 4 * i - j], T[17 + 4 * i + j], 1'b1, 8'(24 + (j << 6) + ( ( 1 - i ) << 5 )));
+                            T[30 - 4 * i - j] <= b_res.a;
+                            T[17 + 4 * i + j] <= b_res.b;
+                        end
+                    end
+                end
+                STEP_10_B: begin
+                // 10. If n is greater than or equal to 5, invoke B( 30 - 4 * i - j, 17 + 4 * i + j, 24 + (j << 6) + ( ( 1 - i ) << 5 ), 1, r ) for i = 0..1, for j=0..1.
+                    for (int i = 1; i <= 1; i++) begin
                         for (int j = 0; j <= 1; j++) begin
                             butterfly_t b_res;
                             b_res = b(T[30 - 4 * i - j], T[17 + 4 * i + j], 1'b1, 8'(24 + (j << 6) + ( ( 1 - i ) << 5 )));
@@ -323,7 +322,7 @@ module inv_dct_32 #(
                     end
                 end
 
-                STEP_12: begin
+                STEP_12_13: begin
                 // 12. Invoke B( 2 * i, 2 * i + 1, 32 + 16 * i, 1 - i, r ) for i = 0..1.
                     for (int i = 0; i <= 1; i++) begin
                         butterfly_t b_res;
@@ -331,10 +330,6 @@ module inv_dct_32 #(
                         T[2 * i] <= b_res.a;
                         T[2 * i + 1] <= b_res.b;
                     end
-                end
-
-                STEP_13: begin
-                // 13. If n is greater than or equal to 3, invoke H( 4 + 2 * i, 5 + 2 * i, i, r ) for i = 0..1.
                     for (int i = 0; i <= 1; i++) begin
                         butterfly_t b_res;
                         b_res = h(T[4 + 2 * i], T[5 + 2 * i], 1'(i));
@@ -343,7 +338,7 @@ module inv_dct_32 #(
                     end
                 end
 
-                STEP_14: begin
+                STEP_14_15_17: begin
                 // 14. If n is greater than or equal to 4, invoke B( 14 - i, 9 + i, 48 + 64 * i, 1, r ) for i = 0..1.
                     for (int i = 0; i <= 1; i++) begin
                         butterfly_t b_res;
@@ -351,10 +346,6 @@ module inv_dct_32 #(
                         T[14 - i] <= b_res.a;
                         T[9 + i] <= b_res.b;
                     end
-                end
-
-                STEP_15: begin
-                // 15. If n is greater than or equal to 5, invoke H( 16 + 4 * i + j, 19 + 4 * i - j, i & 1, r ) for i = 0..3, for j = 0..1.
                     for (int i = 0; i <= 3; i++) begin
                         for (int j = 0; j <= 1; j++) begin
                             butterfly_t b_res;
@@ -363,10 +354,6 @@ module inv_dct_32 #(
                             T[19 + 4 * i - j] <= b_res.b;
                         end
                     end
-                end
-
-                STEP_17: begin
-                // 17. Invoke H( i, 3 - i, 0, r ) for i = 0..1.
                     for (int i = 0; i <= 1; i++) begin
                         butterfly_t b_res;
                         b_res = h(T[i], T[3 - i], 0);
@@ -375,29 +362,25 @@ module inv_dct_32 #(
                     end
                 end
 
-                STEP_18: begin
+                STEP_18_19: begin
                 // 18. If n is greater than or equal to 3, invoke B( 6, 5, 32, 1, r ).
                     butterfly_t b_res;
                     b_res = b(T[6], T[5], 1'b1, 8'(32));
                     T[6] <= b_res.a;
                     T[5] <= b_res.b;
-                end
-
-                STEP_19: begin
-                // 19. If n is greater than or equal to 4, invoke H( 8 + 4 * i + j, 11 + 4 * i - j, i, r ) for i = 0..1, for j = 0..1.
                     for (int i = 0; i <= 1; i++) begin
                         for (int j = 0; j <= 1; j++) begin
-                            butterfly_t b_res;
-                            b_res = h(T[8 + 4 * i + j], T[11 + 4 * i - j], 1'(i));
-                            T[8 + 4 * i + j] <= b_res.a;
-                            T[11 + 4 * i - j] <= b_res.b;
+                            butterfly_t b_res_19;
+                            b_res_19 = h(T[8 + 4 * i + j], T[11 + 4 * i - j], 1'(i));
+                            T[8 + 4 * i + j] <= b_res_19.a;
+                            T[11 + 4 * i - j] <= b_res_19.b;
                         end
                     end
                 end
 
-                STEP_20: begin
+                STEP_20_A: begin
                 // 20. If n is greater than or equal to 5, invoke B( 29 - i, 18 + i, 48 + ( i >> 1 ) * 64, 1, r ) for i = 0..3.
-                    for (int i = 0; i <= 3; i++) begin
+                    for (int i = 0; i <= 1; i++) begin
                         butterfly_t b_res;
                         b_res = b(T[29 - i], T[18 + i], 1'b1, 8'(48 + (i >> 1) * 64));
                         T[29 - i] <= b_res.a;
@@ -405,7 +388,17 @@ module inv_dct_32 #(
                     end
                 end
 
-                STEP_22: begin
+                STEP_20_B: begin
+                // 20. If n is greater than or equal to 5, invoke B( 29 - i, 18 + i, 48 + ( i >> 1 ) * 64, 1, r ) for i = 0..3.
+                    for (int i = 2; i <= 3; i++) begin
+                        butterfly_t b_res;
+                        b_res = b(T[29 - i], T[18 + i], 1'b1, 8'(48 + (i >> 1) * 64));
+                        T[29 - i] <= b_res.a;
+                        T[18 + i] <= b_res.b;
+                    end
+                end
+
+                STEP_22_23_24: begin
                 // 22. If n is greater than or equal to 3, invoke H( i, 7 - i, 0, r ) for i = 0..3.
                     for (int i = 0; i <= 3; i++) begin
                         butterfly_t b_res;
@@ -413,20 +406,12 @@ module inv_dct_32 #(
                         T[i] <= b_res.a;
                         T[7 - i] <= b_res.b;
                     end
-                end
-
-                STEP_23: begin
-                // 23. If n is greater than or equal to 4, invoke B( 13 - i, 10 + i, 32, 1, r ) for i = 0..1.
                     for (int i = 0; i <= 1; i++) begin
                         butterfly_t b_res;
                         b_res = b(T[13 - i], T[10 + i], 1'b1, 8'(32));
                         T[13 - i] <= b_res.a;
                         T[10 + i] <= b_res.b;
                     end
-                end
-
-                STEP_24: begin
-                // 24. If n is greater than or equal to 5, invoke H( 16 + i * 8 + j, 23 + i * 8 - j, i, r ) for i = 0..1, for j = 0..3.
                     for (int i = 0; i <= 1; i++) begin
                         for (int j = 0; j <= 3; j++) begin
                             butterfly_t b_res;
@@ -437,7 +422,7 @@ module inv_dct_32 #(
                     end
                 end
 
-                STEP_26: begin
+                STEP_26_27_A: begin
                 // 26. If n is greater than or equal to 4, invoke H( i, 15 - i, 0, r ) for i = 0..7.
                     for (int i = 0; i <= 7; i++) begin
                         butterfly_t b_res;
@@ -445,11 +430,17 @@ module inv_dct_32 #(
                         T[i] <= b_res.a;
                         T[15 - i] <= b_res.b;
                     end
+                    for (int i = 0; i <= 1; i++) begin
+                        butterfly_t b_res;
+                        b_res = b(T[27 - i], T[20 + i], 1'b1, 8'(32));
+                        T[27 - i] <= b_res.a;
+                        T[20 + i] <= b_res.b;
+                    end
                 end
 
-                STEP_27: begin
+                STEP_27_B: begin
                 // 27. If n is greater than or equal to 5, invoke B( 27 - i, 20 + i, 32, 1, r ) for i = 0..3.
-                    for (int i = 0; i <= 3; i++) begin
+                    for (int i = 2; i <= 3; i++) begin
                         butterfly_t b_res;
                         b_res = b(T[27 - i], T[20 + i], 1'b1, 8'(32));
                         T[27 - i] <= b_res.a;
