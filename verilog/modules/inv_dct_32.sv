@@ -502,6 +502,211 @@ module inv_dct_32 #(
         end
     end
 
+    always_comb begin
+        t_a[0] = 0;
+        t_y[0] = 0;
+        c[0] = 0;
+        angle[0] = 0;
+        t_a[1] = 0;
+        t_y[1] = 0;
+        c[1] = 0;
+        angle[1] = 0;
+
+        case (state)
+            IDLE: begin
+                
+            end
+
+            STEP_1: begin
+            // 1. Invoke the inverse DCT permutation process as specified in section 7.13.2.2 with the input variable n.
+                
+            end
+
+            STEP_3_A: begin
+            // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
+                for (int i = 0; i <= 1; i++) begin
+                    t_a[i]      = T[16+i];
+                    t_y[i]      = T[31-i];
+                    c[i]        = 1'b0;
+                    angle[i]    = 8'(6 + (brev(3, 16'(7 - i)) << 3));
+                end
+            end
+
+            STEP_3_B: begin
+            // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
+                for (int i = 2; i <= 3; i++) begin
+                    t_a[i-2]     = T[16+i];
+                    t_y[i-2]     = T[31-i];
+                    c[i-2]       = 1'b0;
+                    angle[i-2]   = 8'(6 + (brev(3, 16'(7 - i)) << 3));
+                end
+            end
+
+            STEP_3_C: begin
+            // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
+                for (int i = 4; i <= 5; i++) begin
+                    t_a[i-4]      = T[16+i];
+                    t_y[i-4]      = T[31-i];
+                    c[i-4]        = 1'b0;
+                    angle[i-4]    = 8'(6 + (brev(3, 16'(7 - i)) << 3));
+                end
+            end
+
+            STEP_3_D: begin
+            // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
+                for (int i = 6; i <= 7; i++) begin
+                    t_a[i-6]      = T[16+i];
+                    t_y[i-6]      = T[31-i];
+                    c[i-6]        = 1'b0;
+                    angle[i-6]    = 8'(6 + (brev(3, 16'(7 - i)) << 3));
+                end
+            end
+
+            STEP_5_A: begin
+            // 5. If n is greater than or equal to 4, invoke B( 8 + i, 15 - i, 12 + ( brev( 2, 3 - i ) << 4 ), 0, r ) for i = 0..3.
+                for (int i = 0; i <= 1; i++) begin
+                    t_a[i]      = T[8 + i];
+                    t_y[i]      = T[15 - i];
+                    c[i]        = 1'b0;
+                    angle[i]    = 8'(12 + (brev(2, 16'(3 - i)) << 4));
+                end
+            end
+            STEP_5_B: begin
+            // 5. If n is greater than or equal to 4, invoke B( 8 + i, 15 - i, 12 + ( brev( 2, 3 - i ) << 4 ), 0, r ) for i = 0..3.
+                for (int i = 2; i <= 3; i++) begin
+                    t_a[i-2]      = T[8 + i];
+                    t_y[i-2]      = T[15 - i];
+                    c[i-2]        = 1'b0;
+                    angle[i-2]    = 8'(12 + (brev(2, 16'(3 - i)) << 4));
+                end
+            end
+
+            STEP_6_8_9: begin
+
+                for (int i = 0; i <= 1; i++) begin
+                        t_a[i]      = T[4 + i];
+                        t_y[i]      = T[7 - i];
+                        c[i]        = 1'b0;
+                        angle[i]    = 8'(56 - 32 * i);
+                end
+
+            end
+
+            STEP_10_A: begin
+            // 10. If n is greater than or equal to 5, invoke B( 30 - 4 * i - j, 17 + 4 * i + j, 24 + (j << 6) + ( ( 1 - i ) << 5 ), 1, r ) for i = 0..1, for j=0..1.
+                for (int i = 0; i <= 0; i++) begin
+                    for (int j = 0; j <= 1; j++) begin
+                        t_a[j]      = T[30 - 4 * i - j];
+                        t_y[j]      = T[17 + 4 * i + j];
+                        c[j]        = 1'b1;
+                        angle[j]    = 8'(24 + (j << 6) + ( ( 1 - i ) << 5 ));
+                    end
+                end
+            end
+            STEP_10_B: begin
+            // 10. If n is greater than or equal to 5, invoke B( 30 - 4 * i - j, 17 + 4 * i + j, 24 + (j << 6) + ( ( 1 - i ) << 5 ), 1, r ) for i = 0..1, for j=0..1.
+                for (int i = 1; i <= 1; i++) begin
+                    for (int j = 0; j <= 1; j++) begin
+                        t_a[j]      = T[30 - 4 * i - j];
+                        t_y[j]      = T[17 + 4 * i + j];
+                        c[j]        = 1'b1;
+                        angle[j]    = 8'(24 + (j << 6) + ( ( 1 - i ) << 5 ));
+                    end
+                end
+            end
+
+            STEP_12_13: begin
+            // 12. Invoke B( 2 * i, 2 * i + 1, 32 + 16 * i, 1 - i, r ) for i = 0..1.
+                for (int i = 0; i <= 1; i++) begin
+                    t_a[i]           = T[2 * i];
+                    t_y[i]           = T[2 * i + 1];
+                    c[i]             = (i == 0) ? 1'b1 : 1'b0;
+                    angle[i]         = 8'(32 + 16 * i);
+                end
+            end
+
+            STEP_14_15_17: begin
+            // 14. If n is greater than or equal to 4, invoke B( 14 - i, 9 + i, 48 + 64 * i, 1, r ) for i = 0..1.
+                for (int i = 0; i <= 1; i++) begin
+                    t_a[i]           = T[14 - i];
+                    t_y[i]           = T[9 + i];
+                    c[i]             = 1'b1;
+                    angle[i]         = 8'(48 + 64 * i);
+                end
+            end
+
+            STEP_18_19: begin
+            // 18. If n is greater than or equal to 3, invoke B( 6, 5, 32, 1, r ).
+                t_a[0]           = T[6];
+                t_y[0]           = T[5];
+                c[0]             = 1'b1;
+                angle[0]         = 8'(32);
+            end
+
+            STEP_20_A: begin
+            // 20. If n is greater than or equal to 5, invoke B( 29 - i, 18 + i, 48 + ( i >> 1 ) * 64, 1, r ) for i = 0..3.
+                for (int i = 0; i <= 1; i++) begin
+                    t_a[i]           = T[29-i];
+                    t_y[i]           = T[18+i];
+                    c[i]             = 1'b1;
+                    angle[i]         = 8'(48 + (i >> 1) * 64);
+                end
+            end
+
+            STEP_20_B: begin
+            // 20. If n is greater than or equal to 5, invoke B( 29 - i, 18 + i, 48 + ( i >> 1 ) * 64, 1, r ) for i = 0..3.
+                for (int i = 2; i <= 3; i++) begin
+                    t_a[i-2]           = T[29-i];
+                    t_y[i-2]           = T[18+i];
+                    c[i-2]             = 1'b1;
+                    angle[i-2]         = 8'(48 + (i >> 1) * 64);
+                end
+            end
+
+            STEP_22_23_24: begin
+            // 22. If n is greater than or equal to 3, invoke H( i, 7 - i, 0, r ) for i = 0..3.
+
+                for (int i = 0; i <= 1; i++) begin
+                    t_a[i]           = T[13-i];
+                    t_y[i]           = T[10+i];
+                    c[i]             = 1'b1;
+                    angle[i]         = 8'(32);
+                end
+            end
+
+            STEP_26_27_A: begin
+            // 26. If n is greater than or equal to 4, invoke H( i, 15 - i, 0, r ) for i = 0..7.
+                for (int i = 0; i <= 1; i++) begin
+                    t_a[i]           = T[27-i];
+                    t_y[i]           = T[20+i];
+                    c[i]             = 1'b1;
+                    angle[i]         = 8'(32);
+                end
+            end
+
+            STEP_27_B: begin
+            // 27. If n is greater than or equal to 5, invoke B( 27 - i, 20 + i, 32, 1, r ) for i = 0..3.
+                for (int i = 2; i <= 3; i++) begin
+                    t_a[i-2]           = T[27-i];
+                    t_y[i-2]           = T[20+i];
+                    c[i-2]             = 1'b1;
+                    angle[i-2]         = 8'(32);
+                end
+            end
+
+            STEP_29: begin
+
+            end
+
+            DONE: begin
+
+            end
+
+            default: begin end
+
+        endcase
+    end
+
     genvar j;
     generate
         for (j = 0; j < N; j++) begin : evil_stupid_generate
