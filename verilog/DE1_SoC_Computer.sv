@@ -379,30 +379,24 @@ wire [31:0] gpio_in, gpio_out ;
 wire m10k_clk; //onchip_memory2_0_clk1_clk
 wire m10k_rst; //onchip_memory2_0_reset1_reset
 
+localparam N_BLOCKS = 11;
 
-wire m10k_0_clk;
-logic [9:0] m10k_0_address;
-wire m10k_0_write;
-wire signed [15:0] m10k_0_readdata;
-wire signed [15:0] m10k_0_writedata;
+logic [9:0] m10k_address[N_BLOCKS];
+wire m10k_write [N_BLOCKS];
+wire signed [15:0] m10k_readdata [N_BLOCKS];
+wire signed [15:0] m10k_writedata [N_BLOCKS];
 
-wire [9:0] block_write_addr;
-wire [9:0] block_read_addr;
-
-always_comb begin
-	if(reading)
-		m10k_0_address = block_read_addr;
-	else if (writing)
-		m10k_0_address = block_write_addr;
-	else
-		m10k_0_address = 0;
-end
-
-wire reading;
-wire writing;
+wire [9:0] block_write_addr [N_BLOCKS];
+wire [9:0] block_read_addr [N_BLOCKS];
 
 wire [31:0] request_pio, response_pio;
 
+
+wire clk;
+wire rst;
+assign clk = CLOCK_50;
+assign rst = ~KEY[0];
+assign m10k_clk = clk;
 
 // load signal logic
 typedef enum logic [1:0] {
@@ -410,53 +404,64 @@ typedef enum logic [1:0] {
 	COMPUTE,
 	COPY_FROM_FPGA
 } req_resp_state_t;
-req_resp_state_t req_resp_state;
+genvar i;
+generate
+	for (i=0; i < N_BLOCKS; i += 1) begin : gen_main
+		always_comb begin
+			if(reading)
+				m10k_address[i] = block_read_addr[i];
+			else if (writing)
+				m10k_address[i] = block_write_addr[i];
+			else
+				m10k_address[i] = 0;
+		end
 
-wire clk;
-wire rst;
-assign clk = CLOCK_50;
-assign rst = ~KEY[0];
-assign m10k_0_clk = clk;
+		wire reading;
+		wire writing;
 
-always_ff @(posedge clk) begin
-	if (rst)
-		req_resp_state <= COPY_TO_FPGA;
-	else if (req_resp_state == COPY_TO_FPGA)
-		req_resp_state <= request_pio[0] ? COMPUTE : COPY_TO_FPGA;
-	else if (req_resp_state == COMPUTE)
-		req_resp_state <= block_ready ? COPY_FROM_FPGA : COMPUTE;
-	else if (req_resp_state == COPY_FROM_FPGA)
-		req_resp_state <= !request_pio[0] ? COPY_TO_FPGA : COPY_FROM_FPGA;
-end
+		req_resp_state_t req_resp_state;
 
-assign response_pio[0] = req_resp_state == COPY_FROM_FPGA;
 
-wire block_ready;
-wire block_request;
+		always_ff @(posedge clk) begin
+			if (rst)
+				req_resp_state <= COPY_TO_FPGA;
+			else if (req_resp_state == COPY_TO_FPGA)
+				req_resp_state <= request_pio[i] ? COMPUTE : COPY_TO_FPGA;
+			else if (req_resp_state == COMPUTE)
+				req_resp_state <= block_ready ? COPY_FROM_FPGA : COMPUTE;
+			else if (req_resp_state == COPY_FROM_FPGA)
+				req_resp_state <= !request_pio[i] ? COPY_TO_FPGA : COPY_FROM_FPGA;
+		end
 
-req_resp_state_t prev_cycle_state;
-always_ff @(posedge clk) begin
-	if (rst)
-		prev_cycle_state <= COPY_FROM_FPGA;
-	else prev_cycle_state <= req_resp_state;
-end
+		assign response_pio[i] = req_resp_state == COPY_FROM_FPGA;
 
-// TODO: synchronizer on pio
-assign block_request = (prev_cycle_state == COPY_TO_FPGA) && request_pio[0];//(req_resp_state == COMPUTE);
+		wire block_ready;
+		wire block_request;
 
-single_block_32 test_block (
-    .mem_write_data(m10k_0_writedata),
-    .mem_write_addr(block_write_addr),
-    .mem_read_addr(block_read_addr),
-    .we(m10k_0_write),
-    .ready(block_ready), // held high until request received
-    .mem_read_data(m10k_0_readdata),
-	.reading(reading),
-	.writing(writing),
-    .request(block_request), // pulse input of request
-    .clk(CLOCK_50),
-    .rst(~KEY[0])
-);
+		req_resp_state_t prev_cycle_state;
+		always_ff @(posedge clk) begin
+			if (rst)
+				prev_cycle_state <= COPY_FROM_FPGA;
+			else prev_cycle_state <= req_resp_state;
+		end
+
+		assign block_request = (prev_cycle_state == COPY_TO_FPGA) && request_pio[i];//(req_resp_state == COMPUTE);
+
+		single_block_32 test_block (
+			.mem_write_data(m10k_writedata[i]),
+			.mem_write_addr(block_write_addr[i]),
+			.mem_read_addr(block_read_addr[i]),
+			.we(m10k_write[i]),
+			.ready(block_ready), // held high until request received
+			.mem_read_data(m10k_readdata[i]),
+			.reading(reading),
+			.writing(writing),
+			.request(block_request), // pulse input of request
+			.clk(clk),
+			.rst(rst)
+		);
+	end
+endgenerate
 
 //=======================================================
 //  Structural coding
@@ -466,14 +471,104 @@ single_block_32 test_block (
 Computer_System The_System (
 
 	// M10K garbage
-	.onchip_memory2_0_clk1_clk		(m10k_0_clk),
-	.onchip_memory2_0_s1_address	(m10k_0_address),
-	.onchip_memory2_0_s1_write		(m10k_0_write),
+	.onchip_memory2_0_clk1_clk		(m10k_clk),
+	.onchip_memory2_0_s1_address	(m10k_address[0]),
+	.onchip_memory2_0_s1_write		(m10k_write[0]),
 	.onchip_memory2_0_s1_clken		(1'b1),
-	.onchip_memory2_0_s1_readdata	(m10k_0_readdata),
-	.onchip_memory2_0_s1_writedata	(m10k_0_writedata),
+	.onchip_memory2_0_s1_readdata	(m10k_readdata[0]),
+	.onchip_memory2_0_s1_writedata	(m10k_writedata[0]),
 	.onchip_memory2_0_s1_byteenable (2'b11),
 	.onchip_memory2_0_s1_chipselect (1'b1),
+
+	.onchip_memory_1_clk1_clk		(m10k_clk),
+	.onchip_memory_1_s1_address		(m10k_address[1]),
+	.onchip_memory_1_s1_write		(m10k_write[1]),
+	.onchip_memory_1_s1_clken		(1'b1),
+	.onchip_memory_1_s1_readdata	(m10k_readdata[1]),
+	.onchip_memory_1_s1_writedata	(m10k_writedata[1]),
+	.onchip_memory_1_s1_byteenable 	(2'b11),
+	.onchip_memory_1_s1_chipselect 	(1'b1),
+
+	.onchip_memory_2_clk1_clk		(m10k_clk),
+	.onchip_memory_2_s1_address		(m10k_address[2]),
+	.onchip_memory_2_s1_write		(m10k_write[2]),
+	.onchip_memory_2_s1_clken		(1'b1),
+	.onchip_memory_2_s1_readdata	(m10k_readdata[2]),
+	.onchip_memory_2_s1_writedata	(m10k_writedata[2]),
+	.onchip_memory_2_s1_byteenable 	(2'b11),
+	.onchip_memory_2_s1_chipselect 	(1'b1),
+
+	.onchip_memory_3_clk1_clk		(m10k_clk),
+	.onchip_memory_3_s1_address		(m10k_address[3]),
+	.onchip_memory_3_s1_write		(m10k_write[3]),
+	.onchip_memory_3_s1_clken		(1'b1),
+	.onchip_memory_3_s1_readdata	(m10k_readdata[3]),
+	.onchip_memory_3_s1_writedata	(m10k_writedata[3]),
+	.onchip_memory_3_s1_byteenable 	(2'b11),
+	.onchip_memory_3_s1_chipselect 	(1'b1),
+
+	.onchip_memory_4_clk1_clk		(m10k_clk),
+	.onchip_memory_4_s1_address		(m10k_address[4]),
+	.onchip_memory_4_s1_write		(m10k_write[4]),
+	.onchip_memory_4_s1_clken		(1'b1),
+	.onchip_memory_4_s1_readdata	(m10k_readdata[4]),
+	.onchip_memory_4_s1_writedata	(m10k_writedata[4]),
+	.onchip_memory_4_s1_byteenable 	(2'b11),
+	.onchip_memory_4_s1_chipselect 	(1'b1),
+
+	.onchip_memory_5_clk1_clk		(m10k_clk),
+	.onchip_memory_5_s1_address		(m10k_address[5]),
+	.onchip_memory_5_s1_write		(m10k_write[5]),
+	.onchip_memory_5_s1_clken		(1'b1),
+	.onchip_memory_5_s1_readdata	(m10k_readdata[5]),
+	.onchip_memory_5_s1_writedata	(m10k_writedata[5]),
+	.onchip_memory_5_s1_byteenable 	(2'b11),
+	.onchip_memory_5_s1_chipselect 	(1'b1),
+
+	.onchip_memory_6_clk1_clk		(m10k_clk),
+	.onchip_memory_6_s1_address		(m10k_address[6]),
+	.onchip_memory_6_s1_write		(m10k_write[6]),
+	.onchip_memory_6_s1_clken		(1'b1),
+	.onchip_memory_6_s1_readdata	(m10k_readdata[6]),
+	.onchip_memory_6_s1_writedata	(m10k_writedata[6]),
+	.onchip_memory_6_s1_byteenable 	(2'b11),
+	.onchip_memory_6_s1_chipselect 	(1'b1),
+
+	.onchip_memory_7_clk1_clk		(m10k_clk),
+	.onchip_memory_7_s1_address		(m10k_address[7]),
+	.onchip_memory_7_s1_write		(m10k_write[7]),
+	.onchip_memory_7_s1_clken		(1'b1),
+	.onchip_memory_7_s1_readdata	(m10k_readdata[7]),
+	.onchip_memory_7_s1_writedata	(m10k_writedata[7]),
+	.onchip_memory_7_s1_byteenable 	(2'b11),
+	.onchip_memory_7_s1_chipselect 	(1'b1),
+
+	.onchip_memory_8_clk1_clk		(m10k_clk),
+	.onchip_memory_8_s1_address		(m10k_address[8]),
+	.onchip_memory_8_s1_write		(m10k_write[8]),
+	.onchip_memory_8_s1_clken		(1'b1),
+	.onchip_memory_8_s1_readdata	(m10k_readdata[8]),
+	.onchip_memory_8_s1_writedata	(m10k_writedata[8]),
+	.onchip_memory_8_s1_byteenable 	(2'b11),
+	.onchip_memory_8_s1_chipselect 	(1'b1),
+
+	.onchip_memory_9_clk1_clk		(m10k_clk),
+	.onchip_memory_9_s1_address		(m10k_address[9]),
+	.onchip_memory_9_s1_write		(m10k_write[9]),
+	.onchip_memory_9_s1_clken		(1'b1),
+	.onchip_memory_9_s1_readdata	(m10k_readdata[9]),
+	.onchip_memory_9_s1_writedata	(m10k_writedata[9]),
+	.onchip_memory_9_s1_byteenable 	(2'b11),
+	.onchip_memory_9_s1_chipselect 	(1'b1),
+
+	.onchip_memory_10_clk1_clk		(m10k_clk),
+	.onchip_memory_10_s1_address	(m10k_address[10]),
+	.onchip_memory_10_s1_write		(m10k_write[10]),
+	.onchip_memory_10_s1_clken		(1'b1),
+	.onchip_memory_10_s1_readdata	(m10k_readdata[10]),
+	.onchip_memory_10_s1_writedata	(m10k_writedata[10]),
+	.onchip_memory_10_s1_byteenable (2'b11),
+	.onchip_memory_10_s1_chipselect (1'b1),
 
 	////////////////////////////////////
 	// FPGA Side

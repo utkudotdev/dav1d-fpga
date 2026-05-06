@@ -88,7 +88,97 @@
 			request_pio_external_connection_export  : out   std_logic_vector(31 downto 0);                    -- export
 			response_pio_external_connection_export : in    std_logic_vector(31 downto 0) := (others => 'X'); -- export
 			system_pll_ref_clk_clk                  : in    std_logic                     := 'X';             -- clk
-			system_pll_ref_reset_reset              : in    std_logic                     := 'X'              -- reset
+			system_pll_ref_reset_reset              : in    std_logic                     := 'X';             -- reset
+			onchip_memory_1_clk1_clk                : in    std_logic                     := 'X';             -- clk
+			onchip_memory_1_s1_address              : in    std_logic_vector(9 downto 0)  := (others => 'X'); -- address
+			onchip_memory_1_s1_clken                : in    std_logic                     := 'X';             -- clken
+			onchip_memory_1_s1_chipselect           : in    std_logic                     := 'X';             -- chipselect
+			onchip_memory_1_s1_write                : in    std_logic                     := 'X';             -- write
+			onchip_memory_1_s1_readdata             : out   std_logic_vector(15 downto 0);                    -- readdata
+			onchip_memory_1_s1_writedata            : in    std_logic_vector(15 downto 0) := (others => 'X'); -- writedata
+			onchip_memory_1_s1_byteenable           : in    std_logic_vector(1 downto 0)  := (others => 'X'); -- byteenable
+			onchip_memory_1_reset1_reset            : in    std_logic                     := 'X';             -- reset
+			onchip_memory_2_clk1_clk                : in    std_logic                     := 'X';             -- clk
+			onchip_memory_2_s1_address              : in    std_logic_vector(9 downto 0)  := (others => 'X'); -- address
+			onchip_memory_2_s1_clken                : in    std_logic                     := 'X';             -- clken
+			onchip_memory_2_s1_chipselect           : in    std_logic                     := 'X';             -- chipselect
+			onchip_memory_2_s1_write                : in    std_logic                     := 'X';             -- write
+			onchip_memory_2_s1_readdata             : out   std_logic_vector(15 downto 0);                    -- readdata
+			onchip_memory_2_s1_writedata            : in    std_logic_vector(15 downto 0) := (others => 'X'); -- writedata
+			onchip_memory_2_s1_byteenable           : in    std_logic_vector(1 downto 0)  := (others => 'X'); -- byteenable
+			onchip_memory_2_reset1_reset            : in    std_logic                     := 'X';             -- reset
+			onchip_memory_3_clk1_clk                : in    std_logic                     := 'X';             -- clk
+			onchip_memory_3_s1_address              : in    std_logic_vector(9 downto 0)  := (others => 'X'); -- address
+			onchip_memory_3_s1_clken                : in    std_logic                     := 'X';             -- clken
+			onchip_memory_3_s1_chipselect           : in    std_logic                     := 'X';             -- chipselect
+			onchip_memory_3_s1_write                : in    std_logic                     := 'X';             -- write
+			onchip_memory_3_s1_readdata             : out   std_logic_vector(15 downto 0);                    -- readdata
+			onchip_memory_3_s1_writedata            : in    std_logic_vector(15 downto 0) := (others => 'X'); -- writedata
+			onchip_memory_3_s1_byteenable           : in    std_logic_vector(1 downto 0)  := (others => 'X'); -- byteenable
+			onchip_memory_3_reset1_reset            : in    std_logic                     := 'X';             -- reset
+			onchip_memory_4_clk1_clk                : in    std_logic                     := 'X';             -- clk
+			onchip_memory_4_s1_address              : in    std_logic_vector(9 downto 0)  := (others => 'X'); -- address
+			onchip_memory_4_s1_clken                : in    std_logic                     := 'X';             -- clken
+			onchip_memory_4_s1_chipselect           : in    std_logic                     := 'X';             -- chipselect
+			onchip_memory_4_s1_write                : in    std_logic                     := 'X';             -- write
+			onchip_memory_4_s1_readdata             : out   std_logic_vector(15 downto 0);                    -- readdata
+			onchip_memory_4_s1_writedata            : in    std_logic_vector(15 downto 0) := (others => 'X'); -- writedata
+			onchip_memory_4_s1_byteenable           : in    std_logic_vector(1 downto 0)  := (others => 'X'); -- byteenable
+			onchip_memory_4_reset1_reset            : in    std_logic                     := 'X';             -- reset
+			onchip_memory_5_clk1_clk                : in    std_logic                     := 'X';             -- clk
+			onchip_memory_5_s1_address              : in    std_logic_vector(9 downto 0)  := (others => 'X'); -- address
+			onchip_memory_5_s1_clken                : in    std_logic                     := 'X';             -- clken
+			onchip_memory_5_s1_chipselect           : in    std_logic                     := 'X';             -- chipselect
+			onchip_memory_5_s1_write                : in    std_logic                     := 'X';             -- write
+			onchip_memory_5_s1_readdata             : out   std_logic_vector(15 downto 0);                    -- readdata
+			onchip_memory_5_s1_writedata            : in    std_logic_vector(15 downto 0) := (others => 'X'); -- writedata
+			onchip_memory_5_s1_byteenable           : in    std_logic_vector(1 downto 0)  := (others => 'X'); -- byteenable
+			onchip_memory_5_reset1_reset            : in    std_logic                     := 'X';             -- reset
+			onchip_memory_6_clk1_clk                : in    std_logic                     := 'X';             -- clk
+			onchip_memory_6_s1_address              : in    std_logic_vector(9 downto 0)  := (others => 'X'); -- address
+			onchip_memory_6_s1_clken                : in    std_logic                     := 'X';             -- clken
+			onchip_memory_6_s1_chipselect           : in    std_logic                     := 'X';             -- chipselect
+			onchip_memory_6_s1_write                : in    std_logic                     := 'X';             -- write
+			onchip_memory_6_s1_readdata             : out   std_logic_vector(15 downto 0);                    -- readdata
+			onchip_memory_6_s1_writedata            : in    std_logic_vector(15 downto 0) := (others => 'X'); -- writedata
+			onchip_memory_6_s1_byteenable           : in    std_logic_vector(1 downto 0)  := (others => 'X'); -- byteenable
+			onchip_memory_6_reset1_reset            : in    std_logic                     := 'X';             -- reset
+			onchip_memory_7_clk1_clk                : in    std_logic                     := 'X';             -- clk
+			onchip_memory_7_s1_address              : in    std_logic_vector(9 downto 0)  := (others => 'X'); -- address
+			onchip_memory_7_s1_clken                : in    std_logic                     := 'X';             -- clken
+			onchip_memory_7_s1_chipselect           : in    std_logic                     := 'X';             -- chipselect
+			onchip_memory_7_s1_write                : in    std_logic                     := 'X';             -- write
+			onchip_memory_7_s1_readdata             : out   std_logic_vector(15 downto 0);                    -- readdata
+			onchip_memory_7_s1_writedata            : in    std_logic_vector(15 downto 0) := (others => 'X'); -- writedata
+			onchip_memory_7_s1_byteenable           : in    std_logic_vector(1 downto 0)  := (others => 'X'); -- byteenable
+			onchip_memory_7_reset1_reset            : in    std_logic                     := 'X';             -- reset
+			onchip_memory_8_clk1_clk                : in    std_logic                     := 'X';             -- clk
+			onchip_memory_8_s1_address              : in    std_logic_vector(9 downto 0)  := (others => 'X'); -- address
+			onchip_memory_8_s1_clken                : in    std_logic                     := 'X';             -- clken
+			onchip_memory_8_s1_chipselect           : in    std_logic                     := 'X';             -- chipselect
+			onchip_memory_8_s1_write                : in    std_logic                     := 'X';             -- write
+			onchip_memory_8_s1_readdata             : out   std_logic_vector(15 downto 0);                    -- readdata
+			onchip_memory_8_s1_writedata            : in    std_logic_vector(15 downto 0) := (others => 'X'); -- writedata
+			onchip_memory_8_s1_byteenable           : in    std_logic_vector(1 downto 0)  := (others => 'X'); -- byteenable
+			onchip_memory_8_reset1_reset            : in    std_logic                     := 'X';             -- reset
+			onchip_memory_9_clk1_clk                : in    std_logic                     := 'X';             -- clk
+			onchip_memory_9_s1_address              : in    std_logic_vector(9 downto 0)  := (others => 'X'); -- address
+			onchip_memory_9_s1_clken                : in    std_logic                     := 'X';             -- clken
+			onchip_memory_9_s1_chipselect           : in    std_logic                     := 'X';             -- chipselect
+			onchip_memory_9_s1_write                : in    std_logic                     := 'X';             -- write
+			onchip_memory_9_s1_readdata             : out   std_logic_vector(15 downto 0);                    -- readdata
+			onchip_memory_9_s1_writedata            : in    std_logic_vector(15 downto 0) := (others => 'X'); -- writedata
+			onchip_memory_9_s1_byteenable           : in    std_logic_vector(1 downto 0)  := (others => 'X'); -- byteenable
+			onchip_memory_9_reset1_reset            : in    std_logic                     := 'X';             -- reset
+			onchip_memory_10_clk1_clk               : in    std_logic                     := 'X';             -- clk
+			onchip_memory_10_s1_address             : in    std_logic_vector(9 downto 0)  := (others => 'X'); -- address
+			onchip_memory_10_s1_clken               : in    std_logic                     := 'X';             -- clken
+			onchip_memory_10_s1_chipselect          : in    std_logic                     := 'X';             -- chipselect
+			onchip_memory_10_s1_write               : in    std_logic                     := 'X';             -- write
+			onchip_memory_10_s1_readdata            : out   std_logic_vector(15 downto 0);                    -- readdata
+			onchip_memory_10_s1_writedata           : in    std_logic_vector(15 downto 0) := (others => 'X'); -- writedata
+			onchip_memory_10_s1_byteenable          : in    std_logic_vector(1 downto 0)  := (others => 'X'); -- byteenable
+			onchip_memory_10_reset1_reset           : in    std_logic                     := 'X'              -- reset
 		);
 	end component Computer_System;
 
@@ -182,6 +272,96 @@
 			request_pio_external_connection_export  => CONNECTED_TO_request_pio_external_connection_export,  --  request_pio_external_connection.export
 			response_pio_external_connection_export => CONNECTED_TO_response_pio_external_connection_export, -- response_pio_external_connection.export
 			system_pll_ref_clk_clk                  => CONNECTED_TO_system_pll_ref_clk_clk,                  --               system_pll_ref_clk.clk
-			system_pll_ref_reset_reset              => CONNECTED_TO_system_pll_ref_reset_reset               --             system_pll_ref_reset.reset
+			system_pll_ref_reset_reset              => CONNECTED_TO_system_pll_ref_reset_reset,              --             system_pll_ref_reset.reset
+			onchip_memory_1_clk1_clk                => CONNECTED_TO_onchip_memory_1_clk1_clk,                --             onchip_memory_1_clk1.clk
+			onchip_memory_1_s1_address              => CONNECTED_TO_onchip_memory_1_s1_address,              --               onchip_memory_1_s1.address
+			onchip_memory_1_s1_clken                => CONNECTED_TO_onchip_memory_1_s1_clken,                --                                 .clken
+			onchip_memory_1_s1_chipselect           => CONNECTED_TO_onchip_memory_1_s1_chipselect,           --                                 .chipselect
+			onchip_memory_1_s1_write                => CONNECTED_TO_onchip_memory_1_s1_write,                --                                 .write
+			onchip_memory_1_s1_readdata             => CONNECTED_TO_onchip_memory_1_s1_readdata,             --                                 .readdata
+			onchip_memory_1_s1_writedata            => CONNECTED_TO_onchip_memory_1_s1_writedata,            --                                 .writedata
+			onchip_memory_1_s1_byteenable           => CONNECTED_TO_onchip_memory_1_s1_byteenable,           --                                 .byteenable
+			onchip_memory_1_reset1_reset            => CONNECTED_TO_onchip_memory_1_reset1_reset,            --           onchip_memory_1_reset1.reset
+			onchip_memory_2_clk1_clk                => CONNECTED_TO_onchip_memory_2_clk1_clk,                --             onchip_memory_2_clk1.clk
+			onchip_memory_2_s1_address              => CONNECTED_TO_onchip_memory_2_s1_address,              --               onchip_memory_2_s1.address
+			onchip_memory_2_s1_clken                => CONNECTED_TO_onchip_memory_2_s1_clken,                --                                 .clken
+			onchip_memory_2_s1_chipselect           => CONNECTED_TO_onchip_memory_2_s1_chipselect,           --                                 .chipselect
+			onchip_memory_2_s1_write                => CONNECTED_TO_onchip_memory_2_s1_write,                --                                 .write
+			onchip_memory_2_s1_readdata             => CONNECTED_TO_onchip_memory_2_s1_readdata,             --                                 .readdata
+			onchip_memory_2_s1_writedata            => CONNECTED_TO_onchip_memory_2_s1_writedata,            --                                 .writedata
+			onchip_memory_2_s1_byteenable           => CONNECTED_TO_onchip_memory_2_s1_byteenable,           --                                 .byteenable
+			onchip_memory_2_reset1_reset            => CONNECTED_TO_onchip_memory_2_reset1_reset,            --           onchip_memory_2_reset1.reset
+			onchip_memory_3_clk1_clk                => CONNECTED_TO_onchip_memory_3_clk1_clk,                --             onchip_memory_3_clk1.clk
+			onchip_memory_3_s1_address              => CONNECTED_TO_onchip_memory_3_s1_address,              --               onchip_memory_3_s1.address
+			onchip_memory_3_s1_clken                => CONNECTED_TO_onchip_memory_3_s1_clken,                --                                 .clken
+			onchip_memory_3_s1_chipselect           => CONNECTED_TO_onchip_memory_3_s1_chipselect,           --                                 .chipselect
+			onchip_memory_3_s1_write                => CONNECTED_TO_onchip_memory_3_s1_write,                --                                 .write
+			onchip_memory_3_s1_readdata             => CONNECTED_TO_onchip_memory_3_s1_readdata,             --                                 .readdata
+			onchip_memory_3_s1_writedata            => CONNECTED_TO_onchip_memory_3_s1_writedata,            --                                 .writedata
+			onchip_memory_3_s1_byteenable           => CONNECTED_TO_onchip_memory_3_s1_byteenable,           --                                 .byteenable
+			onchip_memory_3_reset1_reset            => CONNECTED_TO_onchip_memory_3_reset1_reset,            --           onchip_memory_3_reset1.reset
+			onchip_memory_4_clk1_clk                => CONNECTED_TO_onchip_memory_4_clk1_clk,                --             onchip_memory_4_clk1.clk
+			onchip_memory_4_s1_address              => CONNECTED_TO_onchip_memory_4_s1_address,              --               onchip_memory_4_s1.address
+			onchip_memory_4_s1_clken                => CONNECTED_TO_onchip_memory_4_s1_clken,                --                                 .clken
+			onchip_memory_4_s1_chipselect           => CONNECTED_TO_onchip_memory_4_s1_chipselect,           --                                 .chipselect
+			onchip_memory_4_s1_write                => CONNECTED_TO_onchip_memory_4_s1_write,                --                                 .write
+			onchip_memory_4_s1_readdata             => CONNECTED_TO_onchip_memory_4_s1_readdata,             --                                 .readdata
+			onchip_memory_4_s1_writedata            => CONNECTED_TO_onchip_memory_4_s1_writedata,            --                                 .writedata
+			onchip_memory_4_s1_byteenable           => CONNECTED_TO_onchip_memory_4_s1_byteenable,           --                                 .byteenable
+			onchip_memory_4_reset1_reset            => CONNECTED_TO_onchip_memory_4_reset1_reset,            --           onchip_memory_4_reset1.reset
+			onchip_memory_5_clk1_clk                => CONNECTED_TO_onchip_memory_5_clk1_clk,                --             onchip_memory_5_clk1.clk
+			onchip_memory_5_s1_address              => CONNECTED_TO_onchip_memory_5_s1_address,              --               onchip_memory_5_s1.address
+			onchip_memory_5_s1_clken                => CONNECTED_TO_onchip_memory_5_s1_clken,                --                                 .clken
+			onchip_memory_5_s1_chipselect           => CONNECTED_TO_onchip_memory_5_s1_chipselect,           --                                 .chipselect
+			onchip_memory_5_s1_write                => CONNECTED_TO_onchip_memory_5_s1_write,                --                                 .write
+			onchip_memory_5_s1_readdata             => CONNECTED_TO_onchip_memory_5_s1_readdata,             --                                 .readdata
+			onchip_memory_5_s1_writedata            => CONNECTED_TO_onchip_memory_5_s1_writedata,            --                                 .writedata
+			onchip_memory_5_s1_byteenable           => CONNECTED_TO_onchip_memory_5_s1_byteenable,           --                                 .byteenable
+			onchip_memory_5_reset1_reset            => CONNECTED_TO_onchip_memory_5_reset1_reset,            --           onchip_memory_5_reset1.reset
+			onchip_memory_6_clk1_clk                => CONNECTED_TO_onchip_memory_6_clk1_clk,                --             onchip_memory_6_clk1.clk
+			onchip_memory_6_s1_address              => CONNECTED_TO_onchip_memory_6_s1_address,              --               onchip_memory_6_s1.address
+			onchip_memory_6_s1_clken                => CONNECTED_TO_onchip_memory_6_s1_clken,                --                                 .clken
+			onchip_memory_6_s1_chipselect           => CONNECTED_TO_onchip_memory_6_s1_chipselect,           --                                 .chipselect
+			onchip_memory_6_s1_write                => CONNECTED_TO_onchip_memory_6_s1_write,                --                                 .write
+			onchip_memory_6_s1_readdata             => CONNECTED_TO_onchip_memory_6_s1_readdata,             --                                 .readdata
+			onchip_memory_6_s1_writedata            => CONNECTED_TO_onchip_memory_6_s1_writedata,            --                                 .writedata
+			onchip_memory_6_s1_byteenable           => CONNECTED_TO_onchip_memory_6_s1_byteenable,           --                                 .byteenable
+			onchip_memory_6_reset1_reset            => CONNECTED_TO_onchip_memory_6_reset1_reset,            --           onchip_memory_6_reset1.reset
+			onchip_memory_7_clk1_clk                => CONNECTED_TO_onchip_memory_7_clk1_clk,                --             onchip_memory_7_clk1.clk
+			onchip_memory_7_s1_address              => CONNECTED_TO_onchip_memory_7_s1_address,              --               onchip_memory_7_s1.address
+			onchip_memory_7_s1_clken                => CONNECTED_TO_onchip_memory_7_s1_clken,                --                                 .clken
+			onchip_memory_7_s1_chipselect           => CONNECTED_TO_onchip_memory_7_s1_chipselect,           --                                 .chipselect
+			onchip_memory_7_s1_write                => CONNECTED_TO_onchip_memory_7_s1_write,                --                                 .write
+			onchip_memory_7_s1_readdata             => CONNECTED_TO_onchip_memory_7_s1_readdata,             --                                 .readdata
+			onchip_memory_7_s1_writedata            => CONNECTED_TO_onchip_memory_7_s1_writedata,            --                                 .writedata
+			onchip_memory_7_s1_byteenable           => CONNECTED_TO_onchip_memory_7_s1_byteenable,           --                                 .byteenable
+			onchip_memory_7_reset1_reset            => CONNECTED_TO_onchip_memory_7_reset1_reset,            --           onchip_memory_7_reset1.reset
+			onchip_memory_8_clk1_clk                => CONNECTED_TO_onchip_memory_8_clk1_clk,                --             onchip_memory_8_clk1.clk
+			onchip_memory_8_s1_address              => CONNECTED_TO_onchip_memory_8_s1_address,              --               onchip_memory_8_s1.address
+			onchip_memory_8_s1_clken                => CONNECTED_TO_onchip_memory_8_s1_clken,                --                                 .clken
+			onchip_memory_8_s1_chipselect           => CONNECTED_TO_onchip_memory_8_s1_chipselect,           --                                 .chipselect
+			onchip_memory_8_s1_write                => CONNECTED_TO_onchip_memory_8_s1_write,                --                                 .write
+			onchip_memory_8_s1_readdata             => CONNECTED_TO_onchip_memory_8_s1_readdata,             --                                 .readdata
+			onchip_memory_8_s1_writedata            => CONNECTED_TO_onchip_memory_8_s1_writedata,            --                                 .writedata
+			onchip_memory_8_s1_byteenable           => CONNECTED_TO_onchip_memory_8_s1_byteenable,           --                                 .byteenable
+			onchip_memory_8_reset1_reset            => CONNECTED_TO_onchip_memory_8_reset1_reset,            --           onchip_memory_8_reset1.reset
+			onchip_memory_9_clk1_clk                => CONNECTED_TO_onchip_memory_9_clk1_clk,                --             onchip_memory_9_clk1.clk
+			onchip_memory_9_s1_address              => CONNECTED_TO_onchip_memory_9_s1_address,              --               onchip_memory_9_s1.address
+			onchip_memory_9_s1_clken                => CONNECTED_TO_onchip_memory_9_s1_clken,                --                                 .clken
+			onchip_memory_9_s1_chipselect           => CONNECTED_TO_onchip_memory_9_s1_chipselect,           --                                 .chipselect
+			onchip_memory_9_s1_write                => CONNECTED_TO_onchip_memory_9_s1_write,                --                                 .write
+			onchip_memory_9_s1_readdata             => CONNECTED_TO_onchip_memory_9_s1_readdata,             --                                 .readdata
+			onchip_memory_9_s1_writedata            => CONNECTED_TO_onchip_memory_9_s1_writedata,            --                                 .writedata
+			onchip_memory_9_s1_byteenable           => CONNECTED_TO_onchip_memory_9_s1_byteenable,           --                                 .byteenable
+			onchip_memory_9_reset1_reset            => CONNECTED_TO_onchip_memory_9_reset1_reset,            --           onchip_memory_9_reset1.reset
+			onchip_memory_10_clk1_clk               => CONNECTED_TO_onchip_memory_10_clk1_clk,               --            onchip_memory_10_clk1.clk
+			onchip_memory_10_s1_address             => CONNECTED_TO_onchip_memory_10_s1_address,             --              onchip_memory_10_s1.address
+			onchip_memory_10_s1_clken               => CONNECTED_TO_onchip_memory_10_s1_clken,               --                                 .clken
+			onchip_memory_10_s1_chipselect          => CONNECTED_TO_onchip_memory_10_s1_chipselect,          --                                 .chipselect
+			onchip_memory_10_s1_write               => CONNECTED_TO_onchip_memory_10_s1_write,               --                                 .write
+			onchip_memory_10_s1_readdata            => CONNECTED_TO_onchip_memory_10_s1_readdata,            --                                 .readdata
+			onchip_memory_10_s1_writedata           => CONNECTED_TO_onchip_memory_10_s1_writedata,           --                                 .writedata
+			onchip_memory_10_s1_byteenable          => CONNECTED_TO_onchip_memory_10_s1_byteenable,          --                                 .byteenable
+			onchip_memory_10_reset1_reset           => CONNECTED_TO_onchip_memory_10_reset1_reset            --          onchip_memory_10_reset1.reset
 		);
 
