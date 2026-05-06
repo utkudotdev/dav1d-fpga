@@ -23,8 +23,6 @@ module inv_dct_32 #(
     assign valid = valid_reg;
     localparam int n = $clog2(N);
 
-    logic signed [15:0] t_array[N];
-
     typedef struct packed {
         logic signed [15:0] a;
         logic signed [15:0] b;
@@ -196,7 +194,6 @@ module inv_dct_32 #(
     always_ff @(posedge clk) begin
         if (rst) begin
             for (int i = 0; i < N; i++) begin
-                t_array[i] <= 0;
                 T[i] <= 0;
             end
         end
@@ -206,7 +203,7 @@ module inv_dct_32 #(
                     //do nothing lmao
                     if (start_compute) begin
                         for (int i = 0; i < N; i++) begin
-                            t_array[i] <= in_array[i];
+                            T[i] <= in_array[i];
                         end
                     end
                 end
@@ -214,7 +211,7 @@ module inv_dct_32 #(
                 STEP_1: begin
                 // 1. Invoke the inverse DCT permutation process as specified in section 7.13.2.2 with the input variable n.
                     for (int i = 0; i < N; i++) begin
-                        T[i] <= t_array[5'(brev(5, 16'(i)))];
+                        T[i] <= T[5'(brev(5, 16'(i)))];
                     end
                 end
 
