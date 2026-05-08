@@ -22,25 +22,27 @@
 #define AXI_BASE           0xC0000000
 #define AXI_SPAN           0x0C000000  // must be a multiple of page size, 4096
 #define AXI_REQUEST_START  0x00000000
-#define AXI_RESPONSE_START 0x00000010
+#define AXI_REQUEST_DELTA  0x00000010
+#define AXI_RESPONSE_START 0x00000500
+#define AXI_RESPONSE_DELTA 0x00000010
 #define AXI_M10K_START     0x00001000
+#define AXI_M10K_DELTA     0x00001000
 
 #define M10K_WIDTH  32
 #define M10K_HEIGHT 32
 
-#define NUM_SLOTS 32
+#define NUM_SLOTS 5
 typedef uint32_t slot_bitset_t;
 #define SLOT_BITSET_ALL_SET UINT32_MAX
 
 typedef struct FpgaContext {
     slot_bitset_t slot_available;
     volatile int16_t* m10k_ptr[NUM_SLOTS];
-    volatile slot_bitset_t* request_ptr;
-    volatile slot_bitset_t* response_ptr;
+    volatile bool* request_ptr[NUM_SLOTS];
+    volatile bool* response_ptr[NUM_SLOTS];
 
     pthread_mutex_t in_use_lock;
     pthread_cond_t slot_available_cond;
-    pthread_mutex_t request_lock;
 } FpgaContext;
 
 FpgaContext global_ctx = {0};
@@ -56,17 +58,21 @@ bool fpga_init(void) {
     volatile uint8_t* axi_virtual_base = mmap(NULL, AXI_SPAN, (PROT_READ | PROT_WRITE), MAP_SHARED,
         fd, AXI_BASE);
 
-    volatile uint8_t* axi_m10k_addr = axi_virtual_base + AXI_M10K_START;
-    volatile uint8_t* axi_request_addr = axi_virtual_base + AXI_REQUEST_START;
-    volatile uint8_t* axi_response_addr = axi_virtual_base + AXI_RESPONSE_START;
-
     global_ctx.slot_available = SLOT_BITSET_ALL_SET;
-    global_ctx.m10k_ptr[0] = (volatile int16_t*)axi_m10k_addr;
-    global_ctx.request_ptr = (volatile uint32_t*)axi_request_addr;
-    global_ctx.response_ptr = (volatile uint32_t*)axi_response_addr;
 
-    *global_ctx.request_ptr = 0;
-    *global_ctx.response_ptr = 0;
+    for (size_t i = 0; i < NUM_SLOTS; i++) {
+        volatile uint8_t* axi_m10k_addr = axi_virtual_base + AXI_M10K_START + i * AXI_M10K_DELTA;
+        volatile uint8_t* axi_request_addr = axi_virtual_base + AXI_REQUEST_START
+                                             + i * AXI_REQUEST_DELTA;
+        volatile uint8_t* axi_response_addr = axi_virtual_base + AXI_RESPONSE_START
+                                              + i * AXI_RESPONSE_DELTA;
+
+        global_ctx.m10k_ptr[i] = (volatile int16_t*)axi_m10k_addr;
+        global_ctx.request_ptr[i] = (volatile bool*)axi_request_addr;
+        *global_ctx.request_ptr[i] = 0;
+        global_ctx.response_ptr[i] = (volatile bool*)axi_response_addr;
+        *global_ctx.response_ptr[i] = 0;
+    }
 
     int result = pthread_mutex_init(&global_ctx.in_use_lock, NULL);
     if (result != 0) {
@@ -78,18 +84,13 @@ bool fpga_init(void) {
         return false;
     }
 
-    result = pthread_mutex_init(&global_ctx.request_lock, NULL);
-    if (result != 0) {
-        return false;
-    }
-
     return true;
 }
 
 static bool find_open_slot(size_t* slot) {
     slot_bitset_t mask = (slot_bitset_t)((1ull << NUM_SLOTS) - 1);
     int first_open = ffs(global_ctx.slot_available & mask);
-    if (first_open == 0 || first_open > 1) {
+    if (first_open == 0) {
         return false;
     }
     *slot = (size_t)(first_open - 1);
@@ -104,21 +105,10 @@ static void slot_bitset_unset(slot_bitset_t* bitset, size_t slot) {
     *bitset &= ~(1u << slot);
 }
 
-static void slot_bitset_set_vol(volatile slot_bitset_t* bitset, size_t slot) {
-    *bitset |= (1u << slot);
-}
-
-static void slot_bitset_unset_vol(volatile slot_bitset_t* bitset, size_t slot) {
-    *bitset &= ~(1u << slot);
-}
-
-static bool slot_bitset_get_vol(volatile slot_bitset_t* bitset, size_t slot) {
-    return (*bitset & (1u << slot)) > 0;
-}
-
 void inv_txfm_add_fpga(pixel* dst, const ptrdiff_t stride, coef* const coeff, const int eob,
-    const /*enum RectTxfmSize*/ int tx, const int shift, const enum TxfmType txtp) {
-    assert(txtp == IDTX);
+    const /*enum RectTxfmSize*/ int tx, const enum TxfmType txtp) {
+    assert(tx == TX_32X32);
+    assert(txtp == DCT_DCT || txtp == IDTX);
 
     const TxfmInfo* const t_dim = &dav1d_txfm_dimensions[tx];
     const int w = 4 * t_dim->w, h = 4 * t_dim->h;
@@ -132,7 +122,7 @@ void inv_txfm_add_fpga(pixel* dst, const ptrdiff_t stride, coef* const coeff, co
     slot_bitset_unset(&global_ctx.slot_available, slot);
     pthread_mutex_unlock(&global_ctx.in_use_lock);
 
-    const uint8_t* const txtps = dav1d_tx1d_types[IDTX];
+    const uint8_t* const txtps = dav1d_tx1d_types[txtp];
     int last_nonzero_col;  // in first 1d itx
     if (txtps[1] == IDENTITY && txtps[0] != IDENTITY) {
         last_nonzero_col = imin(sh - 1, eob);
@@ -150,7 +140,6 @@ void inv_txfm_add_fpga(pixel* dst, const ptrdiff_t stride, coef* const coeff, co
     volatile int16_t* m10k_ptr = global_ctx.m10k_ptr[slot];
     for (int y = 0; y <= last_nonzero_col; y++, m10k_ptr += M10K_WIDTH) {
         for (int x = 0; x < sw; x++) {
-            printf("%d ", coeff[y + x * sh]);
             m10k_ptr[x] = coeff[y + x * sh];
         }
     }
@@ -163,15 +152,13 @@ void inv_txfm_add_fpga(pixel* dst, const ptrdiff_t stride, coef* const coeff, co
     }
 
     // send request
-    pthread_mutex_lock(&global_ctx.request_lock);
-    slot_bitset_set_vol(global_ctx.request_ptr, slot);
-    pthread_mutex_unlock(&global_ctx.request_lock);
+    *global_ctx.request_ptr[slot] = true;
 
     int16_t tmp[M10K_WIDTH * M10K_HEIGHT] = {10};
     memset(coeff, 0, sizeof(*coeff) * sw * sh);
     // wait response
     // TODO: for now we will busy wait, but interrupts or something would be nice...
-    while (!slot_bitset_get_vol(global_ctx.response_ptr, slot));
+    while (!*global_ctx.response_ptr[slot]);
 
     // TODO: only copy necessary coeffs
     for (int i = 0; i < M10K_WIDTH * M10K_HEIGHT; i++) {
@@ -179,23 +166,17 @@ void inv_txfm_add_fpga(pixel* dst, const ptrdiff_t stride, coef* const coeff, co
     }
 
     // ack response
-    pthread_mutex_lock(&global_ctx.request_lock);
-    slot_bitset_unset_vol(global_ctx.request_ptr, slot);
-    pthread_mutex_unlock(&global_ctx.request_lock);
+    *global_ctx.request_ptr[slot] = false;
 
-    printf("pxstride: %d\n", PXSTRIDE(stride));
     int16_t* c = tmp;
-    printf("Transformed coeffs from FPGA:\n");
     for (int y = 0; y < M10K_HEIGHT; y++, dst += PXSTRIDE(stride)) {
         for (int x = 0; x < M10K_WIDTH; x++) {
-            printf("%d ", *c);
             dst[x] = iclip_pixel(dst[x] + *c++);
         }
-        printf("\n");
     }
 
     // wait complete
-    while (slot_bitset_get_vol(global_ctx.response_ptr, slot));
+    while (*global_ctx.response_ptr[slot]);
 
     pthread_mutex_lock(&global_ctx.in_use_lock);
     slot_bitset_set(&global_ctx.slot_available, slot);
