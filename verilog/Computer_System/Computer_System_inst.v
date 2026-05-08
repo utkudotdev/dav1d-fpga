@@ -174,19 +174,17 @@
 		.onchip_memory_9_s1_byteenable              (<connected-to-onchip_memory_9_s1_byteenable>),              //                                    .byteenable
 		.pp_in_lw_axi_export                        (<connected-to-pp_in_lw_axi_export>),                        //                        pp_in_lw_axi.export
 		.pp_out_lw_axi_export                       (<connected-to-pp_out_lw_axi_export>),                       //                       pp_out_lw_axi.export
-		.system_pll_ref_clk_clk                     (<connected-to-system_pll_ref_clk_clk>),                     //                  system_pll_ref_clk.clk
-		.system_pll_ref_reset_reset                 (<connected-to-system_pll_ref_reset_reset>),                 //                system_pll_ref_reset.reset
 		.request_pio_0_external_connection_export   (<connected-to-request_pio_0_external_connection_export>),   //   request_pio_0_external_connection.export
 		.request_pio_10_external_connection_export  (<connected-to-request_pio_10_external_connection_export>),  //  request_pio_10_external_connection.export
-		.request_pio_9_external_connection_export   (<connected-to-request_pio_9_external_connection_export>),   //   request_pio_9_external_connection.export
-		.request_pio_8_external_connection_export   (<connected-to-request_pio_8_external_connection_export>),   //   request_pio_8_external_connection.export
-		.request_pio_7_external_connection_export   (<connected-to-request_pio_7_external_connection_export>),   //   request_pio_7_external_connection.export
-		.request_pio_6_external_connection_export   (<connected-to-request_pio_6_external_connection_export>),   //   request_pio_6_external_connection.export
-		.request_pio_5_external_connection_export   (<connected-to-request_pio_5_external_connection_export>),   //   request_pio_5_external_connection.export
-		.request_pio_4_external_connection_export   (<connected-to-request_pio_4_external_connection_export>),   //   request_pio_4_external_connection.export
-		.request_pio_3_external_connection_export   (<connected-to-request_pio_3_external_connection_export>),   //   request_pio_3_external_connection.export
-		.request_pio_2_external_connection_export   (<connected-to-request_pio_2_external_connection_export>),   //   request_pio_2_external_connection.export
 		.request_pio_1_external_connection_export   (<connected-to-request_pio_1_external_connection_export>),   //   request_pio_1_external_connection.export
+		.request_pio_2_external_connection_export   (<connected-to-request_pio_2_external_connection_export>),   //   request_pio_2_external_connection.export
+		.request_pio_3_external_connection_export   (<connected-to-request_pio_3_external_connection_export>),   //   request_pio_3_external_connection.export
+		.request_pio_4_external_connection_export   (<connected-to-request_pio_4_external_connection_export>),   //   request_pio_4_external_connection.export
+		.request_pio_5_external_connection_export   (<connected-to-request_pio_5_external_connection_export>),   //   request_pio_5_external_connection.export
+		.request_pio_6_external_connection_export   (<connected-to-request_pio_6_external_connection_export>),   //   request_pio_6_external_connection.export
+		.request_pio_7_external_connection_export   (<connected-to-request_pio_7_external_connection_export>),   //   request_pio_7_external_connection.export
+		.request_pio_8_external_connection_export   (<connected-to-request_pio_8_external_connection_export>),   //   request_pio_8_external_connection.export
+		.request_pio_9_external_connection_export   (<connected-to-request_pio_9_external_connection_export>),   //   request_pio_9_external_connection.export
 		.response_pio_0_external_connection_export  (<connected-to-response_pio_0_external_connection_export>),  //  response_pio_0_external_connection.export
 		.response_pio_10_external_connection_export (<connected-to-response_pio_10_external_connection_export>), // response_pio_10_external_connection.export
 		.response_pio_1_external_connection_export  (<connected-to-response_pio_1_external_connection_export>),  //  response_pio_1_external_connection.export
@@ -197,6 +195,10 @@
 		.response_pio_6_external_connection_export  (<connected-to-response_pio_6_external_connection_export>),  //  response_pio_6_external_connection.export
 		.response_pio_7_external_connection_export  (<connected-to-response_pio_7_external_connection_export>),  //  response_pio_7_external_connection.export
 		.response_pio_8_external_connection_export  (<connected-to-response_pio_8_external_connection_export>),  //  response_pio_8_external_connection.export
-		.response_pio_9_external_connection_export  (<connected-to-response_pio_9_external_connection_export>)   //  response_pio_9_external_connection.export
+		.response_pio_9_external_connection_export  (<connected-to-response_pio_9_external_connection_export>),  //  response_pio_9_external_connection.export
+		.system_pll_ref_clk_clk                     (<connected-to-system_pll_ref_clk_clk>),                     //                  system_pll_ref_clk.clk
+		.system_pll_ref_reset_reset                 (<connected-to-system_pll_ref_reset_reset>),                 //                system_pll_ref_reset.reset
+		.pll_0_outclk0_clk                          (<connected-to-pll_0_outclk0_clk>),                          //                       pll_0_outclk0.clk
+		.pll_0_locked_export                        (<connected-to-pll_0_locked_export>)                         //                        pll_0_locked.export
 	);
 

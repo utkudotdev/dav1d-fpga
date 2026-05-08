@@ -379,7 +379,7 @@ wire [31:0] gpio_in, gpio_out ;
 wire m10k_clk; //onchip_memory2_0_clk1_clk
 wire m10k_rst; //onchip_memory2_0_reset1_reset
 
-localparam N_BLOCKS = 5;
+localparam N_BLOCKS = 6;
 
 logic [9:0] m10k_address[N_BLOCKS];
 wire m10k_write [N_BLOCKS];
@@ -395,7 +395,7 @@ wire response_pio [N_BLOCKS];
 
 wire clk;
 wire rst;
-assign clk = CLOCK_50;
+// assign clk = CLOCK_50;
 assign rst = ~KEY[0];
 assign m10k_clk = clk;
 
@@ -470,6 +470,8 @@ endgenerate
 // From Qsys
 
 Computer_System The_System (
+	// PLL
+	.pll_0_outclk0_clk				(clk),
 
 	// M10K garbage
 	.onchip_memory2_0_clk1_clk		(m10k_clk),
@@ -517,14 +519,14 @@ Computer_System The_System (
 	.onchip_memory_4_s1_byteenable 	(2'b11),
 	.onchip_memory_4_s1_chipselect 	(1'b1),
 
-	// .onchip_memory_5_clk1_clk		(m10k_clk),
-	// .onchip_memory_5_s1_address		(m10k_address[5]),
-	// .onchip_memory_5_s1_write		(m10k_write[5]),
-	// .onchip_memory_5_s1_clken		(1'b1),
-	// .onchip_memory_5_s1_readdata	(m10k_readdata[5]),
-	// .onchip_memory_5_s1_writedata	(m10k_writedata[5]),
-	// .onchip_memory_5_s1_byteenable 	(2'b11),
-	// .onchip_memory_5_s1_chipselect 	(1'b1),
+	.onchip_memory_5_clk1_clk		(m10k_clk),
+	.onchip_memory_5_s1_address		(m10k_address[5]),
+	.onchip_memory_5_s1_write		(m10k_write[5]),
+	.onchip_memory_5_s1_clken		(1'b1),
+	.onchip_memory_5_s1_readdata	(m10k_readdata[5]),
+	.onchip_memory_5_s1_writedata	(m10k_writedata[5]),
+	.onchip_memory_5_s1_byteenable 	(2'b11),
+	.onchip_memory_5_s1_chipselect 	(1'b1),
 
 	// .onchip_memory_6_clk1_clk		(m10k_clk),
 	// .onchip_memory_6_s1_address		(m10k_address[6]),

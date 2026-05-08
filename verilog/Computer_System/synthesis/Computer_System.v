@@ -177,6 +177,8 @@ module Computer_System (
 		output wire [15:0] onchip_memory_9_s1_readdata,                //                                    .readdata
 		input  wire [15:0] onchip_memory_9_s1_writedata,               //                                    .writedata
 		input  wire [1:0]  onchip_memory_9_s1_byteenable,              //                                    .byteenable
+		output wire        pll_0_locked_export,                        //                        pll_0_locked.export
+		output wire        pll_0_outclk0_clk,                          //                       pll_0_outclk0.clk
 		input  wire [31:0] pp_in_lw_axi_export,                        //                        pp_in_lw_axi.export
 		output wire [31:0] pp_out_lw_axi_export,                       //                       pp_out_lw_axi.export
 		output wire        request_pio_0_external_connection_export,   //   request_pio_0_external_connection.export
@@ -205,7 +207,7 @@ module Computer_System (
 		input  wire        system_pll_ref_reset_reset                  //                system_pll_ref_reset.reset
 	);
 
-	wire          system_pll_sys_clk_clk;                                                           // System_PLL:sys_clk_clk -> [ARM_A9_HPS:f2h_axi_clk, ARM_A9_HPS:h2f_axi_clk, ARM_A9_HPS:h2f_lw_axi_clk, mm_interconnect_0:System_PLL_sys_clk_clk, mm_interconnect_1:System_PLL_sys_clk_clk, onchip_memory2_0:clk2, onchip_memory_10:clk2, onchip_memory_1:clk2, onchip_memory_2:clk2, onchip_memory_3:clk2, onchip_memory_4:clk2, onchip_memory_5:clk2, onchip_memory_6:clk2, onchip_memory_7:clk2, onchip_memory_8:clk2, onchip_memory_9:clk2, parallel_port_in_lw_axi:clk, parallel_port_out_lw_axi:clk, request_pio_0:clk, request_pio_10:clk, request_pio_1:clk, request_pio_2:clk, request_pio_3:clk, request_pio_4:clk, request_pio_5:clk, request_pio_6:clk, request_pio_7:clk, request_pio_8:clk, request_pio_9:clk, response_pio_0:clk, response_pio_10:clk, response_pio_1:clk, response_pio_2:clk, response_pio_3:clk, response_pio_4:clk, response_pio_5:clk, response_pio_6:clk, response_pio_7:clk, response_pio_8:clk, response_pio_9:clk, rst_controller:clk, rst_controller_001:clk]
+	wire          system_pll_sys_clk_clk;                                                           // System_PLL:sys_clk_clk -> [ARM_A9_HPS:f2h_axi_clk, ARM_A9_HPS:h2f_axi_clk, ARM_A9_HPS:h2f_lw_axi_clk, mm_interconnect_0:System_PLL_sys_clk_clk, mm_interconnect_1:System_PLL_sys_clk_clk, onchip_memory2_0:clk2, onchip_memory_10:clk2, onchip_memory_1:clk2, onchip_memory_2:clk2, onchip_memory_3:clk2, onchip_memory_4:clk2, onchip_memory_5:clk2, onchip_memory_6:clk2, onchip_memory_7:clk2, onchip_memory_8:clk2, onchip_memory_9:clk2, parallel_port_in_lw_axi:clk, parallel_port_out_lw_axi:clk, pll_0:refclk, request_pio_0:clk, request_pio_10:clk, request_pio_1:clk, request_pio_2:clk, request_pio_3:clk, request_pio_4:clk, request_pio_5:clk, request_pio_6:clk, request_pio_7:clk, request_pio_8:clk, request_pio_9:clk, response_pio_0:clk, response_pio_10:clk, response_pio_1:clk, response_pio_2:clk, response_pio_3:clk, response_pio_4:clk, response_pio_5:clk, response_pio_6:clk, response_pio_7:clk, response_pio_8:clk, response_pio_9:clk, rst_controller:clk, rst_controller_002:clk]
 	wire    [1:0] arm_a9_hps_h2f_axi_master_awburst;                                                // ARM_A9_HPS:h2f_AWBURST -> mm_interconnect_0:ARM_A9_HPS_h2f_axi_master_awburst
 	wire    [3:0] arm_a9_hps_h2f_axi_master_arlen;                                                  // ARM_A9_HPS:h2f_ARLEN -> mm_interconnect_0:ARM_A9_HPS_h2f_axi_master_arlen
 	wire   [15:0] arm_a9_hps_h2f_axi_master_wstrb;                                                  // ARM_A9_HPS:h2f_WSTRB -> mm_interconnect_0:ARM_A9_HPS_h2f_axi_master_wstrb
@@ -449,9 +451,10 @@ module Computer_System (
 	wire   [31:0] arm_a9_hps_f2h_irq0_irq;                                                          // irq_mapper:sender_irq -> ARM_A9_HPS:f2h_irq_p0
 	wire   [31:0] arm_a9_hps_f2h_irq1_irq;                                                          // irq_mapper_001:sender_irq -> ARM_A9_HPS:f2h_irq_p1
 	wire          rst_controller_reset_out_reset;                                                   // rst_controller:reset_out -> [mm_interconnect_0:request_pio_0_reset_reset_bridge_in_reset_reset, mm_interconnect_1:parallel_port_out_lw_axi_reset_reset_bridge_in_reset_reset, onchip_memory2_0:reset2, onchip_memory_10:reset2, onchip_memory_1:reset2, onchip_memory_2:reset2, onchip_memory_3:reset2, onchip_memory_4:reset2, onchip_memory_5:reset2, onchip_memory_6:reset2, onchip_memory_7:reset2, onchip_memory_8:reset2, onchip_memory_9:reset2, parallel_port_in_lw_axi:reset, parallel_port_out_lw_axi:reset, request_pio_0:reset_n, request_pio_10:reset_n, request_pio_1:reset_n, request_pio_2:reset_n, request_pio_3:reset_n, request_pio_4:reset_n, request_pio_5:reset_n, request_pio_6:reset_n, request_pio_7:reset_n, request_pio_8:reset_n, request_pio_9:reset_n, response_pio_0:reset_n, response_pio_10:reset_n, response_pio_1:reset_n, response_pio_2:reset_n, response_pio_3:reset_n, response_pio_4:reset_n, response_pio_5:reset_n, response_pio_6:reset_n, response_pio_7:reset_n, response_pio_8:reset_n, response_pio_9:reset_n]
-	wire          arm_a9_hps_h2f_reset_reset;                                                       // ARM_A9_HPS:h2f_rst_n -> [rst_controller:reset_in0, rst_controller_001:reset_in0]
-	wire          system_pll_reset_source_reset;                                                    // System_PLL:reset_source_reset -> rst_controller:reset_in1
-	wire          rst_controller_001_reset_out_reset;                                               // rst_controller_001:reset_out -> [mm_interconnect_0:ARM_A9_HPS_h2f_axi_master_agent_clk_reset_reset_bridge_in_reset_reset, mm_interconnect_1:ARM_A9_HPS_h2f_lw_axi_master_agent_clk_reset_reset_bridge_in_reset_reset]
+	wire          arm_a9_hps_h2f_reset_reset;                                                       // ARM_A9_HPS:h2f_rst_n -> [rst_controller:reset_in0, rst_controller_001:reset_in0, rst_controller_002:reset_in0]
+	wire          system_pll_reset_source_reset;                                                    // System_PLL:reset_source_reset -> [rst_controller:reset_in1, rst_controller_001:reset_in1]
+	wire          rst_controller_001_reset_out_reset;                                               // rst_controller_001:reset_out -> pll_0:rst
+	wire          rst_controller_002_reset_out_reset;                                               // rst_controller_002:reset_out -> [mm_interconnect_0:ARM_A9_HPS_h2f_axi_master_agent_clk_reset_reset_bridge_in_reset_reset, mm_interconnect_1:ARM_A9_HPS_h2f_lw_axi_master_agent_clk_reset_reset_bridge_in_reset_reset]
 
 	Computer_System_ARM_A9_HPS #(
 		.F2S_Width (2),
@@ -947,6 +950,13 @@ module Computer_System (
 		.out_port   (pp_out_lw_axi_export)                                                              //         external_interface.export
 	);
 
+	Computer_System_pll_0 pll_0 (
+		.refclk   (system_pll_sys_clk_clk),             //  refclk.clk
+		.rst      (rst_controller_001_reset_out_reset), //   reset.reset
+		.outclk_0 (pll_0_outclk0_clk),                  // outclk0.clk
+		.locked   (pll_0_locked_export)                 //  locked.export
+	);
+
 	Computer_System_request_pio_0 request_pio_0 (
 		.clk        (system_pll_sys_clk_clk),                        //                 clk.clk
 		.reset_n    (~rst_controller_reset_out_reset),               //               reset.reset_n
@@ -1194,7 +1204,7 @@ module Computer_System (
 		.ARM_A9_HPS_h2f_axi_master_rvalid                                      (arm_a9_hps_h2f_axi_master_rvalid),                 //                                                                .rvalid
 		.ARM_A9_HPS_h2f_axi_master_rready                                      (arm_a9_hps_h2f_axi_master_rready),                 //                                                                .rready
 		.System_PLL_sys_clk_clk                                                (system_pll_sys_clk_clk),                           //                                              System_PLL_sys_clk.clk
-		.ARM_A9_HPS_h2f_axi_master_agent_clk_reset_reset_bridge_in_reset_reset (rst_controller_001_reset_out_reset),               // ARM_A9_HPS_h2f_axi_master_agent_clk_reset_reset_bridge_in_reset.reset
+		.ARM_A9_HPS_h2f_axi_master_agent_clk_reset_reset_bridge_in_reset_reset (rst_controller_002_reset_out_reset),               // ARM_A9_HPS_h2f_axi_master_agent_clk_reset_reset_bridge_in_reset.reset
 		.request_pio_0_reset_reset_bridge_in_reset_reset                       (rst_controller_reset_out_reset),                   //                       request_pio_0_reset_reset_bridge_in_reset.reset
 		.onchip_memory2_0_s2_address                                           (mm_interconnect_0_onchip_memory2_0_s2_address),    //                                             onchip_memory2_0_s2.address
 		.onchip_memory2_0_s2_write                                             (mm_interconnect_0_onchip_memory2_0_s2_write),      //                                                                .write
@@ -1390,7 +1400,7 @@ module Computer_System (
 		.ARM_A9_HPS_h2f_lw_axi_master_rvalid                                      (arm_a9_hps_h2f_lw_axi_master_rvalid),                                              //                                                                   .rvalid
 		.ARM_A9_HPS_h2f_lw_axi_master_rready                                      (arm_a9_hps_h2f_lw_axi_master_rready),                                              //                                                                   .rready
 		.System_PLL_sys_clk_clk                                                   (system_pll_sys_clk_clk),                                                           //                                                 System_PLL_sys_clk.clk
-		.ARM_A9_HPS_h2f_lw_axi_master_agent_clk_reset_reset_bridge_in_reset_reset (rst_controller_001_reset_out_reset),                                               // ARM_A9_HPS_h2f_lw_axi_master_agent_clk_reset_reset_bridge_in_reset.reset
+		.ARM_A9_HPS_h2f_lw_axi_master_agent_clk_reset_reset_bridge_in_reset_reset (rst_controller_002_reset_out_reset),                                               // ARM_A9_HPS_h2f_lw_axi_master_agent_clk_reset_reset_bridge_in_reset.reset
 		.parallel_port_out_lw_axi_reset_reset_bridge_in_reset_reset               (rst_controller_reset_out_reset),                                                   //               parallel_port_out_lw_axi_reset_reset_bridge_in_reset.reset
 		.parallel_port_in_lw_axi_avalon_parallel_port_slave_address               (mm_interconnect_1_parallel_port_in_lw_axi_avalon_parallel_port_slave_address),     //                 parallel_port_in_lw_axi_avalon_parallel_port_slave.address
 		.parallel_port_in_lw_axi_avalon_parallel_port_slave_write                 (mm_interconnect_1_parallel_port_in_lw_axi_avalon_parallel_port_slave_write),       //                                                                   .write
@@ -1484,8 +1494,8 @@ module Computer_System (
 	);
 
 	altera_reset_controller #(
-		.NUM_RESET_INPUTS          (1),
-		.OUTPUT_RESET_SYNC_EDGES   ("deassert"),
+		.NUM_RESET_INPUTS          (2),
+		.OUTPUT_RESET_SYNC_EDGES   ("none"),
 		.SYNC_DEPTH                (2),
 		.RESET_REQUEST_PRESENT     (0),
 		.RESET_REQ_WAIT_TIME       (1),
@@ -1510,8 +1520,71 @@ module Computer_System (
 		.ADAPT_RESET_REQUEST       (0)
 	) rst_controller_001 (
 		.reset_in0      (~arm_a9_hps_h2f_reset_reset),        // reset_in0.reset
-		.clk            (system_pll_sys_clk_clk),             //       clk.clk
+		.reset_in1      (system_pll_reset_source_reset),      // reset_in1.reset
+		.clk            (),                                   //       clk.clk
 		.reset_out      (rst_controller_001_reset_out_reset), // reset_out.reset
+		.reset_req      (),                                   // (terminated)
+		.reset_req_in0  (1'b0),                               // (terminated)
+		.reset_req_in1  (1'b0),                               // (terminated)
+		.reset_in2      (1'b0),                               // (terminated)
+		.reset_req_in2  (1'b0),                               // (terminated)
+		.reset_in3      (1'b0),                               // (terminated)
+		.reset_req_in3  (1'b0),                               // (terminated)
+		.reset_in4      (1'b0),                               // (terminated)
+		.reset_req_in4  (1'b0),                               // (terminated)
+		.reset_in5      (1'b0),                               // (terminated)
+		.reset_req_in5  (1'b0),                               // (terminated)
+		.reset_in6      (1'b0),                               // (terminated)
+		.reset_req_in6  (1'b0),                               // (terminated)
+		.reset_in7      (1'b0),                               // (terminated)
+		.reset_req_in7  (1'b0),                               // (terminated)
+		.reset_in8      (1'b0),                               // (terminated)
+		.reset_req_in8  (1'b0),                               // (terminated)
+		.reset_in9      (1'b0),                               // (terminated)
+		.reset_req_in9  (1'b0),                               // (terminated)
+		.reset_in10     (1'b0),                               // (terminated)
+		.reset_req_in10 (1'b0),                               // (terminated)
+		.reset_in11     (1'b0),                               // (terminated)
+		.reset_req_in11 (1'b0),                               // (terminated)
+		.reset_in12     (1'b0),                               // (terminated)
+		.reset_req_in12 (1'b0),                               // (terminated)
+		.reset_in13     (1'b0),                               // (terminated)
+		.reset_req_in13 (1'b0),                               // (terminated)
+		.reset_in14     (1'b0),                               // (terminated)
+		.reset_req_in14 (1'b0),                               // (terminated)
+		.reset_in15     (1'b0),                               // (terminated)
+		.reset_req_in15 (1'b0)                                // (terminated)
+	);
+
+	altera_reset_controller #(
+		.NUM_RESET_INPUTS          (1),
+		.OUTPUT_RESET_SYNC_EDGES   ("deassert"),
+		.SYNC_DEPTH                (2),
+		.RESET_REQUEST_PRESENT     (0),
+		.RESET_REQ_WAIT_TIME       (1),
+		.MIN_RST_ASSERTION_TIME    (3),
+		.RESET_REQ_EARLY_DSRT_TIME (1),
+		.USE_RESET_REQUEST_IN0     (0),
+		.USE_RESET_REQUEST_IN1     (0),
+		.USE_RESET_REQUEST_IN2     (0),
+		.USE_RESET_REQUEST_IN3     (0),
+		.USE_RESET_REQUEST_IN4     (0),
+		.USE_RESET_REQUEST_IN5     (0),
+		.USE_RESET_REQUEST_IN6     (0),
+		.USE_RESET_REQUEST_IN7     (0),
+		.USE_RESET_REQUEST_IN8     (0),
+		.USE_RESET_REQUEST_IN9     (0),
+		.USE_RESET_REQUEST_IN10    (0),
+		.USE_RESET_REQUEST_IN11    (0),
+		.USE_RESET_REQUEST_IN12    (0),
+		.USE_RESET_REQUEST_IN13    (0),
+		.USE_RESET_REQUEST_IN14    (0),
+		.USE_RESET_REQUEST_IN15    (0),
+		.ADAPT_RESET_REQUEST       (0)
+	) rst_controller_002 (
+		.reset_in0      (~arm_a9_hps_h2f_reset_reset),        // reset_in0.reset
+		.clk            (system_pll_sys_clk_clk),             //       clk.clk
+		.reset_out      (rst_controller_002_reset_out_reset), // reset_out.reset
 		.reset_req      (),                                   // (terminated)
 		.reset_req_in0  (1'b0),                               // (terminated)
 		.reset_in1      (1'b0),                               // (terminated)

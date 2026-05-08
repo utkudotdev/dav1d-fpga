@@ -175,19 +175,17 @@
 			onchip_memory_9_s1_byteenable              : in    std_logic_vector(1 downto 0)  := (others => 'X'); -- byteenable
 			pp_in_lw_axi_export                        : in    std_logic_vector(31 downto 0) := (others => 'X'); -- export
 			pp_out_lw_axi_export                       : out   std_logic_vector(31 downto 0);                    -- export
-			system_pll_ref_clk_clk                     : in    std_logic                     := 'X';             -- clk
-			system_pll_ref_reset_reset                 : in    std_logic                     := 'X';             -- reset
 			request_pio_0_external_connection_export   : out   std_logic;                                        -- export
 			request_pio_10_external_connection_export  : out   std_logic;                                        -- export
-			request_pio_9_external_connection_export   : out   std_logic;                                        -- export
-			request_pio_8_external_connection_export   : out   std_logic;                                        -- export
-			request_pio_7_external_connection_export   : out   std_logic;                                        -- export
-			request_pio_6_external_connection_export   : out   std_logic;                                        -- export
-			request_pio_5_external_connection_export   : out   std_logic;                                        -- export
-			request_pio_4_external_connection_export   : out   std_logic;                                        -- export
-			request_pio_3_external_connection_export   : out   std_logic;                                        -- export
-			request_pio_2_external_connection_export   : out   std_logic;                                        -- export
 			request_pio_1_external_connection_export   : out   std_logic;                                        -- export
+			request_pio_2_external_connection_export   : out   std_logic;                                        -- export
+			request_pio_3_external_connection_export   : out   std_logic;                                        -- export
+			request_pio_4_external_connection_export   : out   std_logic;                                        -- export
+			request_pio_5_external_connection_export   : out   std_logic;                                        -- export
+			request_pio_6_external_connection_export   : out   std_logic;                                        -- export
+			request_pio_7_external_connection_export   : out   std_logic;                                        -- export
+			request_pio_8_external_connection_export   : out   std_logic;                                        -- export
+			request_pio_9_external_connection_export   : out   std_logic;                                        -- export
 			response_pio_0_external_connection_export  : in    std_logic                     := 'X';             -- export
 			response_pio_10_external_connection_export : in    std_logic                     := 'X';             -- export
 			response_pio_1_external_connection_export  : in    std_logic                     := 'X';             -- export
@@ -198,7 +196,11 @@
 			response_pio_6_external_connection_export  : in    std_logic                     := 'X';             -- export
 			response_pio_7_external_connection_export  : in    std_logic                     := 'X';             -- export
 			response_pio_8_external_connection_export  : in    std_logic                     := 'X';             -- export
-			response_pio_9_external_connection_export  : in    std_logic                     := 'X'              -- export
+			response_pio_9_external_connection_export  : in    std_logic                     := 'X';             -- export
+			system_pll_ref_clk_clk                     : in    std_logic                     := 'X';             -- clk
+			system_pll_ref_reset_reset                 : in    std_logic                     := 'X';             -- reset
+			pll_0_outclk0_clk                          : out   std_logic;                                        -- clk
+			pll_0_locked_export                        : out   std_logic                                         -- export
 		);
 	end component Computer_System;
 
@@ -379,19 +381,17 @@
 			onchip_memory_9_s1_byteenable              => CONNECTED_TO_onchip_memory_9_s1_byteenable,              --                                    .byteenable
 			pp_in_lw_axi_export                        => CONNECTED_TO_pp_in_lw_axi_export,                        --                        pp_in_lw_axi.export
 			pp_out_lw_axi_export                       => CONNECTED_TO_pp_out_lw_axi_export,                       --                       pp_out_lw_axi.export
-			system_pll_ref_clk_clk                     => CONNECTED_TO_system_pll_ref_clk_clk,                     --                  system_pll_ref_clk.clk
-			system_pll_ref_reset_reset                 => CONNECTED_TO_system_pll_ref_reset_reset,                 --                system_pll_ref_reset.reset
 			request_pio_0_external_connection_export   => CONNECTED_TO_request_pio_0_external_connection_export,   --   request_pio_0_external_connection.export
 			request_pio_10_external_connection_export  => CONNECTED_TO_request_pio_10_external_connection_export,  --  request_pio_10_external_connection.export
-			request_pio_9_external_connection_export   => CONNECTED_TO_request_pio_9_external_connection_export,   --   request_pio_9_external_connection.export
-			request_pio_8_external_connection_export   => CONNECTED_TO_request_pio_8_external_connection_export,   --   request_pio_8_external_connection.export
-			request_pio_7_external_connection_export   => CONNECTED_TO_request_pio_7_external_connection_export,   --   request_pio_7_external_connection.export
-			request_pio_6_external_connection_export   => CONNECTED_TO_request_pio_6_external_connection_export,   --   request_pio_6_external_connection.export
-			request_pio_5_external_connection_export   => CONNECTED_TO_request_pio_5_external_connection_export,   --   request_pio_5_external_connection.export
-			request_pio_4_external_connection_export   => CONNECTED_TO_request_pio_4_external_connection_export,   --   request_pio_4_external_connection.export
-			request_pio_3_external_connection_export   => CONNECTED_TO_request_pio_3_external_connection_export,   --   request_pio_3_external_connection.export
-			request_pio_2_external_connection_export   => CONNECTED_TO_request_pio_2_external_connection_export,   --   request_pio_2_external_connection.export
 			request_pio_1_external_connection_export   => CONNECTED_TO_request_pio_1_external_connection_export,   --   request_pio_1_external_connection.export
+			request_pio_2_external_connection_export   => CONNECTED_TO_request_pio_2_external_connection_export,   --   request_pio_2_external_connection.export
+			request_pio_3_external_connection_export   => CONNECTED_TO_request_pio_3_external_connection_export,   --   request_pio_3_external_connection.export
+			request_pio_4_external_connection_export   => CONNECTED_TO_request_pio_4_external_connection_export,   --   request_pio_4_external_connection.export
+			request_pio_5_external_connection_export   => CONNECTED_TO_request_pio_5_external_connection_export,   --   request_pio_5_external_connection.export
+			request_pio_6_external_connection_export   => CONNECTED_TO_request_pio_6_external_connection_export,   --   request_pio_6_external_connection.export
+			request_pio_7_external_connection_export   => CONNECTED_TO_request_pio_7_external_connection_export,   --   request_pio_7_external_connection.export
+			request_pio_8_external_connection_export   => CONNECTED_TO_request_pio_8_external_connection_export,   --   request_pio_8_external_connection.export
+			request_pio_9_external_connection_export   => CONNECTED_TO_request_pio_9_external_connection_export,   --   request_pio_9_external_connection.export
 			response_pio_0_external_connection_export  => CONNECTED_TO_response_pio_0_external_connection_export,  --  response_pio_0_external_connection.export
 			response_pio_10_external_connection_export => CONNECTED_TO_response_pio_10_external_connection_export, -- response_pio_10_external_connection.export
 			response_pio_1_external_connection_export  => CONNECTED_TO_response_pio_1_external_connection_export,  --  response_pio_1_external_connection.export
@@ -402,6 +402,10 @@
 			response_pio_6_external_connection_export  => CONNECTED_TO_response_pio_6_external_connection_export,  --  response_pio_6_external_connection.export
 			response_pio_7_external_connection_export  => CONNECTED_TO_response_pio_7_external_connection_export,  --  response_pio_7_external_connection.export
 			response_pio_8_external_connection_export  => CONNECTED_TO_response_pio_8_external_connection_export,  --  response_pio_8_external_connection.export
-			response_pio_9_external_connection_export  => CONNECTED_TO_response_pio_9_external_connection_export   --  response_pio_9_external_connection.export
+			response_pio_9_external_connection_export  => CONNECTED_TO_response_pio_9_external_connection_export,  --  response_pio_9_external_connection.export
+			system_pll_ref_clk_clk                     => CONNECTED_TO_system_pll_ref_clk_clk,                     --                  system_pll_ref_clk.clk
+			system_pll_ref_reset_reset                 => CONNECTED_TO_system_pll_ref_reset_reset,                 --                system_pll_ref_reset.reset
+			pll_0_outclk0_clk                          => CONNECTED_TO_pll_0_outclk0_clk,                          --                       pll_0_outclk0.clk
+			pll_0_locked_export                        => CONNECTED_TO_pll_0_locked_export                         --                        pll_0_locked.export
 		);
 

@@ -175,19 +175,17 @@ module Computer_System (
 	onchip_memory_9_s1_byteenable,
 	pp_in_lw_axi_export,
 	pp_out_lw_axi_export,
-	system_pll_ref_clk_clk,
-	system_pll_ref_reset_reset,
 	request_pio_0_external_connection_export,
 	request_pio_10_external_connection_export,
-	request_pio_9_external_connection_export,
-	request_pio_8_external_connection_export,
-	request_pio_7_external_connection_export,
-	request_pio_6_external_connection_export,
-	request_pio_5_external_connection_export,
-	request_pio_4_external_connection_export,
-	request_pio_3_external_connection_export,
-	request_pio_2_external_connection_export,
 	request_pio_1_external_connection_export,
+	request_pio_2_external_connection_export,
+	request_pio_3_external_connection_export,
+	request_pio_4_external_connection_export,
+	request_pio_5_external_connection_export,
+	request_pio_6_external_connection_export,
+	request_pio_7_external_connection_export,
+	request_pio_8_external_connection_export,
+	request_pio_9_external_connection_export,
 	response_pio_0_external_connection_export,
 	response_pio_10_external_connection_export,
 	response_pio_1_external_connection_export,
@@ -198,7 +196,11 @@ module Computer_System (
 	response_pio_6_external_connection_export,
 	response_pio_7_external_connection_export,
 	response_pio_8_external_connection_export,
-	response_pio_9_external_connection_export);	
+	response_pio_9_external_connection_export,
+	system_pll_ref_clk_clk,
+	system_pll_ref_reset_reset,
+	pll_0_outclk0_clk,
+	pll_0_locked_export);	
 
 	input	[31:0]	arm_a9_hps_h2f_gp_gp_in;
 	output	[31:0]	arm_a9_hps_h2f_gp_gp_out;
@@ -375,19 +377,17 @@ module Computer_System (
 	input	[1:0]	onchip_memory_9_s1_byteenable;
 	input	[31:0]	pp_in_lw_axi_export;
 	output	[31:0]	pp_out_lw_axi_export;
-	input		system_pll_ref_clk_clk;
-	input		system_pll_ref_reset_reset;
 	output		request_pio_0_external_connection_export;
 	output		request_pio_10_external_connection_export;
-	output		request_pio_9_external_connection_export;
-	output		request_pio_8_external_connection_export;
-	output		request_pio_7_external_connection_export;
-	output		request_pio_6_external_connection_export;
-	output		request_pio_5_external_connection_export;
-	output		request_pio_4_external_connection_export;
-	output		request_pio_3_external_connection_export;
-	output		request_pio_2_external_connection_export;
 	output		request_pio_1_external_connection_export;
+	output		request_pio_2_external_connection_export;
+	output		request_pio_3_external_connection_export;
+	output		request_pio_4_external_connection_export;
+	output		request_pio_5_external_connection_export;
+	output		request_pio_6_external_connection_export;
+	output		request_pio_7_external_connection_export;
+	output		request_pio_8_external_connection_export;
+	output		request_pio_9_external_connection_export;
 	input		response_pio_0_external_connection_export;
 	input		response_pio_10_external_connection_export;
 	input		response_pio_1_external_connection_export;
@@ -399,4 +399,8 @@ module Computer_System (
 	input		response_pio_7_external_connection_export;
 	input		response_pio_8_external_connection_export;
 	input		response_pio_9_external_connection_export;
+	input		system_pll_ref_clk_clk;
+	input		system_pll_ref_reset_reset;
+	output		pll_0_outclk0_clk;
+	output		pll_0_locked_export;
 endmodule
