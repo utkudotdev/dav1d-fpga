@@ -83,94 +83,8 @@ module Computer_System (
 	onchip_memory2_0_s1_readdata,
 	onchip_memory2_0_s1_writedata,
 	onchip_memory2_0_s1_byteenable,
-	pp_in_lw_axi_export,
-	pp_out_lw_axi_export,
-	request_pio_external_connection_export,
-	response_pio_external_connection_export,
-	system_pll_ref_clk_clk,
-	system_pll_ref_reset_reset,
-	onchip_memory_1_clk1_clk,
-	onchip_memory_1_s1_address,
-	onchip_memory_1_s1_clken,
-	onchip_memory_1_s1_chipselect,
-	onchip_memory_1_s1_write,
-	onchip_memory_1_s1_readdata,
-	onchip_memory_1_s1_writedata,
-	onchip_memory_1_s1_byteenable,
-	onchip_memory_1_reset1_reset,
-	onchip_memory_2_clk1_clk,
-	onchip_memory_2_s1_address,
-	onchip_memory_2_s1_clken,
-	onchip_memory_2_s1_chipselect,
-	onchip_memory_2_s1_write,
-	onchip_memory_2_s1_readdata,
-	onchip_memory_2_s1_writedata,
-	onchip_memory_2_s1_byteenable,
-	onchip_memory_2_reset1_reset,
-	onchip_memory_3_clk1_clk,
-	onchip_memory_3_s1_address,
-	onchip_memory_3_s1_clken,
-	onchip_memory_3_s1_chipselect,
-	onchip_memory_3_s1_write,
-	onchip_memory_3_s1_readdata,
-	onchip_memory_3_s1_writedata,
-	onchip_memory_3_s1_byteenable,
-	onchip_memory_3_reset1_reset,
-	onchip_memory_4_clk1_clk,
-	onchip_memory_4_s1_address,
-	onchip_memory_4_s1_clken,
-	onchip_memory_4_s1_chipselect,
-	onchip_memory_4_s1_write,
-	onchip_memory_4_s1_readdata,
-	onchip_memory_4_s1_writedata,
-	onchip_memory_4_s1_byteenable,
-	onchip_memory_4_reset1_reset,
-	onchip_memory_5_clk1_clk,
-	onchip_memory_5_s1_address,
-	onchip_memory_5_s1_clken,
-	onchip_memory_5_s1_chipselect,
-	onchip_memory_5_s1_write,
-	onchip_memory_5_s1_readdata,
-	onchip_memory_5_s1_writedata,
-	onchip_memory_5_s1_byteenable,
-	onchip_memory_5_reset1_reset,
-	onchip_memory_6_clk1_clk,
-	onchip_memory_6_s1_address,
-	onchip_memory_6_s1_clken,
-	onchip_memory_6_s1_chipselect,
-	onchip_memory_6_s1_write,
-	onchip_memory_6_s1_readdata,
-	onchip_memory_6_s1_writedata,
-	onchip_memory_6_s1_byteenable,
-	onchip_memory_6_reset1_reset,
-	onchip_memory_7_clk1_clk,
-	onchip_memory_7_s1_address,
-	onchip_memory_7_s1_clken,
-	onchip_memory_7_s1_chipselect,
-	onchip_memory_7_s1_write,
-	onchip_memory_7_s1_readdata,
-	onchip_memory_7_s1_writedata,
-	onchip_memory_7_s1_byteenable,
-	onchip_memory_7_reset1_reset,
-	onchip_memory_8_clk1_clk,
-	onchip_memory_8_s1_address,
-	onchip_memory_8_s1_clken,
-	onchip_memory_8_s1_chipselect,
-	onchip_memory_8_s1_write,
-	onchip_memory_8_s1_readdata,
-	onchip_memory_8_s1_writedata,
-	onchip_memory_8_s1_byteenable,
-	onchip_memory_8_reset1_reset,
-	onchip_memory_9_clk1_clk,
-	onchip_memory_9_s1_address,
-	onchip_memory_9_s1_clken,
-	onchip_memory_9_s1_chipselect,
-	onchip_memory_9_s1_write,
-	onchip_memory_9_s1_readdata,
-	onchip_memory_9_s1_writedata,
-	onchip_memory_9_s1_byteenable,
-	onchip_memory_9_reset1_reset,
 	onchip_memory_10_clk1_clk,
+	onchip_memory_10_reset1_reset,
 	onchip_memory_10_s1_address,
 	onchip_memory_10_s1_clken,
 	onchip_memory_10_s1_chipselect,
@@ -178,7 +92,113 @@ module Computer_System (
 	onchip_memory_10_s1_readdata,
 	onchip_memory_10_s1_writedata,
 	onchip_memory_10_s1_byteenable,
-	onchip_memory_10_reset1_reset);	
+	onchip_memory_1_clk1_clk,
+	onchip_memory_1_reset1_reset,
+	onchip_memory_1_s1_address,
+	onchip_memory_1_s1_clken,
+	onchip_memory_1_s1_chipselect,
+	onchip_memory_1_s1_write,
+	onchip_memory_1_s1_readdata,
+	onchip_memory_1_s1_writedata,
+	onchip_memory_1_s1_byteenable,
+	onchip_memory_2_clk1_clk,
+	onchip_memory_2_reset1_reset,
+	onchip_memory_2_s1_address,
+	onchip_memory_2_s1_clken,
+	onchip_memory_2_s1_chipselect,
+	onchip_memory_2_s1_write,
+	onchip_memory_2_s1_readdata,
+	onchip_memory_2_s1_writedata,
+	onchip_memory_2_s1_byteenable,
+	onchip_memory_3_clk1_clk,
+	onchip_memory_3_reset1_reset,
+	onchip_memory_3_s1_address,
+	onchip_memory_3_s1_clken,
+	onchip_memory_3_s1_chipselect,
+	onchip_memory_3_s1_write,
+	onchip_memory_3_s1_readdata,
+	onchip_memory_3_s1_writedata,
+	onchip_memory_3_s1_byteenable,
+	onchip_memory_4_clk1_clk,
+	onchip_memory_4_reset1_reset,
+	onchip_memory_4_s1_address,
+	onchip_memory_4_s1_clken,
+	onchip_memory_4_s1_chipselect,
+	onchip_memory_4_s1_write,
+	onchip_memory_4_s1_readdata,
+	onchip_memory_4_s1_writedata,
+	onchip_memory_4_s1_byteenable,
+	onchip_memory_5_clk1_clk,
+	onchip_memory_5_reset1_reset,
+	onchip_memory_5_s1_address,
+	onchip_memory_5_s1_clken,
+	onchip_memory_5_s1_chipselect,
+	onchip_memory_5_s1_write,
+	onchip_memory_5_s1_readdata,
+	onchip_memory_5_s1_writedata,
+	onchip_memory_5_s1_byteenable,
+	onchip_memory_6_clk1_clk,
+	onchip_memory_6_reset1_reset,
+	onchip_memory_6_s1_address,
+	onchip_memory_6_s1_clken,
+	onchip_memory_6_s1_chipselect,
+	onchip_memory_6_s1_write,
+	onchip_memory_6_s1_readdata,
+	onchip_memory_6_s1_writedata,
+	onchip_memory_6_s1_byteenable,
+	onchip_memory_7_clk1_clk,
+	onchip_memory_7_reset1_reset,
+	onchip_memory_7_s1_address,
+	onchip_memory_7_s1_clken,
+	onchip_memory_7_s1_chipselect,
+	onchip_memory_7_s1_write,
+	onchip_memory_7_s1_readdata,
+	onchip_memory_7_s1_writedata,
+	onchip_memory_7_s1_byteenable,
+	onchip_memory_8_clk1_clk,
+	onchip_memory_8_reset1_reset,
+	onchip_memory_8_s1_address,
+	onchip_memory_8_s1_clken,
+	onchip_memory_8_s1_chipselect,
+	onchip_memory_8_s1_write,
+	onchip_memory_8_s1_readdata,
+	onchip_memory_8_s1_writedata,
+	onchip_memory_8_s1_byteenable,
+	onchip_memory_9_clk1_clk,
+	onchip_memory_9_reset1_reset,
+	onchip_memory_9_s1_address,
+	onchip_memory_9_s1_clken,
+	onchip_memory_9_s1_chipselect,
+	onchip_memory_9_s1_write,
+	onchip_memory_9_s1_readdata,
+	onchip_memory_9_s1_writedata,
+	onchip_memory_9_s1_byteenable,
+	pp_in_lw_axi_export,
+	pp_out_lw_axi_export,
+	system_pll_ref_clk_clk,
+	system_pll_ref_reset_reset,
+	request_pio_0_external_connection_export,
+	request_pio_10_external_connection_export,
+	request_pio_9_external_connection_export,
+	request_pio_8_external_connection_export,
+	request_pio_7_external_connection_export,
+	request_pio_6_external_connection_export,
+	request_pio_5_external_connection_export,
+	request_pio_4_external_connection_export,
+	request_pio_3_external_connection_export,
+	request_pio_2_external_connection_export,
+	request_pio_1_external_connection_export,
+	response_pio_0_external_connection_export,
+	response_pio_10_external_connection_export,
+	response_pio_1_external_connection_export,
+	response_pio_2_external_connection_export,
+	response_pio_3_external_connection_export,
+	response_pio_4_external_connection_export,
+	response_pio_5_external_connection_export,
+	response_pio_6_external_connection_export,
+	response_pio_7_external_connection_export,
+	response_pio_8_external_connection_export,
+	response_pio_9_external_connection_export);	
 
 	input	[31:0]	arm_a9_hps_h2f_gp_gp_in;
 	output	[31:0]	arm_a9_hps_h2f_gp_gp_out;
@@ -263,94 +283,8 @@ module Computer_System (
 	output	[15:0]	onchip_memory2_0_s1_readdata;
 	input	[15:0]	onchip_memory2_0_s1_writedata;
 	input	[1:0]	onchip_memory2_0_s1_byteenable;
-	input	[31:0]	pp_in_lw_axi_export;
-	output	[31:0]	pp_out_lw_axi_export;
-	output	[31:0]	request_pio_external_connection_export;
-	input	[31:0]	response_pio_external_connection_export;
-	input		system_pll_ref_clk_clk;
-	input		system_pll_ref_reset_reset;
-	input		onchip_memory_1_clk1_clk;
-	input	[9:0]	onchip_memory_1_s1_address;
-	input		onchip_memory_1_s1_clken;
-	input		onchip_memory_1_s1_chipselect;
-	input		onchip_memory_1_s1_write;
-	output	[15:0]	onchip_memory_1_s1_readdata;
-	input	[15:0]	onchip_memory_1_s1_writedata;
-	input	[1:0]	onchip_memory_1_s1_byteenable;
-	input		onchip_memory_1_reset1_reset;
-	input		onchip_memory_2_clk1_clk;
-	input	[9:0]	onchip_memory_2_s1_address;
-	input		onchip_memory_2_s1_clken;
-	input		onchip_memory_2_s1_chipselect;
-	input		onchip_memory_2_s1_write;
-	output	[15:0]	onchip_memory_2_s1_readdata;
-	input	[15:0]	onchip_memory_2_s1_writedata;
-	input	[1:0]	onchip_memory_2_s1_byteenable;
-	input		onchip_memory_2_reset1_reset;
-	input		onchip_memory_3_clk1_clk;
-	input	[9:0]	onchip_memory_3_s1_address;
-	input		onchip_memory_3_s1_clken;
-	input		onchip_memory_3_s1_chipselect;
-	input		onchip_memory_3_s1_write;
-	output	[15:0]	onchip_memory_3_s1_readdata;
-	input	[15:0]	onchip_memory_3_s1_writedata;
-	input	[1:0]	onchip_memory_3_s1_byteenable;
-	input		onchip_memory_3_reset1_reset;
-	input		onchip_memory_4_clk1_clk;
-	input	[9:0]	onchip_memory_4_s1_address;
-	input		onchip_memory_4_s1_clken;
-	input		onchip_memory_4_s1_chipselect;
-	input		onchip_memory_4_s1_write;
-	output	[15:0]	onchip_memory_4_s1_readdata;
-	input	[15:0]	onchip_memory_4_s1_writedata;
-	input	[1:0]	onchip_memory_4_s1_byteenable;
-	input		onchip_memory_4_reset1_reset;
-	input		onchip_memory_5_clk1_clk;
-	input	[9:0]	onchip_memory_5_s1_address;
-	input		onchip_memory_5_s1_clken;
-	input		onchip_memory_5_s1_chipselect;
-	input		onchip_memory_5_s1_write;
-	output	[15:0]	onchip_memory_5_s1_readdata;
-	input	[15:0]	onchip_memory_5_s1_writedata;
-	input	[1:0]	onchip_memory_5_s1_byteenable;
-	input		onchip_memory_5_reset1_reset;
-	input		onchip_memory_6_clk1_clk;
-	input	[9:0]	onchip_memory_6_s1_address;
-	input		onchip_memory_6_s1_clken;
-	input		onchip_memory_6_s1_chipselect;
-	input		onchip_memory_6_s1_write;
-	output	[15:0]	onchip_memory_6_s1_readdata;
-	input	[15:0]	onchip_memory_6_s1_writedata;
-	input	[1:0]	onchip_memory_6_s1_byteenable;
-	input		onchip_memory_6_reset1_reset;
-	input		onchip_memory_7_clk1_clk;
-	input	[9:0]	onchip_memory_7_s1_address;
-	input		onchip_memory_7_s1_clken;
-	input		onchip_memory_7_s1_chipselect;
-	input		onchip_memory_7_s1_write;
-	output	[15:0]	onchip_memory_7_s1_readdata;
-	input	[15:0]	onchip_memory_7_s1_writedata;
-	input	[1:0]	onchip_memory_7_s1_byteenable;
-	input		onchip_memory_7_reset1_reset;
-	input		onchip_memory_8_clk1_clk;
-	input	[9:0]	onchip_memory_8_s1_address;
-	input		onchip_memory_8_s1_clken;
-	input		onchip_memory_8_s1_chipselect;
-	input		onchip_memory_8_s1_write;
-	output	[15:0]	onchip_memory_8_s1_readdata;
-	input	[15:0]	onchip_memory_8_s1_writedata;
-	input	[1:0]	onchip_memory_8_s1_byteenable;
-	input		onchip_memory_8_reset1_reset;
-	input		onchip_memory_9_clk1_clk;
-	input	[9:0]	onchip_memory_9_s1_address;
-	input		onchip_memory_9_s1_clken;
-	input		onchip_memory_9_s1_chipselect;
-	input		onchip_memory_9_s1_write;
-	output	[15:0]	onchip_memory_9_s1_readdata;
-	input	[15:0]	onchip_memory_9_s1_writedata;
-	input	[1:0]	onchip_memory_9_s1_byteenable;
-	input		onchip_memory_9_reset1_reset;
 	input		onchip_memory_10_clk1_clk;
+	input		onchip_memory_10_reset1_reset;
 	input	[9:0]	onchip_memory_10_s1_address;
 	input		onchip_memory_10_s1_clken;
 	input		onchip_memory_10_s1_chipselect;
@@ -358,5 +292,111 @@ module Computer_System (
 	output	[15:0]	onchip_memory_10_s1_readdata;
 	input	[15:0]	onchip_memory_10_s1_writedata;
 	input	[1:0]	onchip_memory_10_s1_byteenable;
-	input		onchip_memory_10_reset1_reset;
+	input		onchip_memory_1_clk1_clk;
+	input		onchip_memory_1_reset1_reset;
+	input	[9:0]	onchip_memory_1_s1_address;
+	input		onchip_memory_1_s1_clken;
+	input		onchip_memory_1_s1_chipselect;
+	input		onchip_memory_1_s1_write;
+	output	[15:0]	onchip_memory_1_s1_readdata;
+	input	[15:0]	onchip_memory_1_s1_writedata;
+	input	[1:0]	onchip_memory_1_s1_byteenable;
+	input		onchip_memory_2_clk1_clk;
+	input		onchip_memory_2_reset1_reset;
+	input	[9:0]	onchip_memory_2_s1_address;
+	input		onchip_memory_2_s1_clken;
+	input		onchip_memory_2_s1_chipselect;
+	input		onchip_memory_2_s1_write;
+	output	[15:0]	onchip_memory_2_s1_readdata;
+	input	[15:0]	onchip_memory_2_s1_writedata;
+	input	[1:0]	onchip_memory_2_s1_byteenable;
+	input		onchip_memory_3_clk1_clk;
+	input		onchip_memory_3_reset1_reset;
+	input	[9:0]	onchip_memory_3_s1_address;
+	input		onchip_memory_3_s1_clken;
+	input		onchip_memory_3_s1_chipselect;
+	input		onchip_memory_3_s1_write;
+	output	[15:0]	onchip_memory_3_s1_readdata;
+	input	[15:0]	onchip_memory_3_s1_writedata;
+	input	[1:0]	onchip_memory_3_s1_byteenable;
+	input		onchip_memory_4_clk1_clk;
+	input		onchip_memory_4_reset1_reset;
+	input	[9:0]	onchip_memory_4_s1_address;
+	input		onchip_memory_4_s1_clken;
+	input		onchip_memory_4_s1_chipselect;
+	input		onchip_memory_4_s1_write;
+	output	[15:0]	onchip_memory_4_s1_readdata;
+	input	[15:0]	onchip_memory_4_s1_writedata;
+	input	[1:0]	onchip_memory_4_s1_byteenable;
+	input		onchip_memory_5_clk1_clk;
+	input		onchip_memory_5_reset1_reset;
+	input	[9:0]	onchip_memory_5_s1_address;
+	input		onchip_memory_5_s1_clken;
+	input		onchip_memory_5_s1_chipselect;
+	input		onchip_memory_5_s1_write;
+	output	[15:0]	onchip_memory_5_s1_readdata;
+	input	[15:0]	onchip_memory_5_s1_writedata;
+	input	[1:0]	onchip_memory_5_s1_byteenable;
+	input		onchip_memory_6_clk1_clk;
+	input		onchip_memory_6_reset1_reset;
+	input	[9:0]	onchip_memory_6_s1_address;
+	input		onchip_memory_6_s1_clken;
+	input		onchip_memory_6_s1_chipselect;
+	input		onchip_memory_6_s1_write;
+	output	[15:0]	onchip_memory_6_s1_readdata;
+	input	[15:0]	onchip_memory_6_s1_writedata;
+	input	[1:0]	onchip_memory_6_s1_byteenable;
+	input		onchip_memory_7_clk1_clk;
+	input		onchip_memory_7_reset1_reset;
+	input	[9:0]	onchip_memory_7_s1_address;
+	input		onchip_memory_7_s1_clken;
+	input		onchip_memory_7_s1_chipselect;
+	input		onchip_memory_7_s1_write;
+	output	[15:0]	onchip_memory_7_s1_readdata;
+	input	[15:0]	onchip_memory_7_s1_writedata;
+	input	[1:0]	onchip_memory_7_s1_byteenable;
+	input		onchip_memory_8_clk1_clk;
+	input		onchip_memory_8_reset1_reset;
+	input	[9:0]	onchip_memory_8_s1_address;
+	input		onchip_memory_8_s1_clken;
+	input		onchip_memory_8_s1_chipselect;
+	input		onchip_memory_8_s1_write;
+	output	[15:0]	onchip_memory_8_s1_readdata;
+	input	[15:0]	onchip_memory_8_s1_writedata;
+	input	[1:0]	onchip_memory_8_s1_byteenable;
+	input		onchip_memory_9_clk1_clk;
+	input		onchip_memory_9_reset1_reset;
+	input	[9:0]	onchip_memory_9_s1_address;
+	input		onchip_memory_9_s1_clken;
+	input		onchip_memory_9_s1_chipselect;
+	input		onchip_memory_9_s1_write;
+	output	[15:0]	onchip_memory_9_s1_readdata;
+	input	[15:0]	onchip_memory_9_s1_writedata;
+	input	[1:0]	onchip_memory_9_s1_byteenable;
+	input	[31:0]	pp_in_lw_axi_export;
+	output	[31:0]	pp_out_lw_axi_export;
+	input		system_pll_ref_clk_clk;
+	input		system_pll_ref_reset_reset;
+	output		request_pio_0_external_connection_export;
+	output		request_pio_10_external_connection_export;
+	output		request_pio_9_external_connection_export;
+	output		request_pio_8_external_connection_export;
+	output		request_pio_7_external_connection_export;
+	output		request_pio_6_external_connection_export;
+	output		request_pio_5_external_connection_export;
+	output		request_pio_4_external_connection_export;
+	output		request_pio_3_external_connection_export;
+	output		request_pio_2_external_connection_export;
+	output		request_pio_1_external_connection_export;
+	input		response_pio_0_external_connection_export;
+	input		response_pio_10_external_connection_export;
+	input		response_pio_1_external_connection_export;
+	input		response_pio_2_external_connection_export;
+	input		response_pio_3_external_connection_export;
+	input		response_pio_4_external_connection_export;
+	input		response_pio_5_external_connection_export;
+	input		response_pio_6_external_connection_export;
+	input		response_pio_7_external_connection_export;
+	input		response_pio_8_external_connection_export;
+	input		response_pio_9_external_connection_export;
 endmodule

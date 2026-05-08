@@ -379,7 +379,7 @@ wire [31:0] gpio_in, gpio_out ;
 wire m10k_clk; //onchip_memory2_0_clk1_clk
 wire m10k_rst; //onchip_memory2_0_reset1_reset
 
-localparam N_BLOCKS = 11;
+localparam N_BLOCKS = 5;
 
 logic [9:0] m10k_address[N_BLOCKS];
 wire m10k_write [N_BLOCKS];
@@ -389,7 +389,8 @@ wire signed [15:0] m10k_writedata [N_BLOCKS];
 wire [9:0] block_write_addr [N_BLOCKS];
 wire [9:0] block_read_addr [N_BLOCKS];
 
-wire [31:0] request_pio, response_pio;
+wire request_pio [N_BLOCKS];
+wire response_pio [N_BLOCKS];
 
 
 wire clk;
@@ -516,59 +517,59 @@ Computer_System The_System (
 	.onchip_memory_4_s1_byteenable 	(2'b11),
 	.onchip_memory_4_s1_chipselect 	(1'b1),
 
-	.onchip_memory_5_clk1_clk		(m10k_clk),
-	.onchip_memory_5_s1_address		(m10k_address[5]),
-	.onchip_memory_5_s1_write		(m10k_write[5]),
-	.onchip_memory_5_s1_clken		(1'b1),
-	.onchip_memory_5_s1_readdata	(m10k_readdata[5]),
-	.onchip_memory_5_s1_writedata	(m10k_writedata[5]),
-	.onchip_memory_5_s1_byteenable 	(2'b11),
-	.onchip_memory_5_s1_chipselect 	(1'b1),
+	// .onchip_memory_5_clk1_clk		(m10k_clk),
+	// .onchip_memory_5_s1_address		(m10k_address[5]),
+	// .onchip_memory_5_s1_write		(m10k_write[5]),
+	// .onchip_memory_5_s1_clken		(1'b1),
+	// .onchip_memory_5_s1_readdata	(m10k_readdata[5]),
+	// .onchip_memory_5_s1_writedata	(m10k_writedata[5]),
+	// .onchip_memory_5_s1_byteenable 	(2'b11),
+	// .onchip_memory_5_s1_chipselect 	(1'b1),
 
-	.onchip_memory_6_clk1_clk		(m10k_clk),
-	.onchip_memory_6_s1_address		(m10k_address[6]),
-	.onchip_memory_6_s1_write		(m10k_write[6]),
-	.onchip_memory_6_s1_clken		(1'b1),
-	.onchip_memory_6_s1_readdata	(m10k_readdata[6]),
-	.onchip_memory_6_s1_writedata	(m10k_writedata[6]),
-	.onchip_memory_6_s1_byteenable 	(2'b11),
-	.onchip_memory_6_s1_chipselect 	(1'b1),
+	// .onchip_memory_6_clk1_clk		(m10k_clk),
+	// .onchip_memory_6_s1_address		(m10k_address[6]),
+	// .onchip_memory_6_s1_write		(m10k_write[6]),
+	// .onchip_memory_6_s1_clken		(1'b1),
+	// .onchip_memory_6_s1_readdata	(m10k_readdata[6]),
+	// .onchip_memory_6_s1_writedata	(m10k_writedata[6]),
+	// .onchip_memory_6_s1_byteenable 	(2'b11),
+	// .onchip_memory_6_s1_chipselect 	(1'b1),
 
-	.onchip_memory_7_clk1_clk		(m10k_clk),
-	.onchip_memory_7_s1_address		(m10k_address[7]),
-	.onchip_memory_7_s1_write		(m10k_write[7]),
-	.onchip_memory_7_s1_clken		(1'b1),
-	.onchip_memory_7_s1_readdata	(m10k_readdata[7]),
-	.onchip_memory_7_s1_writedata	(m10k_writedata[7]),
-	.onchip_memory_7_s1_byteenable 	(2'b11),
-	.onchip_memory_7_s1_chipselect 	(1'b1),
+	// .onchip_memory_7_clk1_clk		(m10k_clk),
+	// .onchip_memory_7_s1_address		(m10k_address[7]),
+	// .onchip_memory_7_s1_write		(m10k_write[7]),
+	// .onchip_memory_7_s1_clken		(1'b1),
+	// .onchip_memory_7_s1_readdata	(m10k_readdata[7]),
+	// .onchip_memory_7_s1_writedata	(m10k_writedata[7]),
+	// .onchip_memory_7_s1_byteenable 	(2'b11),
+	// .onchip_memory_7_s1_chipselect 	(1'b1),
 
-	.onchip_memory_8_clk1_clk		(m10k_clk),
-	.onchip_memory_8_s1_address		(m10k_address[8]),
-	.onchip_memory_8_s1_write		(m10k_write[8]),
-	.onchip_memory_8_s1_clken		(1'b1),
-	.onchip_memory_8_s1_readdata	(m10k_readdata[8]),
-	.onchip_memory_8_s1_writedata	(m10k_writedata[8]),
-	.onchip_memory_8_s1_byteenable 	(2'b11),
-	.onchip_memory_8_s1_chipselect 	(1'b1),
+	// .onchip_memory_8_clk1_clk		(m10k_clk),
+	// .onchip_memory_8_s1_address		(m10k_address[8]),
+	// .onchip_memory_8_s1_write		(m10k_write[8]),
+	// .onchip_memory_8_s1_clken		(1'b1),
+	// .onchip_memory_8_s1_readdata	(m10k_readdata[8]),
+	// .onchip_memory_8_s1_writedata	(m10k_writedata[8]),
+	// .onchip_memory_8_s1_byteenable 	(2'b11),
+	// .onchip_memory_8_s1_chipselect 	(1'b1),
 
-	.onchip_memory_9_clk1_clk		(m10k_clk),
-	.onchip_memory_9_s1_address		(m10k_address[9]),
-	.onchip_memory_9_s1_write		(m10k_write[9]),
-	.onchip_memory_9_s1_clken		(1'b1),
-	.onchip_memory_9_s1_readdata	(m10k_readdata[9]),
-	.onchip_memory_9_s1_writedata	(m10k_writedata[9]),
-	.onchip_memory_9_s1_byteenable 	(2'b11),
-	.onchip_memory_9_s1_chipselect 	(1'b1),
+	// .onchip_memory_9_clk1_clk		(m10k_clk),
+	// .onchip_memory_9_s1_address		(m10k_address[9]),
+	// .onchip_memory_9_s1_write		(m10k_write[9]),
+	// .onchip_memory_9_s1_clken		(1'b1),
+	// .onchip_memory_9_s1_readdata	(m10k_readdata[9]),
+	// .onchip_memory_9_s1_writedata	(m10k_writedata[9]),
+	// .onchip_memory_9_s1_byteenable 	(2'b11),
+	// .onchip_memory_9_s1_chipselect 	(1'b1),
 
-	.onchip_memory_10_clk1_clk		(m10k_clk),
-	.onchip_memory_10_s1_address	(m10k_address[10]),
-	.onchip_memory_10_s1_write		(m10k_write[10]),
-	.onchip_memory_10_s1_clken		(1'b1),
-	.onchip_memory_10_s1_readdata	(m10k_readdata[10]),
-	.onchip_memory_10_s1_writedata	(m10k_writedata[10]),
-	.onchip_memory_10_s1_byteenable (2'b11),
-	.onchip_memory_10_s1_chipselect (1'b1),
+	// .onchip_memory_10_clk1_clk		(m10k_clk),
+	// .onchip_memory_10_s1_address	(m10k_address[10]),
+	// .onchip_memory_10_s1_write		(m10k_write[10]),
+	// .onchip_memory_10_s1_clken		(1'b1),
+	// .onchip_memory_10_s1_readdata	(m10k_readdata[10]),
+	// .onchip_memory_10_s1_writedata	(m10k_writedata[10]),
+	// .onchip_memory_10_s1_byteenable (2'b11),
+	// .onchip_memory_10_s1_chipselect (1'b1),
 
 	////////////////////////////////////
 	// FPGA Side
@@ -581,8 +582,30 @@ Computer_System The_System (
 	////////////////////////////////////
 	// PIO ports
 	////////////////////////////////////
-	.request_pio_external_connection_export(request_pio),  //  request_pio_external_connection.export
-	.response_pio_external_connection_export(response_pio), // response_pio_external_connection.export          
+	.request_pio_0_external_connection_export	(request_pio[0]),  //  request_pio_external_connection.export
+	.request_pio_1_external_connection_export	(request_pio[1]),  //  request_pio_external_connection.export
+	.request_pio_2_external_connection_export	(request_pio[2]),  //  request_pio_external_connection.export
+	.request_pio_3_external_connection_export	(request_pio[3]),  //  request_pio_external_connection.export
+	.request_pio_4_external_connection_export	(request_pio[4]),  //  request_pio_external_connection.export
+	// .request_pio_5_external_connection_export	(request_pio[5]),  //  request_pio_external_connection.export
+	// .request_pio_6_external_connection_export	(request_pio[6]),  //  request_pio_external_connection.export
+	// .request_pio_7_external_connection_export	(request_pio[7]),  //  request_pio_external_connection.export
+	// .request_pio_8_external_connection_export	(request_pio[8]),  //  request_pio_external_connection.export
+	// .request_pio_9_external_connection_export	(request_pio[9]),  //  request_pio_external_connection.export
+	// .request_pio_10_external_connection_export	(request_pio[10]),  //  request_pio_external_connection.export
+
+
+	.response_pio_0_external_connection_export	(response_pio[0]),  //  response_pio_external_connection.export
+	.response_pio_1_external_connection_export	(response_pio[1]),  //  response_pio_external_connection.export
+	.response_pio_2_external_connection_export	(response_pio[2]),  //  response_pio_external_connection.export
+	.response_pio_3_external_connection_export	(response_pio[3]),  //  response_pio_external_connection.export
+	.response_pio_4_external_connection_export	(response_pio[4]),  //  response_pio_external_connection.export
+	// .response_pio_5_external_connection_export	(response_pio[5]),  //  response_pio_external_connection.export
+	// .response_pio_6_external_connection_export	(response_pio[6]),  //  response_pio_external_connection.export
+	// .response_pio_7_external_connection_export	(response_pio[7]),  //  response_pio_external_connection.export
+	// .response_pio_8_external_connection_export	(response_pio[8]),  //  response_pio_external_connection.export
+	// .response_pio_9_external_connection_export	(response_pio[9]),  //  response_pio_external_connection.export
+	// .response_pio_10_external_connection_export	(response_pio[10]),  //  response_pio_external_connection.export  
 	.pp_out_lw_axi_export            (pp_out_lw_axi), 
 	.pp_in_lw_axi_export             (pp_in_lw_axi),  
 	
