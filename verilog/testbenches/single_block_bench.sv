@@ -86,7 +86,7 @@ module single_block_bench ();
         .mem_write_data(mem_write_data),
         .mem_write_addr(mem_write_addr),
         .mem_read_addr(mem_read_addr_out),
-        .we(we),
+        .we_out(we),
         .ready(ready),
         .writing(writing),
         .reading(reading),
