@@ -409,9 +409,9 @@ genvar i;
 generate
 	for (i=0; i < N_BLOCKS; i += 1) begin : gen_main
 		always_comb begin
-			if(reading)
+			if(!m10k_write[i])
 				m10k_address[i] = block_read_addr[i];
-			else if (writing)
+			else if (m10k_write[i])
 				m10k_address[i] = block_write_addr[i];
 			else
 				m10k_address[i] = 0;

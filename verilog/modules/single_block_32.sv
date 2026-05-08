@@ -1,5 +1,5 @@
-`include "modules/identity_32.sv"
-// `include "modules/inv_dct_32.sv"
+// `include "modules/identity_32.sv"
+`include "modules/inv_dct_32.sv"
 `include "modules/arr_writer.sv"
 `include "modules/arr_reader.sv"
 `include "modules/fair_rw_lock_mgr.sv"
@@ -252,8 +252,8 @@ module single_block_32 (
         end
     endgenerate
 
-    identity_32 inv_iden (
-        .out_array(tf_out_arr),
+    inv_dct_32 inv_dct (
+        .out(tf_out_arr),
         .valid(compute_valid),  //TODO
         .ready(compute_ready),  //TODO
         .job_id_out(compute_job_id),
