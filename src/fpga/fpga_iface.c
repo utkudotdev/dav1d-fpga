@@ -11,6 +11,7 @@
 #include <string.h>
 #include <strings.h>
 #include <sys/mman.h>
+#include <unistd.h>
 
 #include "common/bitdepth.h"
 #include "common/intops.h"

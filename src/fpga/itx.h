@@ -33,6 +33,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
+#include <unistd.h>
 
 #include "common/bitdepth.h"
 #include "common/intops.h"
@@ -178,6 +179,10 @@ static void dav1d_inv_txfm_add_dct_dct_32x32_8bpc_fpga(pixel* dst, const ptrdiff
         }
     }
 
+    while (true) {
+        sleep(1000);
+    }
+
     free(copy.dst_copy);
 }
 
@@ -185,13 +190,14 @@ static void dav1d_inv_txfm_add_idtx_32x32_8bpc_fpga(pixel* dst, const ptrdiff_t 
     coef* const coeff, const int eob HIGHBD_DECL_SUFFIX) {
     bruh copy = copy_dst_coeff(dst, stride, coeff, eob);
 
-    inv_txfm_add_c(copy.dst_copy, stride, copy.coeff_copy, eob, TX_32X32, 2, IDTX);
+    inv_txfm_add_c_bruh(copy.dst_copy, stride, copy.coeff_copy, eob, TX_32X32, 2, IDTX);
     inv_txfm_add_fpga(dst, stride, coeff, eob, TX_32X32, IDTX);
 
     const TxfmInfo* const t_dim = &dav1d_txfm_dimensions[TX_32X32];
     const int w = 4 * t_dim->w, h = 4 * t_dim->h;
     pixel* dst_ptr = dst;
     pixel* dst_copy_ptr = copy.dst_copy;
+
     for (int y = 0; y < h; y++, dst_ptr += PXSTRIDE(stride), dst_copy_ptr += PXSTRIDE(stride)) {
         for (int x = 0; x < w; x++) {
             if (dst_ptr[x] != dst_copy_ptr[x]) {
