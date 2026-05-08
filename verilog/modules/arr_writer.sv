@@ -20,21 +20,6 @@ module arr_writer #(
     input                           clk,
     input                           rst
 );
-    integer j;
-    // arr array is the actual registers holding arr
-    logic signed [15:0] arr_internal[N];
-    always_ff @(posedge clk) begin
-        if (rst) begin
-            for (j = 0; j < N; j = j + 1) begin
-                arr_internal[j] <= 0;
-            end
-        end else begin  // put in new arr for writing only when flag is raised
-            for (j = 0; j < 32; j = j + 1) begin
-                arr_internal[j] <= start_write ? arr[j] : arr_internal[j];
-            end
-        end
-    end
-
 
     // here's how this horrible logic works:
     // state = rst, waiting to start a write
@@ -49,7 +34,7 @@ module arr_writer #(
     logic mem_lock_req_reg;
 
     assign mem_lock_request = mem_lock_req_reg;
-    assign mem_write_data   = arr_internal[mem_write_counter];
+    assign mem_write_data   = arr[mem_write_counter];
 
     always_ff @(posedge clk) begin
         if (rst) begin

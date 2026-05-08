@@ -8,13 +8,14 @@ module arr_reader #(
     parameter int N = 32,
     parameter int ADDR_WIDTH = $clog2(N * N)
 ) (
-    output wire signed [15:0] array[N],  // parallel output of N 16-bit items of array
+    output logic signed [15:0] out_array[N],  // parallel output of N 16-bit items of array
     output wire [ADDR_WIDTH-1:0] mem_read_addr,
     output wire valid,  // flag for done reading array
     output wire ready,
     output wire mem_lock_request,
+    input wire [15:0] in_array[N],
     input wire signed [15:0] mem_read_data,
-    input wire [ADDR_WIDTH-1:0] start_addr,
+    input wire signed [ADDR_WIDTH-1:0] start_addr,
     // Flag for starting a read. Goes high when the client module is ready for a read and the input
     // address is set correctly. Essentially can be thought of as (in_ready & in_valid)
     input wire start_read,
@@ -24,20 +25,30 @@ module arr_reader #(
     input wire rst
 );
     // array internal is the actual register
-    logic signed [15:0] arr_internal[N];
-    assign array = arr_internal;
+    // logic signed [15:0] arr_internal[N];
+    // assign array = arr_internal;
     // 1-hot select logic for loading
     logic [N-1:0] arr_reg_sel;
+
+    // genvar i;
+    // generate
+    //     for (i = 0; i < N; i++) begin : gen_reg_arr_in
+    //         always_ff @(posedge clk) begin
+    //             if (rst) begin
+    //                 arr_internal[i] <= 16'b0;
+    //             end else begin
+    //                 arr_internal[i] <= arr_reg_sel[i] ? mem_read_data : arr_internal[i];
+    //             end
+    //         end
+    //     end
+    // endgenerate
 
     genvar i;
     generate
         for (i = 0; i < N; i++) begin : gen_reg_arr_in
-            always_ff @(posedge clk) begin
-                if (rst) begin
-                    arr_internal[i] <= 16'b0;
-                end else begin
-                    arr_internal[i] <= arr_reg_sel[i] ? mem_read_data : arr_internal[i];
-                end
+            always_comb begin
+                out_array = in_array;
+                out_array[i] = arr_reg_sel[i] ? mem_read_data : in_array[i]; 
             end
         end
     endgenerate
