@@ -1,4 +1,4 @@
-// `include "modules/identity_32.sv"
+`include "modules/identity_32.sv"
 `include "modules/inv_dct_32.sv"
 `include "modules/arr_writer.sv"
 `include "modules/arr_reader.sv"
@@ -96,14 +96,43 @@ module single_block_32 (
     end
 
 
-    typedef enum logic [1:0] {
+    typedef enum logic [2:0] {
         WORKING_INIT,
+        WORKING_WAIT_FOR_START,
         READ,
         COMPUTE,
         READ_WRITE
     } working_state_t;
     working_state_t working_state;
     working_state_t prev_working_state;
+    working_state_t next_working_state;
+
+    always_comb begin
+        if (rst) begin
+            next_working_state = WORKING_INIT;
+        end else begin
+            case (working_state)
+                WORKING_INIT: begin
+                    next_working_state = working_state_t'(state == START_JOB ? WORKING_WAIT_FOR_START : WORKING_INIT);
+                end
+                WORKING_WAIT_FOR_START: begin
+                    next_working_state = READ;
+                end
+                READ: begin
+                    next_working_state = working_state_t'(read_valid ? COMPUTE : READ);
+                end
+                COMPUTE: begin
+                    next_working_state = working_state_t'(compute_valid ? READ_WRITE : COMPUTE);
+                end
+                READ_WRITE: begin  // TODO: this state can disappear later
+                    next_working_state = working_state_t'(read_valid && write_ready ? (done_all_writes ? WORKING_INIT : COMPUTE) : READ_WRITE);
+                end
+                default: begin
+                    next_working_state = WORKING_INIT;
+                end
+            endcase
+        end
+    end
 
     always_ff @(posedge clk) begin
         if (rst) begin
@@ -111,23 +140,7 @@ module single_block_32 (
             prev_working_state <= WORKING_INIT;
         end else begin
             prev_working_state <= working_state;
-            case (working_state)
-                WORKING_INIT: begin
-                    working_state <= working_state_t'(state == START_JOB ? READ : WORKING_INIT);
-                end
-                READ: begin
-                    working_state <= working_state_t'(read_valid ? COMPUTE : READ);
-                end
-                COMPUTE: begin
-                    working_state <= working_state_t'(compute_valid ? READ_WRITE : COMPUTE);
-                end
-                READ_WRITE: begin  // TODO: this state can disappear later
-                    working_state <= working_state_t'(read_valid && write_ready ? (done_all_writes ? WORKING_INIT : COMPUTE) : READ_WRITE);
-                end
-                default: begin
-                    working_state <= WORKING_INIT;
-                end
-            endcase
+            working_state <= next_working_state;
         end
     end
 
@@ -191,9 +204,11 @@ module single_block_32 (
     //                     (read_valid && compute_ready && write_ready && !start_write);
     // assign start_read = (prev_working_state == WORKING_INIT && working_state == READ) || 
     //                     (prev_working_state == COMPUTE && working_state == READ_WRITE);
-    assign start_read = (compute_valid && (working_state == COMPUTE)) || 
-                        (read_valid && write_ready && (working_state == READ_WRITE)) ||
-                        (prev_working_state == WORKING_INIT && working_state == READ);
+    // assign start_read = (compute_valid && (working_state == COMPUTE)) || 
+    //                     (read_valid && write_ready && (working_state == READ_WRITE)) ||
+    //                     (prev_working_state == WORKING_INIT && working_state == READ);
+    assign start_read = (working_state != READ && working_state != READ_WRITE) 
+        && (next_working_state == READ || next_working_state == READ_WRITE);
 
     logic start_read_prev;
     always_ff @(posedge clk) begin
@@ -219,27 +234,28 @@ module single_block_32 (
         .start_read(start_read),
         .is_column(done_rows),
         .clk(clk),
-        .rst(rst || (state == START_JOB))
+        .rst(rst)
     );
 
 
     logic start_compute;
 
     // assign start_compute = (state == WORKING_ARR) && read_valid && compute_ready && write_ready && !(start_write);
-    assign start_compute = (working_state == READ || working_state == READ_WRITE) && read_valid;
+    // assign start_compute = (working_state == READ || working_state == READ_WRITE) && read_valid;
+    assign start_compute = working_state != COMPUTE && next_working_state == COMPUTE;
 
     wire [15:0] compute_job_id;
-    // identity_32 iden (
-    //     .out_array(tf_out_arr),
-    //     .job_id_out(compute_job_id),
-    //     .valid(compute_valid),
-    //     .ready(compute_ready),
-    //     .job_id_in(arr_read_counter),
-    //     .in_array(T),
-    //     .start_compute(start_compute),
-    //     .clk(clk),
-    //     .rst(rst || (state == START_JOB))
-    // );
+    identity_32 iden (
+        .out_array(tf_out_arr),
+        .job_id_out(compute_job_id),
+        .valid(compute_valid),
+        .ready(compute_ready),
+        .job_id_in(arr_read_counter),
+        .in_array(T),
+        .start_compute(start_compute),
+        .clk(clk),
+        .rst(rst || (state == START_JOB))
+    );
 
     localparam ROWSHIFT = 2;
     localparam COLSHIFT = 4;
@@ -252,17 +268,17 @@ module single_block_32 (
         end
     endgenerate
 
-    inv_dct_32 inv_dct (
-        .out(tf_out_arr),
-        .valid(compute_valid),  //TODO
-        .ready(compute_ready),  //TODO
-        .job_id_out(compute_job_id),
-        .in_array(T),
-        .job_id_in(arr_read_counter),
-        .start_compute(start_compute),
-        .clk(clk),
-        .rst(rst || (state == START_JOB))
-    );
+    // inv_dct_32 inv_dct (
+    //     .out(tf_out_arr),
+    //     .valid(compute_valid),  //TODO
+    //     .ready(compute_ready),  //TODO
+    //     .job_id_out(compute_job_id),
+    //     .in_array(T),
+    //     .job_id_in(arr_read_counter),
+    //     .start_compute(start_compute),
+    //     .clk(clk),
+    //     .rst(rst)
+    // );
 
     logic [15:0] job_id_prev;
 
@@ -274,7 +290,8 @@ module single_block_32 (
     // assign start_write = (state == WORKING_ARR) && compute_valid &&
     //                      (job_id_prev != compute_job_id) && write_ready;
     // assign start_write =    (prev_working_state == COMPUTE && working_state == READ_WRITE);
-    assign start_write = compute_valid && (working_state == COMPUTE);
+    // assign start_write = compute_valid && (working_state == COMPUTE);
+    assign start_write = working_state != READ_WRITE && next_working_state == READ_WRITE;
     //read_valid;
 
     arr_writer #(
@@ -291,7 +308,7 @@ module single_block_32 (
         .start_write(start_write),
         .is_column(done_rows),
         .clk(clk),
-        .rst(rst || (state == START_JOB))
+        .rst(rst)
     );
 
     always_ff @(posedge clk) begin
