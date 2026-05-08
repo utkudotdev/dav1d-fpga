@@ -342,9 +342,9 @@ module inv_dct_32 #(
                     for (int i = 0; i <= 3; i++) begin
                         for (int j = 0; j <= 1; j++) begin
                             // butterfly_t b_res;
-                            b_res[j+4*i] = h(in_T[16+4*i+j], in_T[19+4*i-j], 1'((i & 1)));
-                            out_T[16+4*i+j] = b_res[j+4*i].a;
-                            out_T[19+4*i-j] = b_res[j+4*i].b;
+                            b_res[j+2*i] = h(in_T[16+4*i+j], in_T[19+4*i-j], 1'((i & 1)));
+                            out_T[16+4*i+j] = b_res[j+2*i].a;
+                            out_T[19+4*i-j] = b_res[j+2*i].b;
                         end
                     end
                     for (int i = 0; i <= 1; i++) begin
