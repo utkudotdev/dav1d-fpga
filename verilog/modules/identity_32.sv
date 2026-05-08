@@ -33,7 +33,12 @@ module identity_32 (
             end
         end
     end
-    assign out_array = in_array;
+    genvar i;
+    generate 
+        for (i = 0; i < 32; i += 1) begin : gen_iden
+            assign out_array[i] = in_array[i] << 2;
+        end
+    endgenerate
     assign valid = valid_reg;
     assign job_id_out = internal_job_id;
     // s-cycle so always ready
