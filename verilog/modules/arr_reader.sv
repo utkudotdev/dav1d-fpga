@@ -47,7 +47,6 @@ module arr_reader #(
     generate
         for (i = 0; i < N; i++) begin : gen_reg_arr_in
             always_comb begin
-                out_array = in_array;
                 out_array[i] = arr_reg_sel[i] ? mem_read_data : in_array[i]; 
             end
         end
