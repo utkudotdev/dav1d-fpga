@@ -13,7 +13,7 @@ module arr_reader #(
     output wire valid,  // flag for done reading array
     output wire ready,
     output wire mem_lock_request,
-    input wire [15:0] in_array[N],
+    input wire signed [15:0] in_array[N],
     input wire signed [15:0] mem_read_data,
     input wire signed [ADDR_WIDTH-1:0] start_addr,
     // Flag for starting a read. Goes high when the client module is ready for a read and the input
@@ -46,9 +46,7 @@ module arr_reader #(
     genvar i;
     generate
         for (i = 0; i < N; i++) begin : gen_reg_arr_in
-            always_comb begin
-                out_array[i] = arr_reg_sel[i] ? mem_read_data : in_array[i]; 
-            end
+            assign out_array[i] = arr_reg_sel[i] ? mem_read_data : in_array[i];
         end
     endgenerate
 
@@ -84,7 +82,7 @@ module arr_reader #(
             end else if (try_get_lock) begin
                 if (mem_lock) begin
                     state_mem_read <= 1;
-                    try_get_lock <= 0;
+                    try_get_lock   <= 0;
                 end
             end else begin
                 if (state_mem_read != 0) begin

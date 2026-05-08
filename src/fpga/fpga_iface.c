@@ -168,11 +168,14 @@ void inv_txfm_add_fpga(pixel* dst, const ptrdiff_t stride, coef* const coeff, co
     // ack response
     *global_ctx.request_ptr[slot] = false;
 
+    printf("FPGA coefficients:\n");
     int16_t* c = tmp;
     for (int y = 0; y < M10K_HEIGHT; y++, dst += PXSTRIDE(stride)) {
         for (int x = 0; x < M10K_WIDTH; x++) {
+            printf("%d ", *c);
             dst[x] = iclip_pixel(dst[x] + *c++);
         }
+        printf("\n");
     }
 
     // wait complete

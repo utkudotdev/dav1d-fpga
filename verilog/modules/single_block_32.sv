@@ -1,5 +1,5 @@
 `include "modules/identity_32.sv"
-`include "modules/inv_dct_32.sv"
+// `include "modules/inv_dct_32.sv"
 `include "modules/arr_writer.sv"
 `include "modules/arr_reader.sv"
 `include "modules/fair_rw_lock_mgr.sv"
@@ -25,16 +25,16 @@ module single_block_32 (
     input                clk,
     input                rst
 );
-
-    wire signed [15:0] mem_read_data_internal;
-
-    
-
     // talk to qsys attached memory --> put in array
     localparam N = 32;
 
-    logic signed [15:0] T [N];
-    wire signed  [15:0] out_arr_reader[N];
+    wire signed [15:0] tf_out_arr[N];
+    wire compute_valid;
+    wire read_valid;
+    wire signed [15:0] mem_read_data_internal;
+
+    logic signed [15:0] T[N];
+    wire signed [15:0] out_arr_reader[N];
 
     // load signal logic
     typedef enum logic [1:0] {
@@ -47,18 +47,16 @@ module single_block_32 (
     state_t prev_state;
 
     always_ff @(posedge clk) begin
-        if (rst)
-            prev_state <= INIT;
-        else
-            prev_state <= state;
+        if (rst) prev_state <= INIT;
+        else prev_state <= state;
     end
 
     assign ready = state == INIT;
 
     logic done_rows;
-    wire done_all_writes;
+    wire  done_all_writes;
 
-    wire we;
+    wire  we;
     assign we_out = we && done_rows;
 
     wire compute_ready;
@@ -97,7 +95,7 @@ module single_block_32 (
         end
     end
 
-    
+
     typedef enum logic [1:0] {
         WORKING_INIT,
         READ,
@@ -127,26 +125,24 @@ module single_block_32 (
                     working_state <= working_state_t'(read_valid && write_ready ? (done_all_writes ? WORKING_INIT : COMPUTE) : READ_WRITE);
                 end
                 default: begin
-                    working_state     <= WORKING_INIT;
+                    working_state <= WORKING_INIT;
                 end
             endcase
         end
     end
 
-    
+
     always_ff @(posedge clk) begin
         if (rst) begin
-            for (int j = 0; j < N; j ++) begin
+            for (int j = 0; j < N; j++) begin
                 T[j] <= 16'b0;
             end
-        end
-        else if (working_state == READ || working_state == READ_WRITE) begin
-            for (int j = 0; j < N; j ++) begin
+        end else if (working_state == READ || working_state == READ_WRITE) begin
+            for (int j = 0; j < N; j++) begin
                 T[j] <= out_arr_reader[j];
             end
-        end
-        else if (working_state == COMPUTE) begin
-            for (int j = 0; j < N; j ++) begin
+        end else if (working_state == COMPUTE) begin
+            for (int j = 0; j < N; j++) begin
                 T[j] <= tf_out_arr[j];
             end
         end
@@ -170,7 +166,6 @@ module single_block_32 (
     );
 
     // wire signed [15:0] arr[N];
-    wire read_valid;
     wire read_ready;
     wire start_read;
 
@@ -199,7 +194,7 @@ module single_block_32 (
     assign start_read = (compute_valid && (working_state == COMPUTE)) || 
                         (read_valid && write_ready && (working_state == READ_WRITE)) ||
                         (prev_working_state == WORKING_INIT && working_state == READ);
-    
+
     logic start_read_prev;
     always_ff @(posedge clk) begin
         if (rst) start_read_prev <= 0;
@@ -228,13 +223,11 @@ module single_block_32 (
     );
 
 
-    wire  compute_valid;
     logic start_compute;
 
     // assign start_compute = (state == WORKING_ARR) && read_valid && compute_ready && write_ready && !(start_write);
     assign start_compute = (working_state == READ || working_state == READ_WRITE) && read_valid;
 
-    wire signed [15:0] tf_out_arr[N];
     wire [15:0] compute_job_id;
     // identity_32 iden (
     //     .out_array(tf_out_arr),
@@ -255,11 +248,7 @@ module single_block_32 (
     genvar i;
     generate
         for (i = 0; i < N; i++) begin : write_assign
-            assign arr_to_write[i] = done_rows ? round2(
-                T[i], COLSHIFT
-            ) : round2(
-                T[i], ROWSHIFT
-            );
+            assign arr_to_write[i] = done_rows ? round2(T[i], COLSHIFT) : round2(T[i], ROWSHIFT);
         end
     endgenerate
 
@@ -322,12 +311,12 @@ module single_block_32 (
     end
 
     M10K_16_1024 m10k_mem (
-        .q              (mem_read_data_internal),
-        .d              (mem_write_data),
-        .write_address  (mem_write_addr),
-        .read_address   (mem_read_addr),
-        .we             (we && !done_rows),
-        .clk            (clk)
+        .q            (mem_read_data_internal),
+        .d            (mem_write_data),
+        .write_address(mem_write_addr),
+        .read_address (mem_read_addr),
+        .we           (we && !done_rows),
+        .clk          (clk)
     );
 
 endmodule

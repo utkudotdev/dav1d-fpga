@@ -160,29 +160,25 @@ static bruh copy_dst_coeff(pixel* dst, const ptrdiff_t stride, coef* const coeff
 // we're not gonna worry about any of the HIGHBD_DECL_SUFFIX stuff as that's only for high bit depth
 static void dav1d_inv_txfm_add_dct_dct_32x32_8bpc_fpga(pixel* dst, const ptrdiff_t stride,
     coef* const coeff, const int eob HIGHBD_DECL_SUFFIX) {
-    // bruh copy = copy_dst_coeff(dst, stride, coeff, eob);
-    //
-    // inv_txfm_add_c_bruh(copy.dst_copy, stride, copy.coeff_copy, eob, TX_32X32, 2, DCT_DCT);
+    bruh copy = copy_dst_coeff(dst, stride, coeff, eob);
+
+    inv_txfm_add_c_bruh(copy.dst_copy, stride, copy.coeff_copy, eob, TX_32X32, 2, DCT_DCT);
     inv_txfm_add_fpga(dst, stride, coeff, eob, TX_32X32, DCT_DCT);
 
-    // const TxfmInfo* const t_dim = &dav1d_txfm_dimensions[TX_32X32];
-    // const int w = 4 * t_dim->w, h = 4 * t_dim->h;
-    // pixel* dst_ptr = dst;
-    // pixel* dst_copy_ptr = copy.dst_copy;
-    //
-    // bool stop = false;
+    const TxfmInfo* const t_dim = &dav1d_txfm_dimensions[TX_32X32];
+    const int w = 4 * t_dim->w, h = 4 * t_dim->h;
+    pixel* dst_ptr = dst;
+    pixel* dst_copy_ptr = copy.dst_copy;
 
-    // for (int y = 0; y < h && !stop;
-    //     y++, dst_ptr += PXSTRIDE(stride), dst_copy_ptr += PXSTRIDE(stride)) {
-    //     for (int x = 0; x < w && !stop; x++) {
-    //         if (dst_ptr[x] != dst_copy_ptr[x]) {
-    //             printf("Mismatch! %d != %d at (%d, %d)\n", dst_ptr[x], dst_copy_ptr[x], x, y);
-    //             stop = true;
-    //         }
-    //     }
-    // }
-    //
-    // free(copy.dst_copy);
+    for (int y = 0; y < h; y++, dst_ptr += PXSTRIDE(stride), dst_copy_ptr += PXSTRIDE(stride)) {
+        for (int x = 0; x < w; x++) {
+            if (dst_ptr[x] != dst_copy_ptr[x]) {
+                printf("Mismatch! %d != %d at (%d, %d)\n", dst_ptr[x], dst_copy_ptr[x], x, y);
+            }
+        }
+    }
+
+    free(copy.dst_copy);
 }
 
 static void dav1d_inv_txfm_add_idtx_32x32_8bpc_fpga(pixel* dst, const ptrdiff_t stride,
