@@ -252,10 +252,10 @@ module single_block_32 (
         end
     endgenerate
 
-    inv_dct_32 inv_dct (
-        .out(tf_out_arr),
-        .valid(compute_valid), //TODO
-        .ready(compute_ready), //TODO
+    identity_32 inv_iden (
+        .out_array(tf_out_arr),
+        .valid(compute_valid),  //TODO
+        .ready(compute_ready),  //TODO
         .job_id_out(compute_job_id),
         .in_array(T),
         .job_id_in(arr_read_counter),
