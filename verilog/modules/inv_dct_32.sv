@@ -6,15 +6,15 @@ import av1_helper_functions::*;
 module inv_dct_32 #(
     parameter int N = 32
 ) (
-    output signed [15:0] out[N],
-    output               valid, //TODO
-    output               ready, //TODO
+    output signed [15:0] out          [N],
+    output               valid,
+    output               ready,
     output        [15:0] job_id_out,
-    input  signed [15:0] in_array[N],
+    input  signed [15:0] in_array     [N],
     input         [15:0] job_id_in,
-    input start_compute,
-    input clk,
-    input rst
+    input                start_compute,
+    input                clk,
+    input                rst
 
 );
     logic [15:0] job_id;
@@ -29,22 +29,24 @@ module inv_dct_32 #(
     } butterfly_t;
 
 
-    logic signed [15:0] x [2];
-    logic signed [15:0] y [2];
-    logic signed [15:0] t_a [2];
-    logic signed [15:0] t_y [2];
-    logic c [2];
-    logic [7:0] angle [2];
+    logic signed [15:0] x[2];
+    logic signed [15:0] y[2];
+    logic signed [15:0] t_a[2];
+    logic signed [15:0] t_y[2];
+    logic c[2];
+    logic [7:0] angle[2];
 
     genvar k;
-    generate 
+    generate
         for (k = 0; k < 2; k += 1) begin : gen_b
-            b_transform b_module (  .x      (x[k]), 
-                                    .y      (y[k]), 
-                                    .t_a    (t_a[k]), 
-                                    .t_b    (t_y[k]), 
-                                    .c      (c[k]), 
-                                    .angle  (angle[k]));
+            b_transform b_module (
+                .x    (x[k]),
+                .y    (y[k]),
+                .t_a  (t_a[k]),
+                .t_b  (t_y[k]),
+                .c    (c[k]),
+                .angle(angle[k])
+            );
         end
     endgenerate
 
@@ -79,10 +81,10 @@ module inv_dct_32 #(
 
     assign ready = state == IDLE;
 
-    
+
     //a variable res that specifies the intermediate clamping range
     // localparam int res = 1 << (n + 5);
-     // res = 2^(n+5) as specified in the spec, where n is the input variable to the function. For our case, n = 5 due to 32 point DCT, so res = 2048.
+    // res = 2^(n+5) as specified in the spec, where n is the input variable to the function. For our case, n = 5 due to 32 point DCT, so res = 2048.
 
     //n = 5 due to 32 point DCT, so we skip steps 2, 4, 7, 10, 11, 15, 16, 25, 28, 30, and 31.
 
@@ -189,235 +191,237 @@ module inv_dct_32 #(
         end
     end
 
-    logic signed [15:0] T[N];
+    butterfly_t b_res;
 
-    always_ff @(posedge clk) begin
+    logic signed [15:0] in_T[N];
+    logic signed [15:0] out_T[N];
+
+    genvar m;
+    generate
+        for (m = 0; m < N; m++) begin : evil_stupid_generate
+            assign in_T[m] = in_array[m];
+            assign out[m]  = out_T[m];
+        end
+    endgenerate
+
+    always_comb begin
+        b_res.a = 0;
+        b_res.b = 0;
+
+        for (int i = 0; i < N; i++) begin
+            out_T[i] = in_T[i];
+        end
+
         if (rst) begin
             for (int i = 0; i < N; i++) begin
-                T[i] <= 0;
+                out_T[i] = 0;
             end
-        end
-        else begin
+        end else begin
             case (state)
                 IDLE: begin
                     //do nothing lmao
-                    if (start_compute) begin
-                        for (int i = 0; i < N; i++) begin
-                            T[i] <= in_array[i];
-                        end
-                    end
                 end
 
                 STEP_1: begin
-                // 1. Invoke the inverse DCT permutation process as specified in section 7.13.2.2 with the input variable n.
+                    // 1. Invoke the inverse DCT permutation process as specified in section 7.13.2.2 with the input variable n.
                     for (int i = 0; i < N; i++) begin
-                        T[i] <= T[5'(brev(5, 16'(i)))];
+                        out_T[i] = in_T[5'(brev(5, 16'(i)))];
                     end
                 end
 
                 STEP_3_A: begin
-                // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
+                    // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
                     for (int i = 0; i <= 1; i++) begin
-                        T[16+i]     <= x[i];
-                        T[31-i]     <= y[i];
+                        out_T[16+i] = x[i];
+                        out_T[31-i] = y[i];
                     end
                 end
 
                 STEP_3_B: begin
-                // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
+                    // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
                     for (int i = 2; i <= 3; i++) begin
-                        T[16+i]     <= x[i-2];
-                        T[31-i]     <= y[i-2];
+                        out_T[16+i] = x[i-2];
+                        out_T[31-i] = y[i-2];
                     end
                 end
 
                 STEP_3_C: begin
-                // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
+                    // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
                     for (int i = 4; i <= 5; i++) begin
-                        T[16+i]     <= x[i-4];
-                        T[31-i]     <= y[i-4];
+                        out_T[16+i] = x[i-4];
+                        out_T[31-i] = y[i-4];
                     end
                 end
 
                 STEP_3_D: begin
-                // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
+                    // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
                     for (int i = 6; i <= 7; i++) begin
-                        T[16+i]     <= x[i-6];
-                        T[31-i]     <= y[i-6];
+                        out_T[16+i] = x[i-6];
+                        out_T[31-i] = y[i-6];
                     end
                 end
 
                 STEP_5_A: begin
-                // 5. If n is greater than or equal to 4, invoke B( 8 + i, 15 - i, 12 + ( brev( 2, 3 - i ) << 4 ), 0, r ) for i = 0..3.
+                    // 5. If n is greater than or equal to 4, invoke B( 8 + i, 15 - i, 12 + ( brev( 2, 3 - i ) << 4 ), 0, r ) for i = 0..3.
                     for (int i = 0; i <= 1; i++) begin
-                        T[8+i]     <= x[i];
-                        T[15-i]     <= y[i];
+                        out_T[8+i]  = x[i];
+                        out_T[15-i] = y[i];
                     end
                 end
                 STEP_5_B: begin
-                // 5. If n is greater than or equal to 4, invoke B( 8 + i, 15 - i, 12 + ( brev( 2, 3 - i ) << 4 ), 0, r ) for i = 0..3.
+                    // 5. If n is greater than or equal to 4, invoke B( 8 + i, 15 - i, 12 + ( brev( 2, 3 - i ) << 4 ), 0, r ) for i = 0..3.
                     for (int i = 2; i <= 3; i++) begin
-                        T[8+i]     <= x[i-2];
-                        T[15-i]     <= y[i-2];
+                        out_T[8+i]  = x[i-2];
+                        out_T[15-i] = y[i-2];
                     end
                 end
 
                 STEP_6_8_9: begin
-                // 6. If n is greater than or equal to 5, invoke H( 16 + 2 * i, 17 + 2 * i, i & 1, r ) for i = 0..7.
+                    // 6. If n is greater than or equal to 5, invoke H( 16 + 2 * i, 17 + 2 * i, i & 1, r ) for i = 0..7.
                     for (int i = 0; i <= 7; i++) begin
-                        butterfly_t b_res;
-                        b_res = h(T[16 + 2 * i], T[17 + 2 * i], 1'(i & 1));
-                        T[16 + 2 * i] <= b_res.a;
-                        T[17 + 2 * i] <= b_res.b;
-                    end 
+                        b_res = h(in_T[16+2*i], in_T[17+2*i], 1'(i & 1));
+                        out_T[16+2*i] = b_res.a;
+                        out_T[17+2*i] = b_res.b;
+                    end
                     for (int i = 0; i <= 1; i++) begin
-                            T[4+i]     <= x[i];
-                            T[7-i]     <= y[i];
+                        out_T[4+i] = x[i];
+                        out_T[7-i] = y[i];
                     end
                     for (int i = 0; i <= 3; i++) begin
-                        butterfly_t b_res;
-                        b_res = h(T[8 + 2 * i], T[9 + 2 * i], 1'(i & 1));
-                        T[8 + 2 * i] <= b_res.a;
-                        T[9 + 2 * i] <= b_res.b;
+                        b_res = h(in_T[8+2*i], in_T[9+2*i], 1'(i & 1));
+                        out_T[8+2*i] = b_res.a;
+                        out_T[9+2*i] = b_res.b;
                     end
                 end
 
                 STEP_10_A: begin
-                // 10. If n is greater than or equal to 5, invoke B( 30 - 4 * i - j, 17 + 4 * i + j, 24 + (j << 6) + ( ( 1 - i ) << 5 ), 1, r ) for i = 0..1, for j=0..1.
+                    // 10. If n is greater than or equal to 5, invoke B( 30 - 4 * i - j, 17 + 4 * i + j, 24 + (j << 6) + ( ( 1 - i ) << 5 ), 1, r ) for i = 0..1, for j=0..1.
                     for (int i = 0; i <= 0; i++) begin
                         for (int j = 0; j <= 1; j++) begin
-                            T[30 - 4 * i - j]     <= x[j];
-                            T[17 + 4 * i + j]     <= y[j];
+                            out_T[30-4*i-j] = x[j];
+                            out_T[17+4*i+j] = y[j];
                         end
                     end
                 end
                 STEP_10_B: begin
-                // 10. If n is greater than or equal to 5, invoke B( 30 - 4 * i - j, 17 + 4 * i + j, 24 + (j << 6) + ( ( 1 - i ) << 5 ), 1, r ) for i = 0..1, for j=0..1.
+                    // 10. If n is greater than or equal to 5, invoke B( 30 - 4 * i - j, 17 + 4 * i + j, 24 + (j << 6) + ( ( 1 - i ) << 5 ), 1, r ) for i = 0..1, for j=0..1.
                     for (int i = 1; i <= 1; i++) begin
                         for (int j = 0; j <= 1; j++) begin
-                            T[30 - 4 * i - j]     <= x[j];
-                            T[17 + 4 * i + j]     <= y[j];
+                            out_T[30-4*i-j] = x[j];
+                            out_T[17+4*i+j] = y[j];
                         end
                     end
                 end
 
                 STEP_12_13: begin
-                // 12. Invoke B( 2 * i, 2 * i + 1, 32 + 16 * i, 1 - i, r ) for i = 0..1.
+                    // 12. Invoke B( 2 * i, 2 * i + 1, 32 + 16 * i, 1 - i, r ) for i = 0..1.
                     for (int i = 0; i <= 1; i++) begin
-                        T[2 * i]        <= x[i];
-                        T[2 * i + 1]    <= y[i];
+                        out_T[2*i]   = x[i];
+                        out_T[2*i+1] = y[i];
                     end
                     for (int i = 0; i <= 1; i++) begin
-                        butterfly_t b_res;
-                        b_res = h(T[4 + 2 * i], T[5 + 2 * i], 1'(i));
-                        T[4 + 2 * i] <= b_res.a;
-                        T[5 + 2 * i] <= b_res.b;
+                        b_res = h(in_T[4+2*i], in_T[5+2*i], 1'(i));
+                        out_T[4+2*i] = b_res.a;
+                        out_T[5+2*i] = b_res.b;
                     end
                 end
 
                 STEP_14_15_17: begin
-                // 14. If n is greater than or equal to 4, invoke B( 14 - i, 9 + i, 48 + 64 * i, 1, r ) for i = 0..1.
+                    // 14. If n is greater than or equal to 4, invoke B( 14 - i, 9 + i, 48 + 64 * i, 1, r ) for i = 0..1.
                     for (int i = 0; i <= 1; i++) begin
-                        T[14 - i]       <= x[i];
-                        T[9 + i]        <= y[i];
+                        out_T[14-i] = x[i];
+                        out_T[9+i]  = y[i];
                     end
                     for (int i = 0; i <= 3; i++) begin
                         for (int j = 0; j <= 1; j++) begin
-                            butterfly_t b_res;
-                            b_res = h(T[16 + 4 * i + j], T[19 + 4 * i - j], 1'((i & 1)));
-                            T[16 + 4 * i + j] <= b_res.a;
-                            T[19 + 4 * i - j] <= b_res.b;
+                            b_res = h(in_T[16+4*i+j], in_T[19+4*i-j], 1'((i & 1)));
+                            out_T[16+4*i+j] = b_res.a;
+                            out_T[19+4*i-j] = b_res.b;
                         end
                     end
                     for (int i = 0; i <= 1; i++) begin
-                        butterfly_t b_res;
-                        b_res = h(T[i], T[3 - i], 0);
-                        T[i] <= b_res.a;
-                        T[3 - i] <= b_res.b;
+                        b_res = h(in_T[i], in_T[3-i], 0);
+                        out_T[i] = b_res.a;
+                        out_T[3-i] = b_res.b;
                     end
                 end
 
                 STEP_18_19: begin
-                // 18. If n is greater than or equal to 3, invoke B( 6, 5, 32, 1, r ).
-                    T[6]            <= x[0];
-                    T[5]            <= y[0];
+                    // 18. If n is greater than or equal to 3, invoke B( 6, 5, 32, 1, r ).
+                    out_T[6] = x[0];
+                    out_T[5] = y[0];
                     for (int i = 0; i <= 1; i++) begin
                         for (int j = 0; j <= 1; j++) begin
-                            butterfly_t b_res_19;
-                            b_res_19 = h(T[8 + 4 * i + j], T[11 + 4 * i - j], 1'(i));
-                            T[8 + 4 * i + j] <= b_res_19.a;
-                            T[11 + 4 * i - j] <= b_res_19.b;
+                            b_res = h(in_T[8+4*i+j], in_T[11+4*i-j], 1'(i));
+                            out_T[8+4*i+j] = b_res.a;
+                            out_T[11+4*i-j] = b_res.b;
                         end
                     end
                 end
 
                 STEP_20_A: begin
-                // 20. If n is greater than or equal to 5, invoke B( 29 - i, 18 + i, 48 + ( i >> 1 ) * 64, 1, r ) for i = 0..3.
+                    // 20. If n is greater than or equal to 5, invoke B( 29 - i, 18 + i, 48 + ( i >> 1 ) * 64, 1, r ) for i = 0..3.
                     for (int i = 0; i <= 1; i++) begin
-                        T[29-i]         <= x[i];
-                        T[18+i]         <= y[i];
+                        out_T[29-i] = x[i];
+                        out_T[18+i] = y[i];
                     end
                 end
 
                 STEP_20_B: begin
-                // 20. If n is greater than or equal to 5, invoke B( 29 - i, 18 + i, 48 + ( i >> 1 ) * 64, 1, r ) for i = 0..3.
+                    // 20. If n is greater than or equal to 5, invoke B( 29 - i, 18 + i, 48 + ( i >> 1 ) * 64, 1, r ) for i = 0..3.
                     for (int i = 2; i <= 3; i++) begin
-                        T[29-i]         <= x[i-2];
-                        T[18+i]         <= y[i-2];
+                        out_T[29-i] = x[i-2];
+                        out_T[18+i] = y[i-2];
                     end
                 end
 
                 STEP_22_23_24: begin
-                // 22. If n is greater than or equal to 3, invoke H( i, 7 - i, 0, r ) for i = 0..3.
+                    // 22. If n is greater than or equal to 3, invoke H( i, 7 - i, 0, r ) for i = 0..3.
                     for (int i = 0; i <= 3; i++) begin
-                        butterfly_t b_res;
-                        b_res = h(T[i], T[7 - i], 0);
-                        T[i] <= b_res.a;
-                        T[7 - i] <= b_res.b;
+                        b_res = h(in_T[i], in_T[7-i], 0);
+                        out_T[i] = b_res.a;
+                        out_T[7-i] = b_res.b;
                     end
                     for (int i = 0; i <= 1; i++) begin
-                        T[13-i]         <= x[i];
-                        T[10+i]         <= y[i];
+                        out_T[13-i] = x[i];
+                        out_T[10+i] = y[i];
                     end
                     for (int i = 0; i <= 1; i++) begin
                         for (int j = 0; j <= 3; j++) begin
-                            butterfly_t b_res;
-                            b_res = h(T[16 + i * 8 + j], T[23 + i * 8 - j], 1'(i));
-                            T[16 + i * 8 + j] <= b_res.a;
-                            T[23 + i * 8 - j] <= b_res.b;
+                            b_res = h(in_T[16+i*8+j], in_T[23+i*8-j], 1'(i));
+                            out_T[16+i*8+j] = b_res.a;
+                            out_T[23+i*8-j] = b_res.b;
                         end
                     end
                 end
 
                 STEP_26_27_A: begin
-                // 26. If n is greater than or equal to 4, invoke H( i, 15 - i, 0, r ) for i = 0..7.
+                    // 26. If n is greater than or equal to 4, invoke H( i, 15 - i, 0, r ) for i = 0..7.
                     for (int i = 0; i <= 7; i++) begin
-                        butterfly_t b_res;
-                        b_res = h(T[i], T[15 - i], 0);
-                        T[i] <= b_res.a;
-                        T[15 - i] <= b_res.b;
+                        b_res = h(in_T[i], in_T[15-i], 0);
+                        out_T[i] = b_res.a;
+                        out_T[15-i] = b_res.b;
                     end
                     for (int i = 0; i <= 1; i++) begin
-                        T[27-i]         <= x[i];
-                        T[20+i]         <= y[i];
+                        out_T[27-i] = x[i];
+                        out_T[20+i] = y[i];
                     end
                 end
 
                 STEP_27_B: begin
-                // 27. If n is greater than or equal to 5, invoke B( 27 - i, 20 + i, 32, 1, r ) for i = 0..3.
+                    // 27. If n is greater than or equal to 5, invoke B( 27 - i, 20 + i, 32, 1, r ) for i = 0..3.
                     for (int i = 2; i <= 3; i++) begin
-                        T[27-i]         <= x[i-2];
-                        T[20+i]         <= y[i-2];
+                        out_T[27-i] = x[i-2];
+                        out_T[20+i] = y[i-2];
                     end
                 end
 
                 STEP_29: begin
-                // 29. If n is greater than or equal to 5, invoke H( i, 31 - i, 0, r ) for i = 0..15.
+                    // 29. If n is greater than or equal to 5, invoke H( i, 31 - i, 0, r ) for i = 0..15.
                     for (int i = 0; i <= 15; i++) begin
-                        butterfly_t b_res;
-                        b_res = h(T[i], T[31 - i], 0);
-                        T[i] <= b_res.a;
-                        T[31 - i] <= b_res.b;
+                        b_res = h(in_T[i], in_T[31-i], 0);
+                        out_T[i] = b_res.a;
+                        out_T[31-i] = b_res.b;
                     end
                 end
 
@@ -425,7 +429,8 @@ module inv_dct_32 #(
 
                 end
 
-                default: begin end
+                default: begin
+                end
 
             endcase
         end
@@ -443,183 +448,183 @@ module inv_dct_32 #(
 
         case (state)
             IDLE: begin
-                
+
             end
 
             STEP_1: begin
-            // 1. Invoke the inverse DCT permutation process as specified in section 7.13.2.2 with the input variable n.
-                
+                // 1. Invoke the inverse DCT permutation process as specified in section 7.13.2.2 with the input variable n.
+
             end
 
             STEP_3_A: begin
-            // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
+                // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
                 for (int i = 0; i <= 1; i++) begin
-                    t_a[i]      = T[16+i];
-                    t_y[i]      = T[31-i];
-                    c[i]        = 1'b0;
-                    angle[i]    = 8'(6 + (brev(3, 16'(7 - i)) << 3));
+                    t_a[i]   = in_T[16+i];
+                    t_y[i]   = in_T[31-i];
+                    c[i]     = 1'b0;
+                    angle[i] = 8'(6 + (brev(3, 16'(7 - i)) << 3));
                 end
             end
 
             STEP_3_B: begin
-            // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
+                // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
                 for (int i = 2; i <= 3; i++) begin
-                    t_a[i-2]     = T[16+i];
-                    t_y[i-2]     = T[31-i];
-                    c[i-2]       = 1'b0;
-                    angle[i-2]   = 8'(6 + (brev(3, 16'(7 - i)) << 3));
+                    t_a[i-2]   = in_T[16+i];
+                    t_y[i-2]   = in_T[31-i];
+                    c[i-2]     = 1'b0;
+                    angle[i-2] = 8'(6 + (brev(3, 16'(7 - i)) << 3));
                 end
             end
 
             STEP_3_C: begin
-            // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
+                // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
                 for (int i = 4; i <= 5; i++) begin
-                    t_a[i-4]      = T[16+i];
-                    t_y[i-4]      = T[31-i];
-                    c[i-4]        = 1'b0;
-                    angle[i-4]    = 8'(6 + (brev(3, 16'(7 - i)) << 3));
+                    t_a[i-4]   = in_T[16+i];
+                    t_y[i-4]   = in_T[31-i];
+                    c[i-4]     = 1'b0;
+                    angle[i-4] = 8'(6 + (brev(3, 16'(7 - i)) << 3));
                 end
             end
 
             STEP_3_D: begin
-            // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
+                // 3. If n is greater than or equal to 5, invoke B( 16 + i, 31 - i, 6 + ( brev( 3, 7 - i ) << 3 ), 0, r ) for i = 0..7.
                 for (int i = 6; i <= 7; i++) begin
-                    t_a[i-6]      = T[16+i];
-                    t_y[i-6]      = T[31-i];
-                    c[i-6]        = 1'b0;
-                    angle[i-6]    = 8'(6 + (brev(3, 16'(7 - i)) << 3));
+                    t_a[i-6]   = in_T[16+i];
+                    t_y[i-6]   = in_T[31-i];
+                    c[i-6]     = 1'b0;
+                    angle[i-6] = 8'(6 + (brev(3, 16'(7 - i)) << 3));
                 end
             end
 
             STEP_5_A: begin
-            // 5. If n is greater than or equal to 4, invoke B( 8 + i, 15 - i, 12 + ( brev( 2, 3 - i ) << 4 ), 0, r ) for i = 0..3.
+                // 5. If n is greater than or equal to 4, invoke B( 8 + i, 15 - i, 12 + ( brev( 2, 3 - i ) << 4 ), 0, r ) for i = 0..3.
                 for (int i = 0; i <= 1; i++) begin
-                    t_a[i]      = T[8 + i];
-                    t_y[i]      = T[15 - i];
-                    c[i]        = 1'b0;
-                    angle[i]    = 8'(12 + (brev(2, 16'(3 - i)) << 4));
+                    t_a[i]   = in_T[8+i];
+                    t_y[i]   = in_T[15-i];
+                    c[i]     = 1'b0;
+                    angle[i] = 8'(12 + (brev(2, 16'(3 - i)) << 4));
                 end
             end
             STEP_5_B: begin
-            // 5. If n is greater than or equal to 4, invoke B( 8 + i, 15 - i, 12 + ( brev( 2, 3 - i ) << 4 ), 0, r ) for i = 0..3.
+                // 5. If n is greater than or equal to 4, invoke B( 8 + i, 15 - i, 12 + ( brev( 2, 3 - i ) << 4 ), 0, r ) for i = 0..3.
                 for (int i = 2; i <= 3; i++) begin
-                    t_a[i-2]      = T[8 + i];
-                    t_y[i-2]      = T[15 - i];
-                    c[i-2]        = 1'b0;
-                    angle[i-2]    = 8'(12 + (brev(2, 16'(3 - i)) << 4));
+                    t_a[i-2]   = in_T[8+i];
+                    t_y[i-2]   = in_T[15-i];
+                    c[i-2]     = 1'b0;
+                    angle[i-2] = 8'(12 + (brev(2, 16'(3 - i)) << 4));
                 end
             end
 
             STEP_6_8_9: begin
 
                 for (int i = 0; i <= 1; i++) begin
-                        t_a[i]      = T[4 + i];
-                        t_y[i]      = T[7 - i];
-                        c[i]        = 1'b0;
-                        angle[i]    = 8'(56 - 32 * i);
+                    t_a[i]   = in_T[4+i];
+                    t_y[i]   = in_T[7-i];
+                    c[i]     = 1'b0;
+                    angle[i] = 8'(56 - 32 * i);
                 end
 
             end
 
             STEP_10_A: begin
-            // 10. If n is greater than or equal to 5, invoke B( 30 - 4 * i - j, 17 + 4 * i + j, 24 + (j << 6) + ( ( 1 - i ) << 5 ), 1, r ) for i = 0..1, for j=0..1.
+                // 10. If n is greater than or equal to 5, invoke B( 30 - 4 * i - j, 17 + 4 * i + j, 24 + (j << 6) + ( ( 1 - i ) << 5 ), 1, r ) for i = 0..1, for j=0..1.
                 for (int i = 0; i <= 0; i++) begin
                     for (int j = 0; j <= 1; j++) begin
-                        t_a[j]      = T[30 - 4 * i - j];
-                        t_y[j]      = T[17 + 4 * i + j];
-                        c[j]        = 1'b1;
-                        angle[j]    = 8'(24 + (j << 6) + ( ( 1 - i ) << 5 ));
+                        t_a[j]   = in_T[30-4*i-j];
+                        t_y[j]   = in_T[17+4*i+j];
+                        c[j]     = 1'b1;
+                        angle[j] = 8'(24 + (j << 6) + ((1 - i) << 5));
                     end
                 end
             end
             STEP_10_B: begin
-            // 10. If n is greater than or equal to 5, invoke B( 30 - 4 * i - j, 17 + 4 * i + j, 24 + (j << 6) + ( ( 1 - i ) << 5 ), 1, r ) for i = 0..1, for j=0..1.
+                // 10. If n is greater than or equal to 5, invoke B( 30 - 4 * i - j, 17 + 4 * i + j, 24 + (j << 6) + ( ( 1 - i ) << 5 ), 1, r ) for i = 0..1, for j=0..1.
                 for (int i = 1; i <= 1; i++) begin
                     for (int j = 0; j <= 1; j++) begin
-                        t_a[j]      = T[30 - 4 * i - j];
-                        t_y[j]      = T[17 + 4 * i + j];
-                        c[j]        = 1'b1;
-                        angle[j]    = 8'(24 + (j << 6) + ( ( 1 - i ) << 5 ));
+                        t_a[j]   = in_T[30-4*i-j];
+                        t_y[j]   = in_T[17+4*i+j];
+                        c[j]     = 1'b1;
+                        angle[j] = 8'(24 + (j << 6) + ((1 - i) << 5));
                     end
                 end
             end
 
             STEP_12_13: begin
-            // 12. Invoke B( 2 * i, 2 * i + 1, 32 + 16 * i, 1 - i, r ) for i = 0..1.
+                // 12. Invoke B( 2 * i, 2 * i + 1, 32 + 16 * i, 1 - i, r ) for i = 0..1.
                 for (int i = 0; i <= 1; i++) begin
-                    t_a[i]           = T[2 * i];
-                    t_y[i]           = T[2 * i + 1];
-                    c[i]             = (i == 0) ? 1'b1 : 1'b0;
-                    angle[i]         = 8'(32 + 16 * i);
+                    t_a[i]   = in_T[2*i];
+                    t_y[i]   = in_T[2*i+1];
+                    c[i]     = (i == 0) ? 1'b1 : 1'b0;
+                    angle[i] = 8'(32 + 16 * i);
                 end
             end
 
             STEP_14_15_17: begin
-            // 14. If n is greater than or equal to 4, invoke B( 14 - i, 9 + i, 48 + 64 * i, 1, r ) for i = 0..1.
+                // 14. If n is greater than or equal to 4, invoke B( 14 - i, 9 + i, 48 + 64 * i, 1, r ) for i = 0..1.
                 for (int i = 0; i <= 1; i++) begin
-                    t_a[i]           = T[14 - i];
-                    t_y[i]           = T[9 + i];
-                    c[i]             = 1'b1;
-                    angle[i]         = 8'(48 + 64 * i);
+                    t_a[i]   = in_T[14-i];
+                    t_y[i]   = in_T[9+i];
+                    c[i]     = 1'b1;
+                    angle[i] = 8'(48 + 64 * i);
                 end
             end
 
             STEP_18_19: begin
-            // 18. If n is greater than or equal to 3, invoke B( 6, 5, 32, 1, r ).
-                t_a[0]           = T[6];
-                t_y[0]           = T[5];
-                c[0]             = 1'b1;
-                angle[0]         = 8'(32);
+                // 18. If n is greater than or equal to 3, invoke B( 6, 5, 32, 1, r ).
+                t_a[0]   = in_T[6];
+                t_y[0]   = in_T[5];
+                c[0]     = 1'b1;
+                angle[0] = 8'(32);
             end
 
             STEP_20_A: begin
-            // 20. If n is greater than or equal to 5, invoke B( 29 - i, 18 + i, 48 + ( i >> 1 ) * 64, 1, r ) for i = 0..3.
+                // 20. If n is greater than or equal to 5, invoke B( 29 - i, 18 + i, 48 + ( i >> 1 ) * 64, 1, r ) for i = 0..3.
                 for (int i = 0; i <= 1; i++) begin
-                    t_a[i]           = T[29-i];
-                    t_y[i]           = T[18+i];
-                    c[i]             = 1'b1;
-                    angle[i]         = 8'(48 + (i >> 1) * 64);
+                    t_a[i]   = in_T[29-i];
+                    t_y[i]   = in_T[18+i];
+                    c[i]     = 1'b1;
+                    angle[i] = 8'(48 + (i >> 1) * 64);
                 end
             end
 
             STEP_20_B: begin
-            // 20. If n is greater than or equal to 5, invoke B( 29 - i, 18 + i, 48 + ( i >> 1 ) * 64, 1, r ) for i = 0..3.
+                // 20. If n is greater than or equal to 5, invoke B( 29 - i, 18 + i, 48 + ( i >> 1 ) * 64, 1, r ) for i = 0..3.
                 for (int i = 2; i <= 3; i++) begin
-                    t_a[i-2]           = T[29-i];
-                    t_y[i-2]           = T[18+i];
-                    c[i-2]             = 1'b1;
-                    angle[i-2]         = 8'(48 + (i >> 1) * 64);
+                    t_a[i-2]   = in_T[29-i];
+                    t_y[i-2]   = in_T[18+i];
+                    c[i-2]     = 1'b1;
+                    angle[i-2] = 8'(48 + (i >> 1) * 64);
                 end
             end
 
             STEP_22_23_24: begin
-            // 22. If n is greater than or equal to 3, invoke H( i, 7 - i, 0, r ) for i = 0..3.
+                // 22. If n is greater than or equal to 3, invoke H( i, 7 - i, 0, r ) for i = 0..3.
 
                 for (int i = 0; i <= 1; i++) begin
-                    t_a[i]           = T[13-i];
-                    t_y[i]           = T[10+i];
-                    c[i]             = 1'b1;
-                    angle[i]         = 8'(32);
+                    t_a[i]   = in_T[13-i];
+                    t_y[i]   = in_T[10+i];
+                    c[i]     = 1'b1;
+                    angle[i] = 8'(32);
                 end
             end
 
             STEP_26_27_A: begin
-            // 26. If n is greater than or equal to 4, invoke H( i, 15 - i, 0, r ) for i = 0..7.
+                // 26. If n is greater than or equal to 4, invoke H( i, 15 - i, 0, r ) for i = 0..7.
                 for (int i = 0; i <= 1; i++) begin
-                    t_a[i]           = T[27-i];
-                    t_y[i]           = T[20+i];
-                    c[i]             = 1'b1;
-                    angle[i]         = 8'(32);
+                    t_a[i]   = in_T[27-i];
+                    t_y[i]   = in_T[20+i];
+                    c[i]     = 1'b1;
+                    angle[i] = 8'(32);
                 end
             end
 
             STEP_27_B: begin
-            // 27. If n is greater than or equal to 5, invoke B( 27 - i, 20 + i, 32, 1, r ) for i = 0..3.
+                // 27. If n is greater than or equal to 5, invoke B( 27 - i, 20 + i, 32, 1, r ) for i = 0..3.
                 for (int i = 2; i <= 3; i++) begin
-                    t_a[i-2]           = T[27-i];
-                    t_y[i-2]           = T[20+i];
-                    c[i-2]             = 1'b1;
-                    angle[i-2]         = 8'(32);
+                    t_a[i-2]   = in_T[27-i];
+                    t_y[i-2]   = in_T[20+i];
+                    c[i-2]     = 1'b1;
+                    angle[i-2] = 8'(32);
                 end
             end
 
@@ -631,30 +636,20 @@ module inv_dct_32 #(
 
             end
 
-            default: begin end
+            default: begin
+            end
 
         endcase
     end
-
-    genvar j;
-    generate
-        for (j = 0; j < N; j++) begin : evil_stupid_generate
-            assign out[j] = T[j];
-        end
-    endgenerate
-
 
     always_ff @(posedge clk) begin
         if (rst) begin
             valid_reg <= 0;
             job_id <= 111;
-        end
-        else if ((start_compute && state == IDLE)) begin
+        end else if ((start_compute && state == IDLE)) begin
             valid_reg <= 0;
             job_id <= job_id_in;
-        end
-        else if (state == DONE)
-            valid_reg <= 1;
+        end else if (state == DONE) valid_reg <= 1;
     end
 
 
