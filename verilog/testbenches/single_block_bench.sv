@@ -5,7 +5,7 @@
 module single_block_bench ();
     localparam N = 32;
     localparam ADDR_WIDTH = $clog2(N * N);
-    localparam STOP = 6000;
+    localparam STOP = 20000;
 
     logic clk, rst;
     logic [31:0] count;
