@@ -452,7 +452,7 @@ generate
 			.mem_write_data(m10k_writedata[i]),
 			.mem_write_addr(block_write_addr[i]),
 			.mem_read_addr(block_read_addr[i]),
-			.we(m10k_write[i]),
+			.we_out(m10k_write[i]),
 			.ready(block_ready), // held high until request received
 			.mem_read_data(m10k_readdata[i]),
 			.reading(reading),
