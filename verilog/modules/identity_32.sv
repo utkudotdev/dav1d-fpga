@@ -24,22 +24,16 @@ module identity_32 (
     integer j;
     always_ff @(posedge clk) begin
         if (rst) begin
-            for (j = 0; j < 32; j = j + 1) begin
-                internal_registers[j] <= 0;
-            end
             valid_reg <= 0;
             internal_job_id <= 0;
         end else begin
             if (start_compute) begin
-                for (j = 0; j < 32; j = j + 1) begin
-                    internal_registers[j] <= in_array[j] <<< 2;
-                end
                 valid_reg <= 1;
                 internal_job_id <= job_id_in;
             end
         end
     end
-    assign out_array = internal_registers;
+    assign out_array = in_array;
     assign valid = valid_reg;
     assign job_id_out = internal_job_id;
     // s-cycle so always ready
